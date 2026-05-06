@@ -1,0 +1,23 @@
+{# Usage: {% include "partials/_batch_stock_card.html" with batch=batch %} #}
+<div class="stock-grid">
+  <div class="stock-cell stock-produced">
+    <div class="stock-cell-label">Produced</div>
+    <div class="stock-cell-val">{{ batch.produced_quantity }}</div>
+  </div>
+  <div class="stock-cell stock-reserved">
+    <div class="stock-cell-label">Reserved</div>
+    <div class="stock-cell-val">{{ batch.reserved_quantity }}</div>
+  </div>
+  <div class="stock-cell stock-consumed">
+    <div class="stock-cell-label">Consumed</div>
+    <div class="stock-cell-val">{{ batch.consumed_quantity }}</div>
+  </div>
+  <div class="stock-cell stock-released">
+    <div class="stock-cell-label">Released</div>
+    <div class="stock-cell-val">{{ batch.released_quantity }}</div>
+  </div>
+  <div class="stock-cell stock-available">
+    <div class="stock-cell-label">Available</div>
+    <div class="stock-cell-val">{{ batch.available_quantity }}</div>
+  </div>
+</div>

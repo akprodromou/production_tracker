@@ -1,0 +1,38 @@
+{#
+  Standalone messages partial — use when you need toasts outside base.html,
+  e.g. inside an HTMX partial response or an iframe.
+
+  In base.html the messages block is already rendered inline.
+  Include this partial only in templates that do NOT extend base.html,
+  or when you need a second render point (e.g. after an HTMX swap).
+
+  Usage:
+    {% include "partials/_messages.html" %}
+#}
+{% if messages %}
+<div class="messages" role="alert" aria-live="polite">
+  {% for message in messages %}
+  <div class="msg msg-{{ message.tags }}" data-autohide="{{ message.extra_tags|default:'true' }}">
+    <span>{{ message }}</span>
+    <button
+      class="msg-close"
+      aria-label="Dismiss"
+      onclick="this.closest('.msg').remove()"
+    >×</button>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+(function() {
+  // Auto-dismiss messages tagged with data-autohide="true" after 4 s
+  document.querySelectorAll('.msg[data-autohide="true"]').forEach(function(el) {
+    setTimeout(function() {
+      el.style.transition = 'opacity .4s';
+      el.style.opacity = '0';
+      setTimeout(function() { el.remove(); }, 420);
+    }, 4000);
+  });
+})();
+</script>
+{% endif %}

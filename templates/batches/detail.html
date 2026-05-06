@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}{{ batch.lot_number }} — Batch Detail{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'batch-list' %}">Raw Batches</a><span>/</span>
+  {{ batch.lot_number }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ batch.lot_number }}</h1>
+    <p>{{ batch.material.name }} · <span class="text-mono">{{ batch.material.sku }}</span> · {{ batch.location.name }}</p>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-success" onclick="document.getElementById('reserveModal').classList.add('open')">Reserve</button>
+    <button class="btn btn-warn"    onclick="document.getElementById('consumeModal').classList.add('open')">Consume</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('releaseModal').classList.add('open')">Release</button>
+    <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
+  </div>
+</div>
+
+{# ── META ROW ── #}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px" class="mb-3">
+  <div class="stat-card">
+    <div class="stat-label">Material</div>
+    <div style="font-size:15px;font-weight:600">{{ batch.material.name }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">SKU</div>
+    <div class="text-mono" style="font-size:15px">{{ batch.material.sku }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Location</div>
+    <div style="font-size:15px">{{ batch.location.name }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Created</div>
+    <div class="text-mono" style="font-size:14px">{{ batch.created_at|date:"Y-m-d H:i" }}</div>
+  </div>
+</div>
+
+{# ── STOCK CARD ── #}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Stock Summary</span></div>
+  <div class="card-body">
+    {% include "partials/_batch_stock_card.html" with batch=batch %}
+    <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+      Total declared: <span class="text-mono">{{ batch.total_quantity }} {{ batch.material.unit.name }}</span>
+    </div>
+  </div>
+</div>
+
+{# ── TRANSACTION LEDGER ── #}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Transaction Ledger</span>
+    <a href="{% url 'transaction-list' %}?batch_id={{ batch.pk }}" class="btn btn-ghost btn-sm">Full view →</a>
+  </div>
+  <div class="table-wrap">
+    {% if transactions %}
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Qty</th>
+          <th>Product Batch</th>
+          <th>Reference</th>
+          <th>When</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td>
+            {% if tx.transaction_type == 'PRODUCED' %}<span class="badge badge-blue">PRODUCED</span>
+            {% elif tx.transaction_type == 'RESERVED' %}<span class="badge badge-orange">RESERVED</span>
+            {% elif tx.transaction_type == 'CONSUMED' %}<span class="badge badge-red">CONSUMED</span>
+            {% else %}<span class="badge badge-grey">RELEASED</span>
+            {% endif %}
+          </td>
+          <td class="td-mono">{{ tx.quantity }}</td>
+          <td class="td-mono text-muted">
+            {% if tx.product_batch %}
+              <a href="{% url 'product-batch-detail' tx.product_batch.pk %}" style="color:var(--accent);text-decoration:none">{{ tx.product_batch.batch_number }}</a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-muted" style="font-size:12px">{{ tx.reference|default:"—" }}</td>
+          <td class="text-muted" style="font-size:12px">{{ tx.created_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">📋</div><h3>No transactions yet</h3></div>
+    {% endif %}
+  </div>
+</div>
+
+{# ── RESERVE MODAL ── #}
+<div class="modal-backdrop" id="reserveModal">
+  <div class="modal">
+    <h3>Reserve Stock</h3>
+    <form method="post" action="{% url 'reserve-material' %}">
+      {% csrf_token %}
+      <input type="hidden" name="batch_id" value="{{ batch.pk }}">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group">
+          <label>Product Batch</label>
+          <select name="product_batch_id" required>
+            <option value="">Select product batch…</option>
+            {% for pb in product_batches %}
+            <option value="{{ pb.pk }}">{{ pb.batch_number }} — {{ pb.material.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantity (available: {{ batch.available_quantity }})</label>
+          <input type="number" name="quantity" step="0.001" min="0.001" max="{{ batch.available_quantity }}" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('reserveModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-success">Reserve</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── CONSUME MODAL ── #}
+<div class="modal-backdrop" id="consumeModal">
+  <div class="modal">
+    <h3>Consume Reserved Stock</h3>
+    <form method="post" action="{% url 'consume-material' %}">
+      {% csrf_token %}
+      <input type="hidden" name="batch_id" value="{{ batch.pk }}">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group">
+          <label>Product Batch</label>
+          <select name="product_batch_id" required>
+            <option value="">Select product batch…</option>
+            {% for pb in product_batches %}
+            <option value="{{ pb.pk }}">{{ pb.batch_number }} — {{ pb.material.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" name="quantity" step="0.001" min="0.001" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('consumeModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-warn">Consume</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── RELEASE MODAL ── #}
+<div class="modal-backdrop" id="releaseModal">
+  <div class="modal">
+    <h3>Release Reservation</h3>
+    <form method="post" action="{% url 'release-material' %}">
+      {% csrf_token %}
+      <input type="hidden" name="batch_id" value="{{ batch.pk }}">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group">
+          <label>Product Batch</label>
+          <select name="product_batch_id" required>
+            <option value="">Select product batch…</option>
+            {% for pb in product_batches %}
+            <option value="{{ pb.pk }}">{{ pb.batch_number }} — {{ pb.material.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantity to Release</label>
+          <input type="number" name="quantity" step="0.001" min="0.001" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('releaseModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-secondary">Release</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── DELETE MODAL ── #}
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete batch <strong style="color:var(--text)">{{ batch.lot_number }}</strong> and all its transactions? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" action="{% url 'batch-delete' batch.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.modal-backdrop').forEach(function(m) {
+  m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+});
+</script>
+{% endblock %}

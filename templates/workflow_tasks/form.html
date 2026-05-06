@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} — Tasks{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'workflow-task-list' %}">Tasks</a><span>/</span>
+  {{ form_title }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>{{ form_title }}</h1></div>
+</div>
+
+<div class="card" style="max-width:680px">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="mb-2">
+        {% for e in form.non_field_errors %}
+        <div class="msg msg-error">{{ e }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="{{ form.description.id_for_label }}">Description</label>
+          {{ form.description }}
+          {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.location.id_for_label }}">Location</label>
+          {{ form.location }}
+          {% if form.location.errors %}<ul class="errorlist">{% for e in form.location.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label for="{{ form.raw_material_batch.id_for_label }}">Raw Material Batch <span class="text-muted">(optional)</span></label>
+            {{ form.raw_material_batch }}
+            {% if form.raw_material_batch.errors %}<ul class="errorlist">{% for e in form.raw_material_batch.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.product_batch.id_for_label }}">Product Batch <span class="text-muted">(optional)</span></label>
+            {{ form.product_batch }}
+            {% if form.product_batch.errors %}<ul class="errorlist">{% for e in form.product_batch.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label for="{{ form.status.id_for_label }}">Status</label>
+            {{ form.status }}
+            {% if form.status.errors %}<ul class="errorlist">{% for e in form.status.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.expected_completion.id_for_label }}">Expected Completion</label>
+            {{ form.expected_completion }}
+            {% if form.expected_completion.errors %}<ul class="errorlist">{% for e in form.expected_completion.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.actual_completion.id_for_label }}">Actual Completion <span class="text-muted">(leave blank if not yet done)</span></label>
+          {{ form.actual_completion }}
+          {% if form.actual_completion.errors %}<ul class="errorlist">{% for e in form.actual_completion.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-actions mt-3">
+        <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+        <a href="{% url 'workflow-task-list' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

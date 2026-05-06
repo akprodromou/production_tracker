@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — InventoryOS{% endblock %}
+
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p>System overview — stock levels, open orders, pending tasks</p>
+  </div>
+</div>
+
+{# ── TOP STATS ── #}
+<div class="stat-grid stat-grid-4 mb-4">
+  <div class="stat-card">
+    <div class="stat-label">Total SKUs</div>
+    <div class="stat-value">{{ total_materials }}</div>
+    <div class="stat-sub">{{ raw_materials }} raw · {{ finished_materials }} finished</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Active Batches</div>
+    <div class="stat-value">{{ active_batches }}</div>
+    <div class="stat-sub">Raw material batches in stock</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Open Mfg Orders</div>
+    <div class="stat-value">{{ open_orders }}</div>
+    <div class="stat-sub">{{ cancelled_orders }} cancelled</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Pending Tasks</div>
+    <div class="stat-value" style="color:var(--warn)">{{ pending_tasks }}</div>
+    <div class="stat-sub">{{ in_progress_tasks }} in progress</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px">
+
+  {# ── LOW STOCK BATCHES ── #}
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⚠ Low Available Stock</span>
+      <a href="{% url 'batch-list' %}" class="btn btn-ghost btn-sm">View all →</a>
+    </div>
+    <div class="table-wrap">
+      {% if low_stock_batches %}
+      <table>
+        <thead>
+          <tr>
+            <th>Lot</th>
+            <th>Material</th>
+            <th>Available</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in low_stock_batches %}
+          <tr>
+            <td class="td-mono">
+              <a href="{% url 'batch-detail' b.pk %}" style="color:var(--accent);text-decoration:none">{{ b.lot_number }}</a>
+            </td>
+            <td>{{ b.material.name }}</td>
+            <td><span class="badge badge-red">{{ b.available_quantity }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">
+        <div class="empty-icon">✅</div>
+        <h3>All batches healthy</h3>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── RECENT TRANSACTIONS ── #}
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Transactions</span>
+      <a href="{% url 'transaction-list' %}" class="btn btn-ghost btn-sm">View all →</a>
+    </div>
+    <div class="table-wrap">
+      {% if recent_transactions %}
+      <table>
+        <thead>
+          <tr><th>Type</th><th>Qty</th><th>Lot</th><th>When</th></tr>
+        </thead>
+        <tbody>
+          {% for tx in recent_transactions %}
+          <tr>
+            <td>
+              {% if tx.transaction_type == 'PRODUCED' %}<span class="badge badge-blue">{{ tx.transaction_type }}</span>
+              {% elif tx.transaction_type == 'RESERVED' %}<span class="badge badge-orange">{{ tx.transaction_type }}</span>
+              {% elif tx.transaction_type == 'CONSUMED' %}<span class="badge badge-red">{{ tx.transaction_type }}</span>
+              {% else %}<span class="badge badge-grey">{{ tx.transaction_type }}</span>
+              {% endif %}
+            </td>
+            <td class="td-mono">{{ tx.quantity }}</td>
+            <td class="td-mono text-muted">{{ tx.raw_material_batch.lot_number }}</td>
+            <td class="text-muted" style="font-size:11px">{{ tx.created_at|timesince }} ago</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        <h3>No transactions yet</h3>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── UPCOMING TASKS ── #}
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Upcoming Tasks</span>
+      <a href="{% url 'workflow-task-list' %}" class="btn btn-ghost btn-sm">View all →</a>
+    </div>
+    <div class="table-wrap">
+      {% if upcoming_tasks %}
+      <table>
+        <thead>
+          <tr><th>Task</th><th>Status</th><th>Due</th></tr>
+        </thead>
+        <tbody>
+          {% for t in upcoming_tasks %}
+          <tr>
+            <td>
+              <a href="{% url 'workflow-task-detail' t.pk %}" style="color:var(--text);text-decoration:none">
+                {{ t.description|truncatechars:40 }}
+              </a>
+            </td>
+            <td>
+              {% if t.status == 'PENDING' %}<span class="badge badge-orange">Pending</span>
+              {% elif t.status == 'IN_PROGRESS' %}<span class="badge badge-blue">In Progress</span>
+              {% else %}<span class="badge badge-green">Done</span>
+              {% endif %}
+            </td>
+            <td style="font-size:11px" class="text-muted">{{ t.expected_completion|date:"M d, H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">
+        <div class="empty-icon">🎉</div>
+        <h3>No pending tasks</h3>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── RECENT PRODUCT BATCHES ── #}
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Product Batches</span>
+      <a href="{% url 'product-batch-list' %}" class="btn btn-ghost btn-sm">View all →</a>
+    </div>
+    <div class="table-wrap">
+      {% if recent_product_batches %}
+      <table>
+        <thead>
+          <tr><th>Batch</th><th>Product</th><th>Qty</th></tr>
+        </thead>
+        <tbody>
+          {% for pb in recent_product_batches %}
+          <tr>
+            <td class="td-mono">
+              <a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a>
+            </td>
+            <td>{{ pb.material.name }}</td>
+            <td class="td-mono">{{ pb.quantity_produced }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">
+        <div class="empty-icon">🏭</div>
+        <h3>No product batches yet</h3>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

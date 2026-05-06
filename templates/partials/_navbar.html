@@ -1,0 +1,179 @@
+{#
+  _navbar.html
+  ───────────────────────────────────────────────────────────────
+  A self-contained top navigation bar.
+
+  base.html already contains a minimal `.topbar` strip (breadcrumbs + date).
+  Use THIS partial as a drop-in replacement when you want a richer navbar —
+  e.g. for a public-facing view, a print layout, or a standalone page that
+  does not use the sidebar layout at all.
+
+  To switch base.html to use this navbar instead of the built-in topbar,
+  replace the <div class="topbar">…</div> block in base.html with:
+      {% include "partials/_navbar.html" %}
+
+  Context variables (all optional):
+    page_title   – shown in the centre of the bar
+    breadcrumbs  – list of dicts: [{"label": "Home", "url": "/"}, …]
+                   last item is treated as current (no link rendered)
+#}
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+
+  {# ── LEFT: hamburger + logo ── #}
+  <div class="navbar-left">
+    <button
+      class="navbar-hamburger"
+      aria-label="Toggle sidebar"
+      onclick="document.querySelector('.sidebar').classList.toggle('sidebar-open')"
+    >
+      <span></span><span></span><span></span>
+    </button>
+    <a href="{% url 'dashboard' %}" class="navbar-brand">
+      <span class="navbar-brand-name">InventoryOS</span>
+    </a>
+  </div>
+
+  {# ── CENTRE: breadcrumb or page title ── #}
+  <div class="navbar-centre">
+    {% if breadcrumbs %}
+      <ol class="navbar-breadcrumb" aria-label="Breadcrumb">
+        {% for crumb in breadcrumbs %}
+          {% if not forloop.last %}
+            <li><a href="{{ crumb.url }}">{{ crumb.label }}</a></li>
+            <li aria-hidden="true" class="navbar-breadcrumb-sep">/</li>
+          {% else %}
+            <li aria-current="page">{{ crumb.label }}</li>
+          {% endif %}
+        {% endfor %}
+      </ol>
+    {% elif page_title %}
+      <span class="navbar-page-title">{{ page_title }}</span>
+    {% endif %}
+  </div>
+
+  {# ── RIGHT: date + quick actions ── #}
+  <div class="navbar-right">
+    <span class="navbar-date">{% now "Y-m-d" %}</span>
+
+    <a href="{% url 'batch-create' %}" class="navbar-action" title="New raw batch">
+      <span>📦</span>
+    </a>
+    <a href="{% url 'workflow-task-create' %}" class="navbar-action" title="New task">
+      <span>✅</span>
+    </a>
+  </div>
+
+</nav>
+
+<style>
+  /* ── Scoped navbar styles ───────────────────────────────────── */
+  .navbar {
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  /* Left */
+  .navbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+  .navbar-hamburger {
+    display: none;               /* shown only on mobile via media query below */
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .navbar-hamburger span {
+    display: block;
+    width: 18px; height: 2px;
+    background: var(--muted);
+    border-radius: 2px;
+    transition: background .15s;
+  }
+  .navbar-hamburger:hover span { background: var(--text); }
+
+  .navbar-brand {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .navbar-brand-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* Centre */
+  .navbar-centre { flex: 1; display: flex; justify-content: center; min-width: 0; }
+
+  .navbar-breadcrumb {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .navbar-breadcrumb a { color: var(--muted); text-decoration: none; transition: color .15s; }
+  .navbar-breadcrumb a:hover { color: var(--text); }
+  .navbar-breadcrumb li[aria-current="page"] { color: var(--text); }
+  .navbar-breadcrumb-sep { opacity: .35; }
+
+  .navbar-page-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* Right */
+  .navbar-right { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+  .navbar-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .navbar-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    text-decoration: none;
+    font-size: 15px;
+    transition: border-color .15s;
+  }
+  .navbar-action:hover { border-color: var(--accent); }
+
+  /* Mobile: show hamburger, hide date */
+  @media (max-width: 900px) {
+    .navbar-hamburger { display: flex; }
+    .navbar-date { display: none; }
+
+    /* Slide sidebar in when toggled */
+    .sidebar.sidebar-open { transform: translateX(0) !important; }
+  }
+</style>

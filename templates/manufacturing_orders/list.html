@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Manufacturing Orders — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Mfg Orders{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Manufacturing Orders</h1>
+    <p>One order per raw material batch</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'manufacturing-order-create' %}" class="btn btn-primary">+ New Order</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Status</label>
+      <select name="status">
+        <option value="">All</option>
+        <option value="active"     {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+        <option value="cancelled"  {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+      </select>
+    </div>
+    <div style="padding-bottom:1px">
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      <a href="{% url 'manufacturing-order-list' %}" class="btn btn-ghost">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if orders %}
+    <table>
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Batch / Lot</th>
+          <th>Material</th>
+          <th>Available Qty</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mo in orders %}
+        <tr>
+          <td class="td-mono">
+            <a href="{% url 'manufacturing-order-detail' mo.pk %}" style="color:var(--accent);text-decoration:none">MO-{{ mo.id }}</a>
+          </td>
+          <td class="td-mono">{{ mo.raw_material_batch.lot_number }}</td>
+          <td>{{ mo.raw_material_batch.material.name }}</td>
+          <td class="td-mono">{{ mo.raw_material_batch.available_quantity }}</td>
+          <td>
+            {% if mo.is_cancelled %}
+              <span class="badge badge-red">Cancelled</span>
+            {% else %}
+              <span class="badge badge-green">Active</span>
+            {% endif %}
+          </td>
+          <td class="text-muted" style="font-size:12px">{{ mo.created_at|date:"Y-m-d" }}</td>
+          <td>
+            <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'manufacturing-order-detail' mo.pk %}" class="btn btn-ghost btn-sm">View</a>
+              {% if mo.is_cancelled %}
+              <form method="post" action="{% url 'manufacturing-order-detail' mo.pk %}">
+                {% csrf_token %}<input type="hidden" name="is_cancelled" value="false">
+                <button type="submit" class="btn btn-success btn-sm">Re-activate</button>
+              </form>
+              {% else %}
+              <form method="post" action="{% url 'manufacturing-order-detail' mo.pk %}">
+                {% csrf_token %}<input type="hidden" name="is_cancelled" value="true">
+                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=orders %}
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">⚙️</div>
+      <h3>No manufacturing orders</h3>
+      <p>Create an order to link a manufacturing run to a raw material batch.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

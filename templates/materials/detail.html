@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ material.name }} — Materials{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'material-list' %}">Materials</a><span>/</span>
+  {{ material.sku }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ material.name }}</h1>
+    <p class="text-mono">{{ material.sku }}</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'material-edit' material.pk %}" class="btn btn-secondary">Edit</a>
+    <button class="btn btn-danger" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
+  </div>
+</div>
+
+{# ── META ── #}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Details</span></div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      <div>
+        <div class="stat-label">Category</div>
+        {% if material.category == 'RAW' %}<span class="badge badge-blue">Raw Material</span>
+        {% elif material.category == 'PKG' %}<span class="badge badge-orange">Packaging</span>
+        {% else %}<span class="badge badge-green">Finished Product</span>
+        {% endif %}
+      </div>
+      <div>
+        <div class="stat-label">Unit</div>
+        <span style="font-family:var(--mono)">{{ material.unit.name }}</span>
+      </div>
+      <div>
+        <div class="stat-label">SKU</div>
+        <span style="font-family:var(--mono)">{{ material.sku }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── LINKED BATCHES ── #}
+{% if material.category in 'RAW,PKG' %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Raw Material Batches</span>
+    <a href="{% url 'batch-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Batch</a>
+  </div>
+  <div class="table-wrap">
+    {% if raw_batches %}
+    <table>
+      <thead>
+        <tr><th>Lot</th><th>Location</th><th>Available</th><th>Reserved</th><th>Total</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for b in raw_batches %}
+        <tr>
+          <td class="td-mono"><a href="{% url 'batch-detail' b.pk %}" style="color:var(--accent);text-decoration:none">{{ b.lot_number }}</a></td>
+          <td>{{ b.location.name }}</td>
+          <td class="td-mono" style="color:var(--accent2)">{{ b.available_quantity }}</td>
+          <td class="td-mono" style="color:var(--warn)">{{ b.reserved_quantity }}</td>
+          <td class="td-mono">{{ b.total_quantity }}</td>
+          <td><a href="{% url 'batch-detail' b.pk %}" class="btn btn-ghost btn-sm">→</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">📦</div><h3>No batches for this material</h3></div>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Product Batches</span>
+    <a href="{% url 'product-batch-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Batch</a>
+  </div>
+  <div class="table-wrap">
+    {% if product_batches %}
+    <table>
+      <thead>
+        <tr><th>Batch #</th><th>Location</th><th>Qty Produced</th><th>Date</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for pb in product_batches %}
+        <tr>
+          <td class="td-mono"><a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a></td>
+          <td>{{ pb.location.name }}</td>
+          <td class="td-mono">{{ pb.quantity_produced }}</td>
+          <td class="text-muted" style="font-size:12px">{{ pb.created_at|date:"Y-m-d" }}</td>
+          <td><a href="{% url 'product-batch-detail' pb.pk %}" class="btn btn-ghost btn-sm">→</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">🏭</div><h3>No product batches yet</h3></div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete material <strong style="color:var(--text)">{{ material.name }}</strong>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" action="{% url 'material-delete' material.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+{% endblock %}

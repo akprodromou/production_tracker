@@ -1,0 +1,28 @@
+{# Usage: {% include "partials/_confirm_delete.html" with delete_url=url object_name="Batch #42" %} #}
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>
+      You are about to permanently delete
+      <strong style="color:var(--text)">{{ object_name }}</strong>.
+      This action cannot be undone.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">
+        Cancel
+      </button>
+      <form method="post" action="{{ delete_url }}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  function openDeleteModal() {
+    document.getElementById('deleteModal').classList.add('open');
+  }
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+</script>

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}{{ task.description|truncatechars:40 }} — Tasks{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'workflow-task-list' %}">Tasks</a><span>/</span>
+  #{{ task.pk }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ task.description }}</h1>
+    <p>Task #{{ task.pk }} · {{ task.location.name }}</p>
+  </div>
+  <div class="page-actions">
+    {% if task.status == 'PENDING' %}
+      <form method="post" action="{% url 'workflow-task-status' task.pk %}">
+        {% csrf_token %}<input type="hidden" name="status" value="IN_PROGRESS">
+        <button type="submit" class="btn btn-secondary">→ Start</button>
+      </form>
+    {% endif %}
+    {% if task.status != 'DONE' %}
+      <form method="post" action="{% url 'workflow-task-status' task.pk %}">
+        {% csrf_token %}<input type="hidden" name="status" value="DONE">
+        <button type="submit" class="btn btn-success">✓ Mark Done</button>
+      </form>
+    {% endif %}
+    <a href="{% url 'workflow-task-edit' task.pk %}" class="btn btn-secondary">Edit</a>
+    <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
+  </div>
+</div>
+
+{# ── STATUS BANNER ── #}
+<div class="mb-3">
+  {% if task.status == 'PENDING' %}
+    <div class="msg msg-warning">⏳ This task is pending and has not been started yet.</div>
+  {% elif task.status == 'IN_PROGRESS' %}
+    <div class="msg msg-info">🔄 This task is currently in progress.</div>
+  {% else %}
+    <div class="msg msg-success">✅ This task was completed on {{ task.actual_completion|date:"Y-m-d H:i" }}.</div>
+  {% endif %}
+</div>
+
+{# ── DETAIL GRID ── #}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="mb-3">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Task Details</span></div>
+    <div class="card-body">
+      <div style="display:grid;gap:14px">
+        <div>
+          <div class="stat-label">Status</div>
+          {% if task.status == 'PENDING' %}<span class="badge badge-orange">Pending</span>
+          {% elif task.status == 'IN_PROGRESS' %}<span class="badge badge-blue">In Progress</span>
+          {% else %}<span class="badge badge-green">Done</span>
+          {% endif %}
+        </div>
+        <div>
+          <div class="stat-label">Location</div>
+          <span>{{ task.location.name }}
+            {% if task.location.is_external %}<span class="badge badge-grey" style="margin-left:6px">External</span>{% endif %}
+          </span>
+        </div>
+        <div>
+          <div class="stat-label">Expected Completion</div>
+          <span class="text-mono">{{ task.expected_completion|date:"Y-m-d H:i" }}</span>
+        </div>
+        <div>
+          <div class="stat-label">Actual Completion</div>
+          <span class="text-mono">{{ task.actual_completion|date:"Y-m-d H:i"|default:"—" }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Linked Batches</span></div>
+    <div class="card-body">
+      <div style="display:grid;gap:14px">
+        <div>
+          <div class="stat-label">Raw Material Batch</div>
+          {% if task.raw_material_batch %}
+            <a href="{% url 'batch-detail' task.raw_material_batch.pk %}" style="color:var(--accent);text-decoration:none;font-family:var(--mono)">
+              {{ task.raw_material_batch.lot_number }}
+            </a>
+            <span class="text-muted"> · {{ task.raw_material_batch.material.name }}</span>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </div>
+        <div>
+          <div class="stat-label">Product Batch</div>
+          {% if task.product_batch %}
+            <a href="{% url 'product-batch-detail' task.product_batch.pk %}" style="color:var(--accent);text-decoration:none;font-family:var(--mono)">
+              {{ task.product_batch.batch_number }}
+            </a>
+            <span class="text-muted"> · {{ task.product_batch.material.name }}</span>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── BATCH STOCK SNAPSHOT ── #}
+{% if task.raw_material_batch %}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Raw Batch Stock Snapshot</span>
+    <a href="{% url 'batch-detail' task.raw_material_batch.pk %}" class="btn btn-ghost btn-sm">Open batch →</a>
+  </div>
+  <div class="card-body">
+    {% include "partials/_batch_stock_card.html" with batch=task.raw_material_batch %}
+  </div>
+</div>
+{% endif %}
+
+{# ── STATUS HISTORY / QUICK ACTIONS ── #}
+{% if task.status != 'DONE' %}
+<div class="card">
+  <div class="card-header"><span class="card-title">Quick Status Update</span></div>
+  <div class="card-body">
+    <form method="post" action="{% url 'workflow-task-status' task.pk %}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+      {% csrf_token %}
+      <div class="form-group" style="flex:1;min-width:160px">
+        <label>Move to status</label>
+        <select name="status">
+          {% if task.status == 'PENDING' %}
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="DONE">Done</option>
+          {% elif task.status == 'IN_PROGRESS' %}
+            <option value="DONE">Done</option>
+            <option value="PENDING">Pending</option>
+          {% endif %}
+        </select>
+      </div>
+      <div class="form-group" style="flex:1;min-width:200px">
+        <label>Actual completion (optional)</label>
+        <input type="datetime-local" name="actual_completion">
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-bottom:1px">Update Status</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete task <strong style="color:var(--text)">{{ task.description|truncatechars:50 }}</strong>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" action="{% url 'workflow-task-delete' task.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+{% endblock %}

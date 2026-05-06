@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Materials — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Materials{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Materials</h1>
+    <p>SKU definitions for raw materials, packaging, and finished products</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'material-create' %}" class="btn btn-primary">+ New Material</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Category</label>
+      <select name="category">
+        <option value="">All categories</option>
+        <option value="RAW" {% if request.GET.category == 'RAW' %}selected{% endif %}>Raw Material</option>
+        <option value="PKG" {% if request.GET.category == 'PKG' %}selected{% endif %}>Packaging</option>
+        <option value="FIN" {% if request.GET.category == 'FIN' %}selected{% endif %}>Finished Product</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Search</label>
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Name or SKU…">
+    </div>
+    <div style="padding-bottom:1px">
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      <a href="{% url 'material-list' %}" class="btn btn-ghost">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if materials %}
+    <table>
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Unit</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in materials %}
+        <tr>
+          <td class="td-mono"><a href="{% url 'material-detail' m.pk %}" style="color:var(--accent);text-decoration:none">{{ m.sku }}</a></td>
+          <td>{{ m.name }}</td>
+          <td>
+            {% if m.category == 'RAW' %}<span class="badge badge-blue">Raw</span>
+            {% elif m.category == 'PKG' %}<span class="badge badge-orange">Packaging</span>
+            {% else %}<span class="badge badge-green">Finished</span>
+            {% endif %}
+          </td>
+          <td class="text-muted">{{ m.unit.name }}</td>
+          <td>
+            <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'material-detail' m.pk %}" class="btn btn-ghost btn-sm">View</a>
+              <a href="{% url 'material-edit' m.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ m.name }}','{% url 'material-delete' m.pk %}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=materials %}
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">🧪</div>
+      <h3>No materials found</h3>
+      <p>{% if request.GET.q or request.GET.category %}Try adjusting your filters.{% else %}Create your first material SKU.{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete <strong id="deleteTarget" style="color:var(--text)"></strong>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" id="deleteForm">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openDeleteModal(name, url) {
+  document.getElementById('deleteTarget').textContent = name;
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModal').classList.add('open');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+{% endblock %}

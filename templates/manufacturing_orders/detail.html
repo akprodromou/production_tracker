@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}MO-{{ order.id }} — Manufacturing Orders{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'manufacturing-order-list' %}">Mfg Orders</a><span>/</span>
+  MO-{{ order.id }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>MO-{{ order.id }}</h1>
+    <p>Manufacturing Order · {{ order.created_at|date:"Y-m-d H:i" }}</p>
+  </div>
+  <div class="page-actions">
+    {% if order.is_cancelled %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="is_cancelled" value="false">
+        <button type="submit" class="btn btn-success">Re-activate Order</button>
+      </form>
+    {% else %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="is_cancelled" value="true">
+        <button type="submit" class="btn btn-danger">Cancel Order</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{# ── STATUS BANNER ── #}
+{% if order.is_cancelled %}
+<div class="msg msg-error mb-3">
+  ⚠ This manufacturing order has been cancelled.
+</div>
+{% endif %}
+
+{# ── ORDER META ── #}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Order Details</span></div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      <div><div class="stat-label">Order ID</div><span class="text-mono">MO-{{ order.id }}</span></div>
+      <div><div class="stat-label">Status</div>
+        {% if order.is_cancelled %}<span class="badge badge-red">Cancelled</span>
+        {% else %}<span class="badge badge-green">Active</span>{% endif %}
+      </div>
+      <div><div class="stat-label">Created</div><span class="text-mono">{{ order.created_at|date:"Y-m-d H:i" }}</span></div>
+    </div>
+  </div>
+</div>
+
+{# ── LINKED BATCH ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Linked Raw Material Batch</span>
+    <a href="{% url 'batch-detail' order.raw_material_batch.pk %}" class="btn btn-ghost btn-sm">Open batch →</a>
+  </div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:16px">
+      <div><div class="stat-label">Lot Number</div><span class="text-mono">{{ order.raw_material_batch.lot_number }}</span></div>
+      <div><div class="stat-label">Material</div>{{ order.raw_material_batch.material.name }}</div>
+      <div><div class="stat-label">Location</div>{{ order.raw_material_batch.location.name }}</div>
+    </div>
+    {% include "partials/_batch_stock_card.html" with batch=order.raw_material_batch %}
+  </div>
+</div>
+{% endblock %}

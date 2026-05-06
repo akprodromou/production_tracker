@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Units — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Units{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Units of Measure</h1>
+    <p>Reference data for material quantities</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'unit-create' %}" class="btn btn-primary">+ New Unit</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if units %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for unit in units %}
+        <tr>
+          <td class="td-mono text-muted">{{ unit.id }}</td>
+          <td><strong>{{ unit.name }}</strong></td>
+          <td>
+            <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'unit-edit' unit.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ unit.name }}','{% url 'unit-delete' unit.pk %}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">📏</div>
+      <h3>No units defined</h3>
+      <p>Add a unit of measure to get started.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# generic delete modal #}
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete unit <strong id="deleteTarget" style="color:var(--text)"></strong>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" id="deleteForm">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openDeleteModal(name, url) {
+  document.getElementById('deleteTarget').textContent = name;
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModal').classList.add('open');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+{% endblock %}

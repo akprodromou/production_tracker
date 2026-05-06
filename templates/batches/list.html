@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Raw Material Batches — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Raw Batches{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Raw Material Batches</h1>
+    <p>Stock tracking by lot number</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'batch-create' %}" class="btn btn-primary">+ New Batch</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Material</label>
+      <select name="material_id">
+        <option value="">All materials</option>
+        {% for m in all_materials %}
+        <option value="{{ m.pk }}" {% if request.GET.material_id == m.pk|stringformat:'s' %}selected{% endif %}>{{ m.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Location</label>
+      <select name="location_id">
+        <option value="">All locations</option>
+        {% for loc in all_locations %}
+        <option value="{{ loc.pk }}" {% if request.GET.location_id == loc.pk|stringformat:'s' %}selected{% endif %}>{{ loc.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Search lot</label>
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Lot number…">
+    </div>
+    <div style="padding-bottom:1px">
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      <a href="{% url 'batch-list' %}" class="btn btn-ghost">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if batches %}
+    <table>
+      <thead>
+        <tr>
+          <th>Lot Number</th>
+          <th>Material</th>
+          <th>Location</th>
+          <th>Total</th>
+          <th>Available</th>
+          <th>Reserved</th>
+          <th>Created</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in batches %}
+        <tr>
+          <td class="td-mono">
+            <a href="{% url 'batch-detail' b.pk %}" style="color:var(--accent);text-decoration:none">{{ b.lot_number }}</a>
+          </td>
+          <td>{{ b.material.name }}<br><span class="text-muted text-mono">{{ b.material.sku }}</span></td>
+          <td>{{ b.location.name }}</td>
+          <td class="td-mono">{{ b.total_quantity }} {{ b.material.unit.name }}</td>
+          <td>
+            {% if b.available_quantity > 0 %}
+              <span class="badge badge-green">{{ b.available_quantity }}</span>
+            {% else %}
+              <span class="badge badge-red">{{ b.available_quantity }}</span>
+            {% endif %}
+          </td>
+          <td><span class="badge badge-orange">{{ b.reserved_quantity }}</span></td>
+          <td class="text-muted" style="font-size:12px">{{ b.created_at|date:"Y-m-d" }}</td>
+          <td>
+            <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'batch-detail' b.pk %}" class="btn btn-ghost btn-sm">View</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=batches %}
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">📦</div>
+      <h3>No batches found</h3>
+      <p>{% if request.GET %}Try adjusting your filters.{% else %}Create your first raw material batch.{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

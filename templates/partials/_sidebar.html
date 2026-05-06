@@ -1,0 +1,43 @@
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>InventoryOS</span>
+    <small>Warehouse &amp; Production</small>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <span class="icon">⬛</span> Dashboard
+    </a>
+
+    <div class="nav-section">Inventory</div>
+    <a href="{% url 'batch-list' %}" class="{% if 'batch' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">📦</span> Raw Batches
+    </a>
+    <a href="{% url 'product-batch-list' %}" class="{% if 'product-batch' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">🏭</span> Product Batches
+    </a>
+    <a href="{% url 'transaction-list' %}" class="{% if 'transaction' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">📋</span> Transactions
+    </a>
+
+    <div class="nav-section">Production</div>
+    <a href="{% url 'manufacturing-order-list' %}" class="{% if 'manufacturing' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">⚙️</span> Mfg Orders
+    </a>
+    <a href="{% url 'workflow-task-list' %}" class="{% if 'workflow' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">✅</span> Tasks
+    </a>
+
+    <div class="nav-section">Reference</div>
+    <a href="{% url 'material-list' %}" class="{% if 'material' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">🧪</span> Materials
+    </a>
+    <a href="{% url 'location-list' %}" class="{% if 'location' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">📍</span> Locations
+    </a>
+    <a href="{% url 'unit-list' %}" class="{% if 'unit' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">📏</span> Units
+    </a>
+  </nav>
+  <div class="sidebar-footer">v1.0.0</div>
+</aside>

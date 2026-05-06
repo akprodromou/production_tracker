@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Transaction Ledger — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Transactions{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Transaction Ledger</h1>
+    <p>Immutable record of all material movements — read only</p>
+  </div>
+</div>
+
+{# ── FILTERS ── #}
+<div class="filter-bar">
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Type</label>
+      <select name="transaction_type">
+        <option value="">All types</option>
+        <option value="PRODUCED" {% if request.GET.transaction_type == 'PRODUCED' %}selected{% endif %}>Produced</option>
+        <option value="RESERVED" {% if request.GET.transaction_type == 'RESERVED' %}selected{% endif %}>Reserved</option>
+        <option value="CONSUMED" {% if request.GET.transaction_type == 'CONSUMED' %}selected{% endif %}>Consumed</option>
+        <option value="RELEASED" {% if request.GET.transaction_type == 'RELEASED' %}selected{% endif %}>Released</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Raw Batch</label>
+      <select name="batch_id">
+        <option value="">All batches</option>
+        {% for b in all_batches %}
+        <option value="{{ b.pk }}" {% if request.GET.batch_id == b.pk|stringformat:'s' %}selected{% endif %}>
+          {{ b.lot_number }} — {{ b.material.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Product Batch</label>
+      <select name="product_batch_id">
+        <option value="">All product batches</option>
+        {% for pb in all_product_batches %}
+        <option value="{{ pb.pk }}" {% if request.GET.product_batch_id == pb.pk|stringformat:'s' %}selected{% endif %}>
+          {{ pb.batch_number }} — {{ pb.material.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Reference</label>
+      <input type="text" name="reference" value="{{ request.GET.reference }}" placeholder="Order ID, ref…">
+    </div>
+    <div style="padding-bottom:1px">
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      <a href="{% url 'transaction-list' %}" class="btn btn-ghost">Clear</a>
+    </div>
+  </form>
+</div>
+
+{# ── SUMMARY STRIP ── #}
+{% if summary %}
+<div class="stat-grid stat-grid-4 mb-3">
+  <div class="stat-card">
+    <div class="stat-label">Produced</div>
+    <div class="stat-value" style="color:var(--accent)">{{ summary.produced }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Reserved</div>
+    <div class="stat-value" style="color:var(--warn)">{{ summary.reserved }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Consumed</div>
+    <div class="stat-value" style="color:var(--danger)">{{ summary.consumed }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Released</div>
+    <div class="stat-value" style="color:var(--muted)">{{ summary.released }}</div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">
+      Entries
+      {% if transactions.paginator.count %}<span class="text-muted" style="font-weight:400;font-size:11px">({{ transactions.paginator.count }} total)</span>{% endif %}
+    </span>
+    <span class="text-muted" style="font-size:11px;font-family:var(--mono)">READ ONLY</span>
+  </div>
+  <div class="table-wrap">
+    {% if transactions %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Type</th>
+          <th>Qty</th>
+          <th>Raw Batch / Lot</th>
+          <th>Product Batch</th>
+          <th>Reference</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td class="td-mono text-muted">{{ tx.id }}</td>
+          <td>
+            {% if tx.transaction_type == 'PRODUCED' %}
+              <span class="badge badge-blue">PRODUCED</span>
+            {% elif tx.transaction_type == 'RESERVED' %}
+              <span class="badge badge-orange">RESERVED</span>
+            {% elif tx.transaction_type == 'CONSUMED' %}
+              <span class="badge badge-red">CONSUMED</span>
+            {% else %}
+              <span class="badge badge-grey">RELEASED</span>
+            {% endif %}
+          </td>
+          <td class="td-mono">{{ tx.quantity }}</td>
+          <td class="td-mono">
+            <a href="{% url 'batch-detail' tx.raw_material_batch.pk %}" style="color:var(--accent);text-decoration:none">
+              {{ tx.raw_material_batch.lot_number }}
+            </a>
+            <span class="text-muted"> · {{ tx.raw_material_batch.material.sku }}</span>
+          </td>
+          <td class="td-mono">
+            {% if tx.product_batch %}
+              <a href="{% url 'product-batch-detail' tx.product_batch.pk %}" style="color:var(--accent);text-decoration:none">
+                {{ tx.product_batch.batch_number }}
+              </a>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td class="text-muted" style="font-size:12px">{{ tx.reference|default:"—" }}</td>
+          <td class="text-muted" style="font-size:12px;font-family:var(--mono)">{{ tx.created_at|date:"Y-m-d H:i:s" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=transactions %}
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">📋</div>
+      <h3>No transactions found</h3>
+      <p>{% if request.GET %}Try adjusting your filters.{% else %}Transactions are created automatically by reserve, consume, and release operations.{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

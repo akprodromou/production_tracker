@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ batch.batch_number }} — Product Batch{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'product-batch-list' %}">Product Batches</a><span>/</span>
+  {{ batch.batch_number }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ batch.batch_number }}</h1>
+    <p>{{ batch.material.name }} · <span class="text-mono">{{ batch.material.sku }}</span> · {{ batch.location.name }}</p>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">Delete Batch</button>
+  </div>
+</div>
+
+{# ── META ── #}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px" class="mb-3">
+  <div class="stat-card">
+    <div class="stat-label">Product</div>
+    <div style="font-size:15px;font-weight:600">{{ batch.material.name }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">SKU</div>
+    <div class="text-mono" style="font-size:15px">{{ batch.material.sku }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Qty Produced</div>
+    <div class="text-mono" style="font-size:22px;font-weight:600;color:var(--accent2)">
+      {{ batch.quantity_produced }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Location</div>
+    <div style="font-size:15px">{{ batch.location.name }}</div>
+  </div>
+</div>
+
+{# ── MATERIAL CONSUMPTION SUMMARY ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Raw Material Consumption Summary</span>
+  </div>
+  <div class="card-body">
+    {% if consumption_summary %}
+    <div style="display:grid;gap:10px">
+      {% for row in consumption_summary %}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;align-items:center;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)">
+        <div>
+          <div class="stat-label">Lot</div>
+          <a href="{% url 'batch-detail' row.batch.pk %}" class="text-mono" style="color:var(--accent);text-decoration:none">{{ row.batch.lot_number }}</a>
+        </div>
+        <div>
+          <div class="stat-label">Material</div>
+          <span style="font-size:13px">{{ row.batch.material.name }}</span>
+        </div>
+        <div>
+          <div class="stat-label">Reserved</div>
+          <span class="text-mono" style="color:var(--warn)">{{ row.reserved }}</span>
+        </div>
+        <div>
+          <div class="stat-label">Consumed</div>
+          <span class="text-mono" style="color:var(--danger)">{{ row.consumed }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty" style="padding:24px">
+      <div class="empty-icon">📋</div>
+      <h3>No material movements yet</h3>
+      <p>Reserve raw materials against this batch to see consumption here.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# ── FULL TRANSACTION LEDGER ── #}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">All Transactions</span>
+    <a href="{% url 'transaction-list' %}?product_batch_id={{ batch.pk }}" class="btn btn-ghost btn-sm">Full ledger view →</a>
+  </div>
+  <div class="table-wrap">
+    {% if transactions %}
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Raw Batch / Lot</th>
+          <th>Qty</th>
+          <th>Reference</th>
+          <th>When</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td>
+            {% if tx.transaction_type == 'RESERVED' %}<span class="badge badge-orange">RESERVED</span>
+            {% elif tx.transaction_type == 'CONSUMED' %}<span class="badge badge-red">CONSUMED</span>
+            {% elif tx.transaction_type == 'RELEASED' %}<span class="badge badge-grey">RELEASED</span>
+            {% else %}<span class="badge badge-blue">{{ tx.transaction_type }}</span>
+            {% endif %}
+          </td>
+          <td class="td-mono">
+            <a href="{% url 'batch-detail' tx.raw_material_batch.pk %}" style="color:var(--accent);text-decoration:none">
+              {{ tx.raw_material_batch.lot_number }}
+            </a>
+            <span class="text-muted"> · {{ tx.raw_material_batch.material.name }}</span>
+          </td>
+          <td class="td-mono">{{ tx.quantity }}</td>
+          <td class="text-muted" style="font-size:12px">{{ tx.reference|default:"—" }}</td>
+          <td class="text-muted" style="font-size:12px">{{ tx.created_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">📋</div><h3>No transactions linked to this batch</h3></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete product batch <strong style="color:var(--text)">{{ batch.batch_number }}</strong>? All linked transactions will be removed. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" action="{% url 'product-batch-delete' batch.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+{% endblock %}
