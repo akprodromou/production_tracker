@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Client Orders — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Orders{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Client Orders</h1><p>Demand from customers driving production</p></div>
+  <div class="page-actions">
+    <a href="{% url 'order-create' %}" class="btn btn-primary">+ New Order</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Status</label>
+      <select name="status">
+        <option value="">All statuses</option>
+        {% for val, label in status_choices %}
+        <option value="{{ val }}" {% if request.GET.status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Client</label>
+      <select name="client_id">
+        <option value="">All clients</option>
+        {% for c in all_clients %}
+        <option value="{{ c.pk }}" {% if request.GET.client_id == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Search</label>
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Reference or client…">
+    </div>
+    <div style="padding-bottom:1px">
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      <a href="{% url 'order-list' %}" class="btn btn-ghost">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if orders %}
+    <table>
+      <thead>
+        <tr><th>Reference</th><th>Client</th><th>Status</th><th>Lines</th><th>Order Date</th><th>Required By</th><th style="text-align:right">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="td-mono"><a href="{% url 'order-detail' o.pk %}" style="color:var(--accent);text-decoration:none">{{ o.reference }}</a></td>
+          <td>{{ o.client.name }}</td>
+          <td>
+            {% if o.status == 'DRAFT' %}<span class="badge badge-grey">Draft</span>
+            {% elif o.status == 'CONFIRMED' %}<span class="badge badge-blue">Confirmed</span>
+            {% elif o.status == 'IN_PRODUCTION' %}<span class="badge badge-orange">In Production</span>
+            {% elif o.status == 'PARTIALLY_FULFILLED' %}<span class="badge badge-orange">Partial</span>
+            {% elif o.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>
+            {% endif %}
+          </td>
+          <td class="td-mono">{{ o.total_lines }}</td>
+          <td class="text-muted" style="font-size:12px">{{ o.order_date|date:"Y-m-d" }}</td>
+          <td class="text-muted" style="font-size:12px">{{ o.required_by|date:"Y-m-d"|default:"—" }}</td>
+          <td>
+            <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'order-detail' o.pk %}" class="btn btn-ghost btn-sm">View</a>
+              <a href="{% url 'order-edit' o.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ o.reference }}','{% url 'order-delete' o.pk %}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=orders %}
+    {% else %}
+    <div class="empty"><div class="empty-icon">📄</div><h3>No orders found</h3><p>{% if request.GET %}Try adjusting your filters.{% else %}Create your first client order.{% endif %}</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete order <strong id="deleteTarget" style="color:var(--text)"></strong>? All order lines will be removed.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" id="deleteForm">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function openDeleteModal(name, url) {
+  document.getElementById('deleteTarget').textContent = name;
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModal').classList.add('open');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+</script>
+{% endblock %}

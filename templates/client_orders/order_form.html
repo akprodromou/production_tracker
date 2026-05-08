@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} — Orders{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'order-list' %}">Orders</a><span>/</span>
+  {{ form_title }}
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .line-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .line-row:last-child { border-bottom: none; }
+  .line-row select,
+  .line-row input[type=text],
+  .line-row input[type=number] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .15s;
+  }
+  .line-row select:focus,
+  .line-row input:focus { border-color: var(--accent); }
+  .line-row select option { background: var(--surface2); color: var(--text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>{{ form_title }}</h1></div>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  {% if form.non_field_errors or formset.non_form_errors %}
+  <div class="mb-2">
+    {% for e in form.non_field_errors %}<div class="msg msg-error">{{ e }}</div>{% endfor %}
+    {% for e in formset.non_form_errors %}<div class="msg msg-error">{{ e }}</div>{% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Order Details</span></div>
+    <div class="card-body">
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label>Reference</label>{{ form.reference }}
+          {% if form.reference.errors %}<ul class="errorlist">{% for e in form.reference.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Client</label>{{ form.client }}
+          {% if form.client.errors %}<ul class="errorlist">{% for e in form.client.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Order Date</label>{{ form.order_date }}
+        </div>
+        <div class="form-group">
+          <label>Required By</label>{{ form.required_by }}
+        </div>
+        <div class="form-group">
+          <label>Status</label>{{ form.status }}
+        </div>
+      </div>
+      <div class="form-group mt-3">
+        <label>Notes</label>{{ form.notes }}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Order Lines</span></div>
+    <div class="card-body">
+      {{ formset.management_form }}
+      <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Product</span>
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Qty Ordered</span>
+        <span></span>
+      </div>
+      <div id="lines-container">
+        {% for lf in formset %}
+        <div class="line-row">
+          <div>
+            {{ lf.material }}
+            {% for h in lf.hidden_fields %}{{ h }}{% endfor %}
+            {% if lf.material.errors %}<ul class="errorlist">{% for e in lf.material.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div>
+            {{ lf.quantity_ordered }}
+            {% if lf.quantity_ordered.errors %}<ul class="errorlist">{% for e in lf.quantity_ordered.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+            {% if lf.instance.pk %}
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--danger)">{{ lf.DELETE }} Remove</label>
+            {% else %}
+              <button type="button" class="btn btn-ghost btn-sm remove-line" style="color:var(--danger)">✕</button>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="add-line-btn" class="btn btn-ghost btn-sm" style="margin-top:12px">+ Add Line</button>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+    <a href="{% url 'order-list' %}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const linesContainer = document.getElementById('lines-container');
+const totalForms     = document.getElementById('id_clientorderline_set-TOTAL_FORMS');
+
+document.getElementById('add-line-btn').addEventListener('click', function() {
+  const idx = parseInt(totalForms.value);
+  const tpl = linesContainer.children[0].outerHTML
+    .replace(/clientorderline_set-\d+-/g, `clientorderline_set-${idx}-`);
+  linesContainer.insertAdjacentHTML('beforeend', tpl);
+  totalForms.value = idx + 1;
+  const newRow = linesContainer.lastElementChild;
+  newRow.querySelectorAll('input[type=text],input[type=number]').forEach(el => el.value = '');
+  newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  newRow.querySelector('.remove-line')?.addEventListener('click', removeLine);
+});
+
+function removeLine() { this.closest('.line-row').remove(); }
+document.querySelectorAll('.remove-line').forEach(btn => btn.addEventListener('click', removeLine));
+</script>
+{% endblock %}

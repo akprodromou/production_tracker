@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} — Production Runs{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'production-run-list' %}">Production Runs</a><span>/</span>
+  {{ form_title }}
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .comp-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .comp-row:last-child { border-bottom: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>{{ form_title }}</h1></div>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="mb-2">{% for e in form.non_field_errors %}<div class="msg msg-error">{{ e }}</div>{% endfor %}</div>
+  {% endif %}
+
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Run Details</span></div>
+    <div class="card-body">
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label>Reference</label>{{ form.reference }}
+          {% if form.reference.errors %}<ul class="errorlist">{% for e in form.reference.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Finished Product</label>{{ form.material }}
+          {% if form.material.errors %}<ul class="errorlist">{% for e in form.material.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Planned Quantity</label>{{ form.planned_quantity }}
+          {% if form.planned_quantity.errors %}<ul class="errorlist">{% for e in form.planned_quantity.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Location</label>{{ form.location }}
+        </div>
+        <div class="form-group">
+          <label>Status</label>{{ form.status }}
+        </div>
+        <div class="form-group">
+          <label>Actual Quantity <span class="text-muted">(on completion)</span></label>
+          {{ form.actual_quantity }}
+        </div>
+      </div>
+      <div class="form-grid form-grid-2 mt-3">
+        <div class="form-group"><label>Planned Start</label>{{ form.planned_start }}</div>
+        <div class="form-group"><label>Planned End</label>{{ form.planned_end }}</div>
+        <div class="form-group"><label>Actual Start</label>{{ form.actual_start }}</div>
+        <div class="form-group"><label>Actual End</label>{{ form.actual_end }}</div>
+      </div>
+      <div class="form-group mt-3"><label>Notes</label>{{ form.notes }}</div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Components Required</span></div>
+    <div class="card-body">
+      {{ formset.management_form }}
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Material</span>
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Qty Required</span>
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Status</span>
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Expected Date</span>
+        <span></span>
+      </div>
+      <div id="comp-container">
+        {% for cf in formset %}
+        <div class="comp-row">
+          <div>
+            {{ cf.material }}
+            {% for h in cf.hidden_fields %}{{ h }}{% endfor %}
+            {% if cf.material.errors %}<ul class="errorlist">{% for e in cf.material.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div>{{ cf.quantity_required }}</div>
+          <div>{{ cf.status }}</div>
+          <div>{{ cf.expected_date }}</div>
+          <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+            {% if cf.instance.pk %}
+              <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--danger)">{{ cf.DELETE }} Del</label>
+            {% else %}
+              <button type="button" class="btn btn-ghost btn-sm remove-comp" style="color:var(--danger)">✕</button>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="add-comp-btn" class="btn btn-ghost btn-sm" style="margin-top:12px">+ Add Component</button>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+    <a href="{% url 'production-run-list' %}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const compContainer = document.getElementById('comp-container');
+const compTotal     = document.getElementById('id_comp-TOTAL_FORMS');
+const addCompBtn    = document.getElementById('add-comp-btn');
+
+addCompBtn.addEventListener('click', function() {
+  const idx  = parseInt(compTotal.value);
+  const tpl  = compContainer.children[0].outerHTML
+    .replace(/comp-0-/g, `comp-${idx}-`)
+    .replace(/comp-\d+-/g, `comp-${idx}-`);
+  compContainer.insertAdjacentHTML('beforeend', tpl);
+  compTotal.value = idx + 1;
+  const newRow = compContainer.lastElementChild;
+  newRow.querySelectorAll('input[type=text],input[type=number],input[type=date]')
+    .forEach(el => el.value = '');
+  newRow.querySelector('.remove-comp')
+    ?.addEventListener('click', () => newRow.remove());
+});
+
+document.querySelectorAll('.remove-comp').forEach(btn =>
+  btn.addEventListener('click', function() { this.closest('.comp-row').remove(); })
+);
+</script>
+{% endblock %}

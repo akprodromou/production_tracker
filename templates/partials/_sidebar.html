@@ -9,8 +9,24 @@
       <span class="icon">⬛</span> Dashboard
     </a>
 
+    <div class="nav-section">Orders</div>
+    <a href="{% url 'order-list' %}" class="{% if 'order' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">📄</span> Client Orders
+    </a>
+    <a href="{% url 'client-list' %}" class="{% if 'client' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">👥</span> Clients
+    </a>
+
+    <div class="nav-section">Production</div>
+    <a href="{% url 'production-run-list' %}" class="{% if 'production-run' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">⚙️</span> Production Runs
+    </a>
+    <!-- <a href="{% url 'workflow-task-list' %}" class="{% if 'workflow' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">✅</span> Tasks
+    </a> -->
+
     <div class="nav-section">Inventory</div>
-    <a href="{% url 'batch-list' %}" class="{% if 'batch' in request.resolver_match.url_name %}active{% endif %}">
+    <a href="{% url 'batch-list' %}" class="{% if request.resolver_match.url_name in 'batch-list,batch-detail,batch-create' %}active{% endif %}">
       <span class="icon">📦</span> Raw Batches
     </a>
     <a href="{% url 'product-batch-list' %}" class="{% if 'product-batch' in request.resolver_match.url_name %}active{% endif %}">
@@ -18,14 +34,6 @@
     </a>
     <a href="{% url 'transaction-list' %}" class="{% if 'transaction' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">📋</span> Transactions
-    </a>
-
-    <div class="nav-section">Production</div>
-    <a href="{% url 'manufacturing-order-list' %}" class="{% if 'manufacturing' in request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">⚙️</span> Mfg Orders
-    </a>
-    <a href="{% url 'workflow-task-list' %}" class="{% if 'workflow' in request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">✅</span> Tasks
     </a>
 
     <div class="nav-section">Reference</div>
@@ -39,5 +47,5 @@
       <span class="icon">📏</span> Units
     </a>
   </nav>
-  <div class="sidebar-footer">v1.0.0</div>
+  <div class="sidebar-footer">v2.0.0</div>
 </aside>

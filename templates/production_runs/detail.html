@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}{{ run.reference }} — Production Run{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'production-run-list' %}">Production Runs</a><span>/</span>
+  {{ run.reference }}
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .component-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 160px;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .component-row:last-child { border-bottom: none; }
+  .component-row:hover { background: var(--surface2); }
+  .component-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 160px;
+    gap: 12px;
+    padding: 8px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .status-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 12px;
+    padding: 4px 8px;
+    width: 100%;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ run.reference }}</h1>
+    <p>{{ run.material.name }} · {{ run.location.name }}</p>
+  </div>
+  <div class="page-actions">
+    {# Status transitions #}
+    {% if run.status == 'PLANNED' %}
+    <form method="post"><{% csrf_token %}<input type="hidden" name="action" value="update_status"><input type="hidden" name="status" value="ACTIVE">
+      <button type="submit" class="btn btn-primary">▶ Start Run</button>
+    </form>
+    {% elif run.status == 'ACTIVE' %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_status"><input type="hidden" name="status" value="COMPLETED">
+      <button type="submit" class="btn btn-success">✓ Complete Run</button>
+    </form>
+    {% endif %}
+    {% if run.status not in 'COMPLETED,CANCELLED' %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_status"><input type="hidden" name="status" value="CANCELLED">
+      <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+    </form>
+    {% endif %}
+    <a href="{% url 'production-run-edit' run.pk %}" class="btn btn-secondary">Edit</a>
+  </div>
+</div>
+
+{# ── RUN META ── #}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px" class="mb-3">
+  <div class="stat-card">
+    <div class="stat-label">Status</div>
+    {% if run.status == 'PLANNED' %}<span class="badge badge-grey">Planned</span>
+    {% elif run.status == 'ACTIVE' %}<span class="badge badge-blue">Active</span>
+    {% elif run.status == 'COMPLETED' %}<span class="badge badge-green">Completed</span>
+    {% else %}<span class="badge badge-red">Cancelled</span>
+    {% endif %}
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Planned Qty</div>
+    <div class="stat-value">{{ run.planned_quantity }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Allocated to Orders</div>
+    <div class="stat-value" style="color:var(--accent2)">{{ run.allocated_quantity }}</div>
+    <div class="stat-sub">{{ run.unallocated_quantity }} unallocated</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Planned Window</div>
+    <div style="font-size:13px;font-family:var(--mono)">
+      {{ run.planned_start|date:"Y-m-d"|default:"—" }} → {{ run.planned_end|date:"Y-m-d"|default:"—" }}
+    </div>
+  </div>
+</div>
+
+{# ── COMPONENT STATUS — the core feature ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Component Status</span>
+    <span class="text-muted" style="font-size:11px">Bottles delivered? Caps still coming? Track it here.</span>
+  </div>
+
+  {% if run.components.all %}
+  <div class="component-header">
+    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Material</span>
+    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Required</span>
+    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Available</span>
+    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Expected</span>
+    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Status</span>
+  </div>
+
+  {% for comp in run.components.all %}
+  <div class="component-row">
+    <div>
+      <strong style="font-size:13px">{{ comp.material.name }}</strong><br>
+      <span class="text-mono text-muted">{{ comp.material.sku }}</span>
+      {% if comp.raw_material_batch %}
+      <br><a href="{% url 'batch-detail' comp.raw_material_batch.pk %}" style="font-size:11px;color:var(--accent);text-decoration:none">
+        LOT: {{ comp.raw_material_batch.lot_number }}
+      </a>
+      {% endif %}
+      {% if comp.notes %}<br><span class="text-muted" style="font-size:11px">{{ comp.notes }}</span>{% endif %}
+    </div>
+    <div class="td-mono">{{ comp.quantity_required }} {{ comp.material.unit.name }}</div>
+    <div class="td-mono">
+      {% if comp.quantity_shortfall > 0 %}
+        <span style="color:var(--danger)">{{ comp.quantity_available }}</span>
+        <span class="text-muted" style="font-size:11px">(short {{ comp.quantity_shortfall }})</span>
+      {% else %}
+        <span style="color:var(--accent2)">{{ comp.quantity_available }}</span>
+      {% endif %}
+    </div>
+    <div class="text-muted" style="font-size:12px">{{ comp.expected_date|date:"Y-m-d"|default:"—" }}</div>
+    <div>
+      <form method="post" action="{% url 'component-status' comp.pk %}" style="display:flex;gap:6px;align-items:center">
+        {% csrf_token %}
+        <select name="status" class="status-select" onchange="this.form.submit()">
+          {% for val, label in comp.STATUS_CHOICES %}
+          <option value="{{ val }}" {% if comp.status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% else %}
+  <div class="empty" style="padding:28px">
+    <div class="empty-icon">📦</div>
+    <h3>No components defined</h3>
+    <p>Edit this run to add the raw materials and packaging required.</p>
+  </div>
+  {% endif %}
+</div>
+
+{# ── ORDER ALLOCATIONS ── #}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Order Allocations</span></div>
+  <div class="card-body">
+
+    {# Existing allocations #}
+    {% if run.allocations.all %}
+    <div class="table-wrap mb-3">
+      <table>
+        <thead>
+          <tr><th>Order</th><th>Client</th><th>Line Product</th><th>Qty Allocated</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for alloc in run.allocations.all %}
+          <tr>
+            <td class="td-mono">
+              <a href="{% url 'order-detail' alloc.order_line.order.pk %}" style="color:var(--accent);text-decoration:none">
+                {{ alloc.order_line.order.reference }}
+              </a>
+            </td>
+            <td>{{ alloc.order_line.order.client.name }}</td>
+            <td>{{ alloc.order_line.material.name }}</td>
+            <td class="td-mono">{{ alloc.quantity_allocated }}</td>
+            <td>
+              <form method="post" action="{% url 'allocation-delete' alloc.pk %}">
+                {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {# Add allocation form #}
+    {% if run.status != 'COMPLETED' and run.status != 'CANCELLED' %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add_allocation">
+      <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:end">
+        <div class="form-group">
+          <label>Order Line</label>
+          {{ allocation_form.order_line }}
+          {% if allocation_form.order_line.errors %}<ul class="errorlist">{% for e in allocation_form.order_line.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Quantity to Allocate</label>
+          {{ allocation_form.quantity_allocated }}
+          {% if allocation_form.quantity_allocated.errors %}<ul class="errorlist">{% for e in allocation_form.quantity_allocated.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div style="padding-bottom:1px">
+          <button type="submit" class="btn btn-primary">Allocate</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">
+        Unallocated capacity: <span class="text-mono">{{ run.unallocated_quantity }}</span>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{# ── NOTES ── #}
+{% if run.notes %}
+<div class="card">
+  <div class="card-header"><span class="card-title">Notes</span></div>
+  <div class="card-body"><p style="font-size:13px;color:var(--muted)">{{ run.notes }}</p></div>
+</div>
+{% endif %}
+{% endblock %}

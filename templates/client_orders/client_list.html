@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Clients — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Clients{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Clients</h1><p>Customer accounts that place orders</p></div>
+  <div class="page-actions">
+    <a href="{% url 'client-create' %}" class="btn btn-primary">+ New Client</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Search</label>
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Client name…">
+    </div>
+    <div style="padding-bottom:1px">
+      <button type="submit" class="btn btn-secondary">Search</button>
+      <a href="{% url 'client-list' %}" class="btn btn-ghost">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if clients %}
+    <table>
+      <thead>
+        <tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th style="text-align:right">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for c in clients %}
+        <tr>
+          <td class="td-mono text-muted">{{ c.id }}</td>
+          <td><strong>{{ c.name }}</strong></td>
+          <td class="text-muted">{{ c.contact_email|default:"—" }}</td>
+          <td class="text-muted">{{ c.contact_phone|default:"—" }}</td>
+          <td class="td-mono">{{ c.orders.count }}</td>
+          <td>
+            <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'order-list' %}?client_id={{ c.pk }}" class="btn btn-ghost btn-sm">Orders</a>
+              <a href="{% url 'client-edit' c.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ c.name }}','{% url 'client-delete' c.pk %}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=clients %}
+    {% else %}
+    <div class="empty"><div class="empty-icon">👥</div><h3>No clients yet</h3><p>Add your first client to start creating orders.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete client <strong id="deleteTarget" style="color:var(--text)"></strong>?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" id="deleteForm">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function openDeleteModal(name, url) {
+  document.getElementById('deleteTarget').textContent = name;
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModal').classList.add('open');
+}
+document.getElementById('deleteModal').addEventListener('click', e => { if (e.target === this) this.classList.remove('open'); });
+</script>
+{% endblock %}

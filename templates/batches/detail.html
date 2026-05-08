@@ -13,34 +13,20 @@
     <p>{{ batch.material.name }} · <span class="text-mono">{{ batch.material.sku }}</span> · {{ batch.location.name }}</p>
   </div>
   <div class="page-actions">
-    <button class="btn btn-success" onclick="document.getElementById('reserveModal').classList.add('open')">Reserve</button>
-    <button class="btn btn-warn"    onclick="document.getElementById('consumeModal').classList.add('open')">Consume</button>
+    <button class="btn btn-success"   onclick="document.getElementById('reserveModal').classList.add('open')">Reserve</button>
+    <button class="btn btn-warn"      onclick="document.getElementById('consumeModal').classList.add('open')">Consume</button>
     <button class="btn btn-secondary" onclick="document.getElementById('releaseModal').classList.add('open')">Release</button>
     <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
   </div>
 </div>
 
-{# ── META ROW ── #}
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px" class="mb-3">
-  <div class="stat-card">
-    <div class="stat-label">Material</div>
-    <div style="font-size:15px;font-weight:600">{{ batch.material.name }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">SKU</div>
-    <div class="text-mono" style="font-size:15px">{{ batch.material.sku }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Location</div>
-    <div style="font-size:15px">{{ batch.location.name }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Created</div>
-    <div class="text-mono" style="font-size:14px">{{ batch.created_at|date:"Y-m-d H:i" }}</div>
-  </div>
+  <div class="stat-card"><div class="stat-label">Material</div><div style="font-size:15px;font-weight:600">{{ batch.material.name }}</div></div>
+  <div class="stat-card"><div class="stat-label">SKU</div><div class="text-mono" style="font-size:15px">{{ batch.material.sku }}</div></div>
+  <div class="stat-card"><div class="stat-label">Location</div><div>{{ batch.location.name }}</div></div>
+  <div class="stat-card"><div class="stat-label">Created</div><div class="text-mono" style="font-size:13px">{{ batch.created_at|date:"Y-m-d H:i" }}</div></div>
 </div>
 
-{# ── STOCK CARD ── #}
 <div class="card mb-3">
   <div class="card-header"><span class="card-title">Stock Summary</span></div>
   <div class="card-body">
@@ -51,7 +37,6 @@
   </div>
 </div>
 
-{# ── TRANSACTION LEDGER ── #}
 <div class="card">
   <div class="card-header">
     <span class="card-title">Transaction Ledger</span>
@@ -61,13 +46,7 @@
     {% if transactions %}
     <table>
       <thead>
-        <tr>
-          <th>Type</th>
-          <th>Qty</th>
-          <th>Product Batch</th>
-          <th>Reference</th>
-          <th>When</th>
-        </tr>
+        <tr><th>Type</th><th>Qty</th><th>Product Batch</th><th>Reference</th><th>When</th></tr>
       </thead>
       <tbody>
         {% for tx in transactions %}
@@ -101,6 +80,9 @@
 <div class="modal-backdrop" id="reserveModal">
   <div class="modal">
     <h3>Reserve Stock</h3>
+    <p style="margin-bottom:12px;font-size:13px;color:var(--muted)">
+      Link this reservation to a product batch. Optionally reference the production run for full traceability.
+    </p>
     <form method="post" action="{% url 'reserve-material' %}">
       {% csrf_token %}
       <input type="hidden" name="batch_id" value="{{ batch.pk }}">
@@ -111,6 +93,15 @@
             <option value="">Select product batch…</option>
             {% for pb in product_batches %}
             <option value="{{ pb.pk }}">{{ pb.batch_number }} — {{ pb.material.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Production Run <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+          <select name="production_run_id">
+            <option value="">None</option>
+            {% for run in production_runs %}
+            <option value="{{ run.pk }}">{{ run.reference }} — {{ run.material.name }}</option>
             {% endfor %}
           </select>
         </div>

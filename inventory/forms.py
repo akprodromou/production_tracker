@@ -1,12 +1,15 @@
-# forms.py
-
 from django import forms
 from django.utils import timezone
 from decimal import Decimal, InvalidOperation
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
+from django.db.models import DecimalField
 
 from .models import (
     Unit, Location, Material, RawMaterialBatch,
-    ManufacturingOrder, ProductBatch, MaterialTransaction, WorkflowTask
+    ProductBatch, MaterialTransaction, WorkflowTask,
+    Client, ClientOrder, ClientOrderLine,
+    ProductionRun, ProductionRunAllocation, ProductionComponent
 )
 
 
@@ -55,9 +58,6 @@ class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
         fields = ['name', 'sku', 'unit', 'category']
-        widgets = {
-            'category': forms.Select(choices=Material.CATEGORY_CHOICES),
-        }
 
     def clean_sku(self):
         sku = self.cleaned_data['sku'].strip()
@@ -83,7 +83,6 @@ class RawMaterialBatchForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Only RAW and PKG materials make sense as raw material batches
         self.fields['material'].queryset = Material.objects.filter(
             category__in=('RAW', 'PKG')
         )
@@ -105,34 +104,6 @@ class RawMaterialBatchForm(forms.ModelForm):
 
 
 # ─────────────────────────────────────────────
-# MANUFACTURING ORDER
-# ─────────────────────────────────────────────
-
-class ManufacturingOrderForm(forms.ModelForm):
-    class Meta:
-        model = ManufacturingOrder
-        fields = ['raw_material_batch']
-
-    def clean_raw_material_batch(self):
-        batch = self.cleaned_data['raw_material_batch']
-        qs = ManufacturingOrder.objects.filter(raw_material_batch=batch)
-        if self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise forms.ValidationError(
-                "A Manufacturing Order already exists for this batch."
-            )
-        return batch
-
-
-class ManufacturingOrderCancelForm(forms.ModelForm):
-    """Dedicated form for toggling cancellation status."""
-    class Meta:
-        model = ManufacturingOrder
-        fields = ['is_cancelled']
-
-
-# ─────────────────────────────────────────────
 # PRODUCT BATCH
 # ─────────────────────────────────────────────
 
@@ -143,7 +114,6 @@ class ProductBatchForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Only finished products can be product batches
         self.fields['material'].queryset = Material.objects.filter(category='FIN')
 
     def clean_batch_number(self):
@@ -169,16 +139,13 @@ class ProductBatchForm(forms.ModelForm):
 
 
 # ─────────────────────────────────────────────
-# MATERIAL TRANSACTION  (manual / admin entry)
+# MATERIAL TRANSACTION
 # ─────────────────────────────────────────────
 
 class MaterialTransactionForm(forms.ModelForm):
     class Meta:
         model = MaterialTransaction
-        fields = [
-            'raw_material_batch', 'product_batch',
-            'transaction_type', 'quantity', 'reference'
-        ]
+        fields = ['raw_material_batch', 'product_batch', 'transaction_type', 'quantity', 'reference']
 
     def clean_quantity(self):
         qty = self.cleaned_data['quantity']
@@ -192,84 +159,48 @@ class MaterialTransactionForm(forms.ModelForm):
         product_batch = cleaned.get('product_batch')
         raw_batch = cleaned.get('raw_material_batch')
 
-        # Mirror MaterialTransaction.clean() rules
         if tx_type in ('RESERVED', 'CONSUMED') and not product_batch:
-            self.add_error(
-                'product_batch',
-                "Product batch is required for RESERVED and CONSUMED transactions."
-            )
-
+            self.add_error('product_batch', "Product batch is required for RESERVED and CONSUMED transactions.")
         if tx_type == 'PRODUCED' and product_batch:
-            self.add_error(
-                'product_batch',
-                "PRODUCED transactions must not reference a product batch."
-            )
+            self.add_error('product_batch', "PRODUCED transactions must not reference a product batch.")
 
-        # Guard: RESERVED — check available stock
         if tx_type == 'RESERVED' and raw_batch and cleaned.get('quantity'):
             qty = cleaned['quantity']
             if raw_batch.available_quantity < qty:
                 raise forms.ValidationError(
-                    f"Insufficient available stock. "
-                    f"Available: {raw_batch.available_quantity}, requested: {qty}."
+                    f"Insufficient available stock. Available: {raw_batch.available_quantity}, requested: {qty}."
                 )
 
-        # Guard: CONSUMED — check remaining reserved for this product batch
         if tx_type == 'CONSUMED' and raw_batch and product_batch and cleaned.get('quantity'):
             qty = cleaned['quantity']
-            from django.db.models import Sum
-            from django.db.models.functions import Coalesce
-
             reserved = raw_batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='RESERVED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
+                product_batch=product_batch, transaction_type='RESERVED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
             consumed = raw_batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='CONSUMED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
+                product_batch=product_batch, transaction_type='CONSUMED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
+            if qty > (reserved - consumed):
+                raise forms.ValidationError(f"Cannot consume more than remaining reserved ({reserved - consumed}).")
 
-            remaining = reserved - consumed
-            if qty > remaining:
-                raise forms.ValidationError(
-                    f"Cannot consume more than remaining reserved. "
-                    f"Remaining reserved: {remaining}, requested: {qty}."
-                )
-
-        # Guard: RELEASED — check remaining reserved minus consumed and already released
         if tx_type == 'RELEASED' and raw_batch and product_batch and cleaned.get('quantity'):
             qty = cleaned['quantity']
-            from django.db.models import Sum
-            from django.db.models.functions import Coalesce
-
             reserved = raw_batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='RESERVED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
+                product_batch=product_batch, transaction_type='RESERVED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
             consumed = raw_batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='CONSUMED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
+                product_batch=product_batch, transaction_type='CONSUMED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
             released = raw_batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='RELEASED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
-            remaining = reserved - consumed - released
-            if qty > remaining:
-                raise forms.ValidationError(
-                    f"Cannot release more than remaining reserved. "
-                    f"Remaining: {remaining}, requested: {qty}."
-                )
+                product_batch=product_batch, transaction_type='RELEASED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
+            if qty > (reserved - consumed - released):
+                raise forms.ValidationError("Cannot release more than remaining reserved.")
 
         return cleaned
 
 
 # ─────────────────────────────────────────────
-# SERVICE ACTION FORMS  (thin, no ModelForm)
+# SERVICE ACTION FORMS
 # ─────────────────────────────────────────────
 
 class ReserveMaterialForm(forms.Form):
@@ -279,28 +210,21 @@ class ReserveMaterialForm(forms.Form):
 
     def clean(self):
         cleaned = super().clean()
-        batch_id = cleaned.get('batch_id')
-        qty = cleaned.get('quantity')
-
-        if batch_id and qty:
+        if cleaned.get('batch_id') and cleaned.get('quantity'):
             try:
-                batch = RawMaterialBatch.objects.get(pk=batch_id)
+                batch = RawMaterialBatch.objects.get(pk=cleaned['batch_id'])
             except RawMaterialBatch.DoesNotExist:
                 raise forms.ValidationError("Raw material batch not found.")
-            if batch.available_quantity < qty:
+            if batch.available_quantity < cleaned['quantity']:
                 raise forms.ValidationError(
-                    f"Not enough stock. Available: {batch.available_quantity}, requested: {qty}."
+                    f"Not enough stock. Available: {batch.available_quantity}, requested: {cleaned['quantity']}."
                 )
-            cleaned['batch'] = batch  # attach object for convenience
-
+            cleaned['batch'] = batch
         if cleaned.get('product_batch_id'):
             try:
-                cleaned['product_batch'] = ProductBatch.objects.get(
-                    pk=cleaned['product_batch_id']
-                )
+                cleaned['product_batch'] = ProductBatch.objects.get(pk=cleaned['product_batch_id'])
             except ProductBatch.DoesNotExist:
                 raise forms.ValidationError("Product batch not found.")
-
         return cleaned
 
 
@@ -311,44 +235,28 @@ class ConsumeMaterialForm(forms.Form):
 
     def clean(self):
         cleaned = super().clean()
-        batch_id = cleaned.get('batch_id')
-        product_batch_id = cleaned.get('product_batch_id')
-        qty = cleaned.get('quantity')
-
-        if batch_id and product_batch_id and qty:
+        if cleaned.get('batch_id') and cleaned.get('product_batch_id') and cleaned.get('quantity'):
             try:
-                batch = RawMaterialBatch.objects.get(pk=batch_id)
+                batch = RawMaterialBatch.objects.get(pk=cleaned['batch_id'])
             except RawMaterialBatch.DoesNotExist:
                 raise forms.ValidationError("Raw material batch not found.")
-
             try:
-                product_batch = ProductBatch.objects.get(pk=product_batch_id)
+                product_batch = ProductBatch.objects.get(pk=cleaned['product_batch_id'])
             except ProductBatch.DoesNotExist:
                 raise forms.ValidationError("Product batch not found.")
-
-            from django.db.models import Sum
-            from django.db.models.functions import Coalesce
-
             reserved = batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='RESERVED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
+                product_batch=product_batch, transaction_type='RESERVED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
             consumed = batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='CONSUMED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
+                product_batch=product_batch, transaction_type='CONSUMED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
             remaining = reserved - consumed
-            if qty > remaining:
+            if cleaned['quantity'] > remaining:
                 raise forms.ValidationError(
-                    f"Cannot consume more than remaining reserved. "
-                    f"Remaining: {remaining}, requested: {qty}."
+                    f"Cannot consume more than remaining reserved ({remaining})."
                 )
-
             cleaned['batch'] = batch
             cleaned['product_batch'] = product_batch
-
         return cleaned
 
 
@@ -359,54 +267,196 @@ class ReleaseMaterialForm(forms.Form):
 
     def clean(self):
         cleaned = super().clean()
-        batch_id = cleaned.get('batch_id')
-        product_batch_id = cleaned.get('product_batch_id')
-        qty = cleaned.get('quantity')
-
-        if batch_id and product_batch_id and qty:
+        if cleaned.get('batch_id') and cleaned.get('product_batch_id') and cleaned.get('quantity'):
             try:
-                batch = RawMaterialBatch.objects.get(pk=batch_id)
+                batch = RawMaterialBatch.objects.get(pk=cleaned['batch_id'])
             except RawMaterialBatch.DoesNotExist:
                 raise forms.ValidationError("Raw material batch not found.")
-
             try:
-                product_batch = ProductBatch.objects.get(pk=product_batch_id)
+                product_batch = ProductBatch.objects.get(pk=cleaned['product_batch_id'])
             except ProductBatch.DoesNotExist:
                 raise forms.ValidationError("Product batch not found.")
-
-            from django.db.models import Sum
-            from django.db.models.functions import Coalesce
-
             reserved = batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='RESERVED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
+                product_batch=product_batch, transaction_type='RESERVED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
             consumed = batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='CONSUMED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
+                product_batch=product_batch, transaction_type='CONSUMED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
             released = batch.transactions.filter(
-                product_batch=product_batch,
-                transaction_type='RELEASED'
-            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0')))['total']
-
+                product_batch=product_batch, transaction_type='RELEASED'
+            ).aggregate(total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField()))['total']
             remaining = reserved - consumed - released
-            if qty > remaining:
-                raise forms.ValidationError(
-                    f"Cannot release more than remaining reserved. "
-                    f"Remaining: {remaining}, requested: {qty}."
-                )
-
+            if cleaned['quantity'] > remaining:
+                raise forms.ValidationError(f"Cannot release more than remaining reserved ({remaining}).")
             cleaned['batch'] = batch
             cleaned['product_batch'] = product_batch
-
         return cleaned
 
 
 # ─────────────────────────────────────────────
-# WORKFLOW TASK
+# CLIENT & ORDERS
+# ─────────────────────────────────────────────
+
+class ClientForm(forms.ModelForm):
+    class Meta:
+        model = Client
+        fields = ['name', 'contact_email', 'contact_phone', 'notes']
+
+    def clean_name(self):
+        return self.cleaned_data['name'].strip()
+
+
+class ClientOrderForm(forms.ModelForm):
+    class Meta:
+        model = ClientOrder
+        fields = ['reference', 'client', 'status', 'order_date', 'required_by', 'notes']
+        widgets = {
+            'order_date':  forms.DateInput(attrs={'type': 'date'}),
+            'required_by': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def clean_reference(self):
+        ref = self.cleaned_data['reference'].strip()
+        qs = ClientOrder.objects.filter(reference__iexact=ref)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(f"Order reference '{ref}' already exists.")
+        return ref
+
+
+class ClientOrderLineForm(forms.ModelForm):
+    class Meta:
+        model = ClientOrderLine
+        fields = ['material', 'quantity_ordered', 'notes']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['material'].queryset = Material.objects.filter(category='FIN')
+
+    def clean_quantity_ordered(self):
+        qty = self.cleaned_data['quantity_ordered']
+        if qty <= Decimal('0'):
+            raise forms.ValidationError("Quantity must be positive.")
+        return qty
+
+
+ClientOrderLineFormSet = forms.inlineformset_factory(
+    ClientOrder,
+    ClientOrderLine,
+    form=ClientOrderLineForm,
+    extra=1,
+    can_delete=True,
+    min_num=1,
+    validate_min=True,
+)
+
+
+# ─────────────────────────────────────────────
+# PRODUCTION RUNS
+# ─────────────────────────────────────────────
+
+class ProductionRunForm(forms.ModelForm):
+    class Meta:
+        model = ProductionRun
+        fields = [
+            'reference', 'material', 'planned_quantity',
+            'status', 'planned_start', 'planned_end',
+            'actual_start', 'actual_end', 'actual_quantity',
+            'location', 'notes'
+        ]
+        widgets = {
+            'planned_start': forms.DateInput(attrs={'type': 'date'}),
+            'planned_end':   forms.DateInput(attrs={'type': 'date'}),
+            'actual_start':  forms.DateInput(attrs={'type': 'date'}),
+            'actual_end':    forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['material'].queryset = Material.objects.filter(category='FIN')
+        self.fields['actual_start'].required = False
+        self.fields['actual_end'].required = False
+        self.fields['actual_quantity'].required = False
+
+    def clean_reference(self):
+        ref = self.cleaned_data['reference'].strip()
+        qs = ProductionRun.objects.filter(reference__iexact=ref)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(f"Production run reference '{ref}' already exists.")
+        return ref
+
+    def clean_planned_quantity(self):
+        qty = self.cleaned_data['planned_quantity']
+        if qty <= Decimal('0'):
+            raise forms.ValidationError("Planned quantity must be positive.")
+        return qty
+
+
+class ProductionRunAllocationForm(forms.ModelForm):
+    class Meta:
+        model = ProductionRunAllocation
+        fields = ['order_line', 'quantity_allocated', 'notes']
+
+    def __init__(self, *args, production_run=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.production_run = production_run
+        # Only show lines for the matching finished product that still need fulfilment
+        if production_run:
+            self.fields['order_line'].queryset = ClientOrderLine.objects.filter(
+                material=production_run.material
+            ).exclude(status='FULFILLED').select_related('order__client')
+            self.fields['order_line'].label_from_instance = lambda obj: (
+                f"{obj.order.reference} / {obj.order.client.name} "
+                f"— {obj.material.name} × {obj.quantity_remaining}"
+            )
+
+    def clean_quantity_allocated(self):
+        qty = self.cleaned_data['quantity_allocated']
+        if qty <= Decimal('0'):
+            raise forms.ValidationError("Allocated quantity must be positive.")
+        return qty
+
+
+class ProductionComponentForm(forms.ModelForm):
+    class Meta:
+        model = ProductionComponent
+        fields = [
+            'material', 'quantity_required', 'quantity_available',
+            'status', 'raw_material_batch', 'expected_date', 'actual_date', 'notes'
+        ]
+        widgets = {
+            'expected_date': forms.DateInput(attrs={'type': 'date'}),
+            'actual_date':   forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['material'].queryset = Material.objects.filter(category__in=['RAW', 'PKG'])
+        self.fields['raw_material_batch'].required = False
+        self.fields['expected_date'].required = False
+        self.fields['actual_date'].required = False
+
+    def clean_quantity_required(self):
+        qty = self.cleaned_data['quantity_required']
+        if qty <= Decimal('0'):
+            raise forms.ValidationError("Required quantity must be positive.")
+        return qty
+
+
+ProductionComponentFormSet = forms.inlineformset_factory(
+    ProductionRun,
+    ProductionComponent,
+    form=ProductionComponentForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+# ─────────────────────────────────────────────
+# WORKFLOW TASKS
 # ─────────────────────────────────────────────
 
 class WorkflowTaskForm(forms.ModelForm):
@@ -414,49 +464,32 @@ class WorkflowTaskForm(forms.ModelForm):
         model = WorkflowTask
         fields = [
             'description', 'raw_material_batch', 'product_batch',
-            'location', 'status', 'expected_completion', 'actual_completion'
+            'production_run', 'location', 'status',
+            'expected_completion', 'actual_completion'
         ]
         widgets = {
-            'expected_completion': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'actual_completion': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'expected_completion': forms.DateInput(attrs={'type': 'date'}),
+            'actual_completion':   forms.DateInput(attrs={'type': 'date'}),
         }
 
     def clean(self):
         cleaned = super().clean()
         status = cleaned.get('status')
-        actual_completion = cleaned.get('actual_completion')
-        expected_completion = cleaned.get('expected_completion')
-
-        # At least one batch context should be set
-        if not cleaned.get('raw_material_batch') and not cleaned.get('product_batch'):
-            raise forms.ValidationError(
-                "A task must be linked to at least one batch "
-                "(raw material batch or product batch)."
-            )
-
-        # Completion date logic
-        if status == 'DONE' and not actual_completion:
-            cleaned['actual_completion'] = timezone.now()
-
-        if actual_completion and expected_completion:
-            if actual_completion < expected_completion:
-                # Allowed — just informational, not an error
-                pass
-
+        if status == 'DONE' and not cleaned.get('actual_completion'):
+            cleaned['actual_completion'] = timezone.now().date()
         return cleaned
 
 
 class WorkflowTaskStatusForm(forms.ModelForm):
-    """Lightweight form for status-only updates (e.g. a Kanban move)."""
     class Meta:
         model = WorkflowTask
         fields = ['status', 'actual_completion']
         widgets = {
-            'actual_completion': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'actual_completion': forms.DateInput(attrs={'type': 'date'}),
         }
 
     def clean(self):
         cleaned = super().clean()
         if cleaned.get('status') == 'DONE' and not cleaned.get('actual_completion'):
-            cleaned['actual_completion'] = timezone.now()
+            cleaned['actual_completion'] = timezone.now().date()
         return cleaned

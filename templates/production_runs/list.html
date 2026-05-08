@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Production Runs — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Production Runs{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Production Runs</h1><p>Manufacturing decisions independent of individual orders</p></div>
+  <div class="page-actions">
+    <a href="{% url 'production-run-create' %}" class="btn btn-primary">+ New Run</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Status</label>
+      <select name="status">
+        <option value="">All statuses</option>
+        {% for val, label in status_choices %}
+        <option value="{{ val }}" {% if request.GET.status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Product</label>
+      <select name="material_id">
+        <option value="">All products</option>
+        {% for m in all_materials %}
+        <option value="{{ m.pk }}" {% if request.GET.material_id == m.pk|stringformat:'s' %}selected{% endif %}>{{ m.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Search</label>
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Reference…">
+    </div>
+    <div style="padding-bottom:1px">
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      <a href="{% url 'production-run-list' %}" class="btn btn-ghost">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if runs %}
+    <table>
+      <thead>
+        <tr><th>Reference</th><th>Product</th><th>Status</th><th>Planned Qty</th><th>Allocated</th><th>Planned End</th><th style="text-align:right">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for run in runs %}
+        <tr>
+          <td class="td-mono"><a href="{% url 'production-run-detail' run.pk %}" style="color:var(--accent);text-decoration:none">{{ run.reference }}</a></td>
+          <td>{{ run.material.name }}</td>
+          <td>
+            {% if run.status == 'PLANNED' %}<span class="badge badge-grey">Planned</span>
+            {% elif run.status == 'ACTIVE' %}<span class="badge badge-blue">Active</span>
+            {% elif run.status == 'COMPLETED' %}<span class="badge badge-green">Completed</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>
+            {% endif %}
+          </td>
+          <td class="td-mono">{{ run.planned_quantity }}</td>
+          <td class="td-mono">
+            {% with a=run.allocated_quantity %}
+            {% if a > 0 %}<span style="color:var(--accent2)">{{ a }}</span>
+            {% else %}<span class="text-muted">0</span>{% endif %}
+            {% endwith %}
+          </td>
+          <td class="text-muted" style="font-size:12px">{{ run.planned_end|date:"Y-m-d"|default:"—" }}</td>
+          <td>
+            <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'production-run-detail' run.pk %}" class="btn btn-ghost btn-sm">View</a>
+              <a href="{% url 'production-run-edit' run.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=runs %}
+    {% else %}
+    <div class="empty"><div class="empty-icon">⚙️</div><h3>No production runs found</h3></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

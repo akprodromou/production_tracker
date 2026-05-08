@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}{{ order.reference }} — Order Detail{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'order-list' %}">Orders</a><span>/</span>
+  {{ order.reference }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ order.reference }}</h1>
+    <p>{{ order.client.name }} · {{ order.order_date|date:"Y-m-d" }}</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'order-edit' order.pk %}" class="btn btn-secondary">Edit</a>
+    <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
+  </div>
+</div>
+
+{# ── STATUS BAR ── #}
+<div class="card mb-3">
+  <div class="card-body" style="display:grid;grid-template-columns:repeat(5,1fr);gap:18px">
+    <div>
+      <div class="stat-label">Status</div>
+      {% if order.status == 'DRAFT' %}<span class="badge badge-grey">Draft</span>
+      {% elif order.status == 'CONFIRMED' %}<span class="badge badge-blue">Confirmed</span>
+      {% elif order.status == 'IN_PRODUCTION' %}<span class="badge badge-orange">In Production</span>
+      {% elif order.status == 'PARTIALLY_FULFILLED' %}<span class="badge badge-orange">Partial</span>
+      {% elif order.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
+      {% else %}<span class="badge badge-red">Cancelled</span>
+      {% endif %}
+    </div>
+    <div><div class="stat-label">Client</div>{{ order.client.name }}</div>
+    <div><div class="stat-label">Order Date</div><span class="text-mono">{{ order.order_date|date:"Y-m-d" }}</span></div>
+    <div><div class="stat-label">Required By</div><span class="text-mono">{{ order.required_by|date:"Y-m-d"|default:"—" }}</span></div>
+    <div>
+      <div class="stat-label">Quick Status Update</div>
+      <form method="post" style="display:flex;gap:6px;align-items:center">
+        {% csrf_token %}
+        <select name="status" style="font-size:12px;padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
+          {% for val, label in order.STATUS_CHOICES %}
+          <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm">Set</button>
+      </form>
+    </div>
+  </div>
+  {% if order.notes %}
+  <div style="padding:0 18px 14px;font-size:13px;color:var(--muted);border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
+    {{ order.notes }}
+  </div>
+  {% endif %}
+</div>
+
+{# ── ORDER LINES ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Order Lines</span>
+    <a href="{% url 'production-run-create' %}" class="btn btn-primary btn-sm">+ New Production Run</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Product</th><th>Qty Ordered</th><th>Qty Fulfilled</th><th>Remaining</th><th>Allocated to Runs</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for line in order.lines.all %}
+        <tr>
+          <td>
+            <strong>{{ line.material.name }}</strong><br>
+            <span class="text-mono text-muted">{{ line.material.sku }}</span>
+          </td>
+          <td class="td-mono">{{ line.quantity_ordered }}</td>
+          <td class="td-mono">{{ line.quantity_fulfilled }}</td>
+          <td class="td-mono" style="{% if line.quantity_remaining > 0 %}color:var(--warn){% endif %}">
+            {{ line.quantity_remaining }}
+          </td>
+          <td>
+            {% for alloc in line.allocations.all %}
+            <div style="font-size:12px;margin-bottom:3px">
+              <a href="{% url 'production-run-detail' alloc.production_run.pk %}" style="color:var(--accent);text-decoration:none">
+                {{ alloc.production_run.reference }}
+              </a>
+              <span class="text-muted">× {{ alloc.quantity_allocated }}</span>
+            </div>
+            {% empty %}
+            <span class="text-muted" style="font-size:12px">Not allocated</span>
+            {% endfor %}
+          </td>
+          <td>
+            {% if line.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+            {% elif line.status == 'ALLOCATED' %}<span class="badge badge-blue">Allocated</span>
+            {% elif line.status == 'PARTIAL' %}<span class="badge badge-orange">Partial</span>
+            {% elif line.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# ── LINKED PRODUCTION RUNS ── #}
+{% with runs=order.lines.all %}
+<div class="card">
+  <div class="card-header"><span class="card-title">Linked Production Runs</span></div>
+  <div class="table-wrap">
+    {% if order.lines.all %}
+    <table>
+      <thead>
+        <tr><th>Run Reference</th><th>Product</th><th>Status</th><th>Allocated Qty</th><th>Components Ready?</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for line in order.lines.all %}
+          {% for alloc in line.allocations.all %}
+          <tr>
+            <td class="td-mono">
+              <a href="{% url 'production-run-detail' alloc.production_run.pk %}" style="color:var(--accent);text-decoration:none">
+                {{ alloc.production_run.reference }}
+              </a>
+            </td>
+            <td>{{ alloc.production_run.material.name }}</td>
+            <td>
+              {% with s=alloc.production_run.status %}
+              {% if s == 'PLANNED' %}<span class="badge badge-grey">Planned</span>
+              {% elif s == 'ACTIVE' %}<span class="badge badge-blue">Active</span>
+              {% elif s == 'COMPLETED' %}<span class="badge badge-green">Completed</span>
+              {% else %}<span class="badge badge-red">Cancelled</span>
+              {% endif %}
+              {% endwith %}
+            </td>
+            <td class="td-mono">{{ alloc.quantity_allocated }}</td>
+            <td>
+              {% with comps=alloc.production_run.components.all %}
+              {% if comps %}
+                {% with ready=alloc.production_run.components.all|length %}
+                <span style="font-size:12px">
+                  {{ comps|length }} component{{ comps|length|pluralize }}
+                </span>
+                {% endwith %}
+              {% else %}
+                <span class="text-muted" style="font-size:12px">No components defined</span>
+              {% endif %}
+              {% endwith %}
+            </td>
+            <td><a href="{% url 'production-run-detail' alloc.production_run.pk %}" class="btn btn-ghost btn-sm">→</a></td>
+          </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">⚙️</div><h3>No production runs linked yet</h3></div>
+    {% endif %}
+  </div>
+</div>
+{% endwith %}
+
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete order <strong style="color:var(--text)">{{ order.reference }}</strong> and all its lines?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" action="{% url 'order-delete' order.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });</script>
+{% endblock %}
