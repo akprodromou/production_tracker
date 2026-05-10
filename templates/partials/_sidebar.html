@@ -18,15 +18,21 @@
     </a>
 
     <div class="nav-section">Production</div>
+    <a href="{% url 'production-board' %}" class="{% if request.resolver_match.url_name == 'production-board' %}active{% endif %}">
+      <span class="icon">🟦</span> Board
+    </a>
     <a href="{% url 'production-run-list' %}" class="{% if 'production-run' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">⚙️</span> Production Runs
     </a>
-    <!-- <a href="{% url 'workflow-task-list' %}" class="{% if 'workflow' in request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">✅</span> Tasks
-    </a> -->
+    <a href="{% url 'allocation-list' %}" class="{% if 'allocation' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">🔗</span> Allocations
+    </a>
+    <a href="{% url 'shipment-history' %}" class="{% if request.resolver_match.url_name == 'shipment-history' %}active{% endif %}">
+      <span class="icon">🚚</span> Shipped
+    </a>
 
     <div class="nav-section">Inventory</div>
-    <a href="{% url 'batch-list' %}" class="{% if request.resolver_match.url_name in 'batch-list,batch-detail,batch-create' %}active{% endif %}">
+    <a href="{% url 'batch-list' %}" class="{% if 'batch-list' == request.resolver_match.url_name or 'batch-detail' == request.resolver_match.url_name or 'batch-create' == request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">📦</span> Raw Batches
     </a>
     <a href="{% url 'product-batch-list' %}" class="{% if 'product-batch' in request.resolver_match.url_name %}active{% endif %}">
@@ -47,5 +53,5 @@
       <span class="icon">📏</span> Units
     </a>
   </nav>
-  <div class="sidebar-footer">v2.0.0</div>
+  <div class="sidebar-footer">v3.0.0</div>
 </aside>

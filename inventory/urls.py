@@ -15,6 +15,7 @@ urlpatterns = [
     # Locations
     path('locations/',                  views.LocationListView.as_view(),   name='location-list'),
     path('locations/create/',           views.LocationCreateView.as_view(), name='location-create'),
+    path('locations/<int:pk>/',         views.LocationDetailView.as_view(), name='location-detail'),
     path('locations/<int:pk>/edit/',    views.LocationEditView.as_view(),   name='location-edit'),
     path('locations/<int:pk>/delete/',  views.LocationDeleteView.as_view(), name='location-delete'),
 
@@ -37,10 +38,10 @@ urlpatterns = [
     path('batches/<int:pk>/delete/',   views.RawMaterialBatchDeleteView.as_view(), name='batch-delete'),
 
     # Product Batches
-    path('product-batches/',                 views.ProductBatchListView.as_view(),   name='product-batch-list'),
-    path('product-batches/create/',          views.ProductBatchCreateView.as_view(), name='product-batch-create'),
-    path('product-batches/<int:pk>/',        views.ProductBatchDetailView.as_view(), name='product-batch-detail'),
-    path('product-batches/<int:pk>/delete/', views.ProductBatchDeleteView.as_view(), name='product-batch-delete'),
+    path('product-batches/',                  views.ProductBatchListView.as_view(),   name='product-batch-list'),
+    path('product-batches/create/',           views.ProductBatchCreateView.as_view(), name='product-batch-create'),
+    path('product-batches/<int:pk>/',         views.ProductBatchDetailView.as_view(), name='product-batch-detail'),
+    path('product-batches/<int:pk>/delete/',  views.ProductBatchDeleteView.as_view(), name='product-batch-delete'),
 
     # Transactions (read-only ledger)
     path('transactions/', views.MaterialTransactionListView.as_view(), name='transaction-list'),
@@ -59,21 +60,22 @@ urlpatterns = [
     path('orders/<int:pk>/delete/',  views.ClientOrderDeleteView.as_view(), name='order-delete'),
 
     # Production Runs
-    path('production-runs/',                          views.ProductionRunListView.as_view(),   name='production-run-list'),
-    path('production-runs/create/',                   views.ProductionRunCreateView.as_view(), name='production-run-create'),
-    path('production-runs/<int:pk>/',                 views.ProductionRunDetailView.as_view(), name='production-run-detail'),
-    path('production-runs/<int:pk>/edit/',            views.ProductionRunEditView.as_view(),   name='production-run-edit'),
-    path('production-runs/<int:pk>/delete/',          views.ProductionRunDeleteView.as_view(), name='production-run-delete'),
+    path('production-runs/',                views.ProductionRunListView.as_view(),   name='production-run-list'),
+    path('production-runs/create/',         views.ProductionRunCreateView.as_view(), name='production-run-create'),
+    path('production-runs/<int:pk>/',       views.ProductionRunDetailView.as_view(), name='production-run-detail'),
+    path('production-runs/<int:pk>/edit/',  views.ProductionRunEditView.as_view(),   name='production-run-edit'),
+    path('production-runs/<int:pk>/delete/', views.ProductionRunDeleteView.as_view(), name='production-run-delete'),
 
-    # Production Run sub-resources
-    path('production-runs/allocations/<int:pk>/delete/', views.ProductionRunAllocationDeleteView.as_view(), name='allocation-delete'),
-    path('production-runs/components/<int:pk>/status/',  views.ProductionComponentUpdateView.as_view(),     name='component-status'),
+    # Production sub-resources
+    path('production-runs/allocations/<int:pk>/delete/',
+         views.ProductionRunAllocationDeleteView.as_view(), name='allocation-delete'),
+    path('production-runs/components/<int:pk>/status/',
+         views.ProductionComponentUpdateView.as_view(), name='component-status'),
 
-    # Workflow Tasks
-    path('tasks/',                   views.WorkflowTaskListView.as_view(),   name='workflow-task-list'),
-    path('tasks/create/',            views.WorkflowTaskCreateView.as_view(), name='workflow-task-create'),
-    path('tasks/<int:pk>/',          views.WorkflowTaskDetailView.as_view(), name='workflow-task-detail'),
-    path('tasks/<int:pk>/edit/',     views.WorkflowTaskEditView.as_view(),   name='workflow-task-edit'),
-    path('tasks/<int:pk>/delete/',   views.WorkflowTaskDeleteView.as_view(), name='workflow-task-delete'),
-    path('tasks/<int:pk>/status/',   views.WorkflowTaskStatusView.as_view(), name='workflow-task-status'),
+    # Allocations table
+    path('allocations/', views.AllocationListView.as_view(), name='allocation-list'),
+
+    # Production Board (Kanban) + Shipment history
+    path('board/',    views.ProductionBoardView.as_view(),   name='production-board'),
+    path('shipped/',  views.ShipmentHistoryView.as_view(),   name='shipment-history'),
 ]

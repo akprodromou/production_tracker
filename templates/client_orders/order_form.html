@@ -126,17 +126,53 @@
 {% block extra_js %}
 <script>
 const linesContainer = document.getElementById('lines-container');
-const totalForms     = document.getElementById('id_clientorderline_set-TOTAL_FORMS');
+
+// Find the TOTAL_FORMS input dynamically — works regardless of prefix
+const totalForms = document.querySelector('[id$="-TOTAL_FORMS"]');
 
 document.getElementById('add-line-btn').addEventListener('click', function() {
-  const idx = parseInt(totalForms.value);
-  const tpl = linesContainer.children[0].outerHTML
-    .replace(/clientorderline_set-\d+-/g, `clientorderline_set-${idx}-`);
-  linesContainer.insertAdjacentHTML('beforeend', tpl);
-  totalForms.value = idx + 1;
-  const newRow = linesContainer.lastElementChild;
-  newRow.querySelectorAll('input[type=text],input[type=number]').forEach(el => el.value = '');
+  if (!totalForms) { console.error('Could not find TOTAL_FORMS input'); return; }
+  const prefix = totalForms.id.replace('-TOTAL_FORMS', ''); // e.g. "clientorderline_set"
+  const idx    = parseInt(totalForms.value);
+
+  // Clone first row as template
+  const srcRow = linesContainer.querySelector('.line-row');
+  if (!srcRow) { console.error('No source row to clone'); return; }
+
+  const newRow = srcRow.cloneNode(true);
+
+  // Re-index: replace old index (0) with new index
+  const oldPrefix0 = prefix + '-0-';
+  const newPrefixN = prefix + '-' + idx + '-';
+  newRow.innerHTML = newRow.innerHTML
+    .split(prefix + '-').join('PLACEHOLDER-')
+    .replace(/PLACEHOLDER-(\d+)-/g, (_, n) => prefix + '-' + idx + '-');
+
+  // Simpler: just replace any occurrence of prefix-<digits>- with prefix-idx-
+  newRow.innerHTML = newRow.innerHTML.replace(
+    new RegExp(prefix.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + '-\\d+-', 'g'),
+    prefix + '-' + idx + '-'
+  );
+
+  // Clear values
+  newRow.querySelectorAll('input[type=text], input[type=number]').forEach(el => el.value = '');
   newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  newRow.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
+
+  // Replace delete label with remove button on new (unsaved) rows
+  const delLabel = newRow.querySelector('label');
+  if (delLabel) {
+    const btn = document.createElement('button');
+    btn.type      = 'button';
+    btn.className = 'btn btn-ghost btn-sm remove-line';
+    btn.style.color = 'var(--danger)';
+    btn.textContent = '✕';
+    delLabel.replaceWith(btn);
+  }
+
+  linesContainer.appendChild(newRow);
+  totalForms.value = idx + 1;
+
   newRow.querySelector('.remove-line')?.addEventListener('click', removeLine);
 });
 

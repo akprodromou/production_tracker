@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Production Board — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Board{% endblock %}
+
+{% block extra_head %}
+<style>
+  .board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    align-items: start;
+    overflow-x: auto;
+  }
+  .board-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    min-height: 160px;
+  }
+  .board-col-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .board-col-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .board-col-count {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+  }
+  .board-cards { padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+
+  .run-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .run-card:hover { border-color: var(--accent); }
+  .run-card-ref  { font-family: var(--mono); font-size: 12px; color: var(--accent); margin-bottom: 3px; }
+  .run-card-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+  .run-card-components { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+  .comp-line { display: flex; align-items: center; gap: 7px; font-size: 11px; }
+  .comp-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .comp-name { color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .comp-st   { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+  .dot-PENDING          { background: var(--muted); }
+  .dot-ORDERED          { background: var(--accent); }
+  .dot-IN_WAREHOUSE_RAW { background: var(--warn); }
+  .dot-IN_PROCESS       { background: #f59e0b; }
+  .dot-FINAL_PRODUCT    { background: var(--accent2); }
+
+  .run-card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 8px; border-top: 1px solid var(--border);
+  }
+  .board-empty { text-align: center; padding: 24px 10px; color: var(--muted); font-size: 12px; }
+
+  .col-title-PENDING          { color: var(--muted); }
+  .col-title-ORDERED          { color: var(--accent); }
+  .col-title-IN_WAREHOUSE_RAW { color: var(--warn); }
+  .col-title-IN_PROCESS       { color: #f59e0b; }
+  .col-title-FINAL_PRODUCT    { color: var(--accent2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Production Board</h1>
+    <p>Runs grouped by their most-blocking component. Shipped runs move to history.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'shipment-history' %}" class="btn btn-secondary">🚚 History</a>
+    <a href="{% url 'production-run-create' %}" class="btn btn-primary">+ New Run</a>
+  </div>
+</div>
+
+<div class="board">
+
+  {# PENDING #}
+  <div class="board-col">
+    <div class="board-col-header">
+      <span class="board-col-title col-title-PENDING">Pending</span>
+      <span class="board-col-count">{{ columns.PENDING|length }}</span>
+    </div>
+    <div class="board-cards">
+      {% for run in columns.PENDING %}{% include "production_runs/_board_card.html" %}{% empty %}
+      <div class="board-empty">No runs</div>{% endfor %}
+    </div>
+  </div>
+
+  {# ORDERED #}
+  <div class="board-col">
+    <div class="board-col-header">
+      <span class="board-col-title col-title-ORDERED">Ordered</span>
+      <span class="board-col-count">{{ columns.ORDERED|length }}</span>
+    </div>
+    <div class="board-cards">
+      {% for run in columns.ORDERED %}{% include "production_runs/_board_card.html" %}{% empty %}
+      <div class="board-empty">No runs</div>{% endfor %}
+    </div>
+  </div>
+
+  {# IN WAREHOUSE RAW #}
+  <div class="board-col">
+    <div class="board-col-header">
+      <span class="board-col-title col-title-IN_WAREHOUSE_RAW">In Warehouse</span>
+      <span class="board-col-count">{{ columns.IN_WAREHOUSE_RAW|length }}</span>
+    </div>
+    <div class="board-cards">
+      {% for run in columns.IN_WAREHOUSE_RAW %}{% include "production_runs/_board_card.html" %}{% empty %}
+      <div class="board-empty">No runs</div>{% endfor %}
+    </div>
+  </div>
+
+  {# IN PROCESS #}
+  <div class="board-col">
+    <div class="board-col-header">
+      <span class="board-col-title col-title-IN_PROCESS">In Process</span>
+      <span class="board-col-count">{{ columns.IN_PROCESS|length }}</span>
+    </div>
+    <div class="board-cards">
+      {% for run in columns.IN_PROCESS %}{% include "production_runs/_board_card.html" %}{% empty %}
+      <div class="board-empty">No runs</div>{% endfor %}
+    </div>
+  </div>
+
+  {# FINAL PRODUCT #}
+  <div class="board-col">
+    <div class="board-col-header">
+      <span class="board-col-title col-title-FINAL_PRODUCT">Final Product</span>
+      <span class="board-col-count">{{ columns.FINAL_PRODUCT|length }}</span>
+    </div>
+    <div class="board-cards">
+      {% for run in columns.FINAL_PRODUCT %}{% include "production_runs/_board_card.html" %}{% empty %}
+      <div class="board-empty">No runs</div>{% endfor %}
+    </div>
+  </div>
+
+</div>
+
+{# ── SHIP MODAL ── #}
+<div class="modal-backdrop" id="shipModal">
+  <div class="modal">
+    <h3>🚚 Ship Production Run</h3>
+    <p id="shipDesc" style="margin-bottom:12px;font-size:13px;color:var(--muted)"></p>
+    <form method="post" action="{% url 'production-board' %}">
+      {% csrf_token %}
+      <input type="hidden" name="run_id" id="shipRunId">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group">
+          <label>Quantity Shipped</label>
+          <input type="number" name="quantity_shipped" id="shipQty" step="0.001" min="0.001" required>
+        </div>
+        <div class="form-group">
+          <label>Notes <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="text" name="ship_notes" placeholder="Carrier, tracking, destination…">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('shipModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-success">Confirm Shipment</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openShipModal(runId, ref, qty) {
+  document.getElementById('shipRunId').value = runId;
+  document.getElementById('shipQty').value   = qty;
+  document.getElementById('shipDesc').textContent =
+    `Confirming shipment for ${ref}. Once shipped this run leaves the board.`;
+  document.getElementById('shipModal').classList.add('open');
+}
+document.getElementById('shipModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+{% endblock %}

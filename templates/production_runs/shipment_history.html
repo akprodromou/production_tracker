@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Shipment History — InventoryOS{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'production-board' %}">Board</a><span>/</span>
+  Shipment History
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Shipment History</h1>
+    <p>Completed production runs that have been shipped. Read-only archive.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'production-board' %}" class="btn btn-secondary">← Back to Board</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if shipments %}
+    <table>
+      <thead>
+        <tr>
+          <th>Run</th>
+          <th>Product</th>
+          <th>Qty Shipped</th>
+          <th>Order</th>
+          <th>Client</th>
+          <th>Shipped At</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in shipments %}
+        <tr>
+          <td class="td-mono">
+            <a href="{% url 'production-run-detail' s.production_run.pk %}" style="color:var(--accent);text-decoration:none">
+              {{ s.production_run.reference }}
+            </a>
+          </td>
+          <td>{{ s.production_run.material.name }}</td>
+          <td class="td-mono" style="color:var(--accent2)">{{ s.quantity_shipped }}</td>
+          <td class="td-mono">
+            {% if s.order_line %}
+              <a href="{% url 'order-detail' s.order_line.order.pk %}" style="color:var(--accent);text-decoration:none">
+                {{ s.order_line.order.reference }}
+              </a>
+            {% else %}
+              <span class="text-muted">Stock</span>
+            {% endif %}
+          </td>
+          <td>{{ s.order_line.order.client.name|default:"—" }}</td>
+          <td class="text-muted" style="font-size:12px;font-family:var(--mono)">
+            {{ s.shipped_at|date:"Y-m-d H:i" }}
+          </td>
+          <td class="text-muted" style="font-size:12px">{{ s.notes|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=shipments %}
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">🚚</div>
+      <h3>No shipments yet</h3>
+      <p>When you ship a production run from the Board, it appears here.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

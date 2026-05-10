@@ -118,17 +118,15 @@ class MaterialTransaction(models.Model):
     product_batch = models.ForeignKey(
         'ProductBatch',
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
+        null=True, blank=True,
         related_name='material_transactions'
     )
     transaction_type = models.CharField(max_length=20, choices=TransactionType.choices)
     quantity = models.DecimalField(max_digits=15, decimal_places=3)
     created_at = models.DateTimeField(auto_now_add=True)
     reference = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Optional external reference (e.g., order ID)"
+        max_length=100, blank=True,
+        help_text="Optional reference e.g. ORDER-42"
     )
 
     def clean(self):
@@ -156,7 +154,7 @@ class MaterialTransaction(models.Model):
 
 
 # ─────────────────────────────────────────────
-# CLIENT ORDERS
+# CLIENTS & ORDERS
 # ─────────────────────────────────────────────
 
 class Client(models.Model):
@@ -175,12 +173,12 @@ class Client(models.Model):
 
 class ClientOrder(models.Model):
     STATUS_CHOICES = [
-        ('DRAFT',       'Draft'),
-        ('CONFIRMED',   'Confirmed'),
-        ('IN_PRODUCTION', 'In Production'),
-        ('PARTIALLY_FULFILLED', 'Partially Fulfilled'),
-        ('FULFILLED',   'Fulfilled'),
-        ('CANCELLED',   'Cancelled'),
+        ('DRAFT',                'Draft'),
+        ('CONFIRMED',            'Confirmed'),
+        ('IN_PRODUCTION',        'In Production'),
+        ('PARTIALLY_FULFILLED',  'Partially Fulfilled'),
+        ('FULFILLED',            'Fulfilled'),
+        ('CANCELLED',            'Cancelled'),
     ]
     reference = models.CharField(max_length=100, unique=True)
     client = models.ForeignKey(Client, on_delete=models.PROTECT, related_name='orders')
@@ -197,17 +195,6 @@ class ClientOrder(models.Model):
     def total_lines(self):
         return self.lines.count()
 
-    @property
-    def fulfilment_summary(self):
-        """Returns dict of line-level fulfilment status counts."""
-        lines = self.lines.all()
-        return {
-            'total':     lines.count(),
-            'fulfilled': lines.filter(status='FULFILLED').count(),
-            'partial':   lines.filter(status='PARTIAL').count(),
-            'pending':   lines.filter(status='PENDING').count(),
-        }
-
     class Meta:
         ordering = ['-order_date']
 
@@ -222,12 +209,13 @@ class ClientOrderLine(models.Model):
     ]
     order = models.ForeignKey(ClientOrder, on_delete=models.CASCADE, related_name='lines')
     material = models.ForeignKey(
-        Material,
-        on_delete=models.PROTECT,
+        Material, on_delete=models.PROTECT,
         limit_choices_to={'category': 'FIN'}
     )
     quantity_ordered = models.DecimalField(max_digits=15, decimal_places=3)
-    quantity_fulfilled = models.DecimalField(max_digits=15, decimal_places=3, default=Decimal('0'))
+    quantity_fulfilled = models.DecimalField(
+        max_digits=15, decimal_places=3, default=Decimal('0')
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     notes = models.TextField(blank=True)
 
@@ -249,28 +237,25 @@ class ClientOrderLine(models.Model):
 
 
 # ─────────────────────────────────────────────
-# PRODUCTION RUNS  (replaces ManufacturingOrder)
+# PRODUCTION RUNS
 # ─────────────────────────────────────────────
 
 class ProductionRun(models.Model):
     STATUS_CHOICES = [
-        ('PLANNED',     'Planned'),
-        ('ACTIVE',      'Active'),
-        ('COMPLETED',   'Completed'),
-        ('CANCELLED',   'Cancelled'),
+        ('PLANNED',    'Planned'),
+        ('ACTIVE',     'Active'),
+        ('COMPLETED',  'Completed'),
+        ('CANCELLED',  'Cancelled'),
     ]
     reference = models.CharField(max_length=100, unique=True)
     material = models.ForeignKey(
-        Material,
-        on_delete=models.PROTECT,
+        Material, on_delete=models.PROTECT,
         limit_choices_to={'category': 'FIN'},
         help_text="The finished product being manufactured"
     )
     planned_quantity = models.DecimalField(max_digits=15, decimal_places=3)
     actual_quantity = models.DecimalField(
-        max_digits=15, decimal_places=3,
-        null=True, blank=True,
-        help_text="Filled in on completion"
+        max_digits=15, decimal_places=3, null=True, blank=True
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PLANNED')
     planned_start = models.DateField(null=True, blank=True)
@@ -280,14 +265,10 @@ class ProductionRun(models.Model):
     location = models.ForeignKey(Location, on_delete=models.PROTECT)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(default=timezone.now)
-
-    # Links to the inventory layer
     product_batch = models.OneToOneField(
-        ProductBatch,
-        on_delete=models.SET_NULL,
+        ProductBatch, on_delete=models.SET_NULL,
         null=True, blank=True,
-        related_name='production_run',
-        help_text="Set when the run is completed and a product batch is recorded"
+        related_name='production_run'
     )
 
     def __str__(self):
@@ -303,45 +284,40 @@ class ProductionRun(models.Model):
     def unallocated_quantity(self):
         return self.planned_quantity - self.allocated_quantity
 
+    @property
+    def board_status(self):
+        """
+        Derives the Kanban stage from the least-advanced component.
+        Status priority (lowest = most blocking):
+          PENDING → ORDERED → IN_WAREHOUSE_RAW → IN_PROCESS → FINAL_PRODUCT
+        """
+        priority = [
+            'PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT'
+        ]
+        components = list(self.components.values_list('status', flat=True))
+        if not components:
+            return 'PENDING'
+        # Return the status with the lowest priority index (the bottleneck)
+        return min(components, key=lambda s: priority.index(s) if s in priority else 0)
+
     class Meta:
         ordering = ['-created_at']
 
 
 class ProductionRunAllocation(models.Model):
     """
-    Many-to-many bridge between ClientOrderLine and ProductionRun.
-    Records how many units from a run are allocated to an order line.
+    Many-to-many bridge: which order lines does this production run serve?
+    A run can also have no allocations if it's producing for stock.
     """
     production_run = models.ForeignKey(
-        ProductionRun,
-        on_delete=models.CASCADE,
-        related_name='allocations'
+        ProductionRun, on_delete=models.CASCADE, related_name='allocations'
     )
     order_line = models.ForeignKey(
-        ClientOrderLine,
-        on_delete=models.CASCADE,
-        related_name='allocations'
+        ClientOrderLine, on_delete=models.CASCADE, related_name='allocations'
     )
     quantity_allocated = models.DecimalField(max_digits=15, decimal_places=3)
     created_at = models.DateTimeField(default=timezone.now)
     notes = models.TextField(blank=True)
-
-    def clean(self):
-        if self.quantity_allocated <= 0:
-            raise ValidationError("Allocated quantity must be positive.")
-        # Cannot allocate more than the run has unallocated (excluding self on edit)
-        existing = self.production_run.allocations.exclude(pk=self.pk).aggregate(
-            total=Coalesce(Sum('quantity_allocated'), Decimal('0'), output_field=DecimalField())
-        )['total']
-        if existing + self.quantity_allocated > self.production_run.planned_quantity:
-            raise ValidationError(
-                f"Allocation exceeds production run capacity. "
-                f"Available: {self.production_run.planned_quantity - existing}"
-            )
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return (
@@ -355,40 +331,34 @@ class ProductionRunAllocation(models.Model):
 
 class ProductionComponent(models.Model):
     """
-    Tracks the per-material status within a production run.
-    One row per raw material / packaging item required.
-    This is what answers: "bottles delivered, caps still in production."
+    One row per raw material / packaging item required for a production run.
+    Status here answers: bottles delivered? caps still coming?
     """
     STATUS_CHOICES = [
-        ('PENDING',      'Pending — not yet ordered'),
-        ('ORDERED',      'Ordered from supplier'),
-        ('IN_TRANSIT',   'In Transit'),
-        ('IN_WAREHOUSE', 'In Warehouse'),
-        ('RESERVED',     'Reserved for this run'),
-        ('CONSUMED',     'Consumed / used in production'),
-        ('SHORT',        'Shortage — insufficient quantity'),
+        ('PENDING',          'Pending — not yet ordered'),
+        ('ORDERED',          'Ordered from supplier'),
+        ('IN_WAREHOUSE_RAW', 'In Warehouse as raw material'),
+        ('IN_PROCESS',       'Processed for production'),
+        ('FINAL_PRODUCT',    'Stored as Final Product'),
     ]
     production_run = models.ForeignKey(
-        ProductionRun,
-        on_delete=models.CASCADE,
-        related_name='components'
+        ProductionRun, on_delete=models.CASCADE, related_name='components'
     )
     material = models.ForeignKey(
-        Material,
-        on_delete=models.PROTECT,
+        Material, on_delete=models.PROTECT,
         limit_choices_to={'category__in': ['RAW', 'PKG']}
     )
     quantity_required = models.DecimalField(max_digits=15, decimal_places=3)
     quantity_available = models.DecimalField(
-        max_digits=15, decimal_places=3,
-        default=Decimal('0')
+        max_digits=15, decimal_places=3, default=Decimal('0')
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='PENDING'
+    )
     raw_material_batch = models.ForeignKey(
-        RawMaterialBatch,
-        on_delete=models.SET_NULL,
+        RawMaterialBatch, on_delete=models.SET_NULL,
         null=True, blank=True,
-        help_text="Set when a specific batch is assigned to this component"
+        help_text="Specific batch assigned to this component"
     )
     expected_date = models.DateField(null=True, blank=True)
     actual_date = models.DateField(null=True, blank=True)
@@ -400,7 +370,7 @@ class ProductionComponent(models.Model):
 
     @property
     def is_ready(self):
-        return self.status in ('IN_WAREHOUSE', 'RESERVED', 'CONSUMED')
+        return self.status in ('IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT')
 
     @property
     def quantity_shortfall(self):
@@ -412,36 +382,25 @@ class ProductionComponent(models.Model):
         ordering = ['production_run', 'material__name']
 
 
-# ─────────────────────────────────────────────
-# WORKFLOW TASKS  (general operational tasks)
-# ─────────────────────────────────────────────
-
-class WorkflowTask(models.Model):
-    STATUS_CHOICES = [
-        ('PENDING',     'Pending'),
-        ('IN_PROGRESS', 'In Progress'),
-        ('DONE',        'Done'),
-    ]
-    description = models.CharField(max_length=255)
-    raw_material_batch = models.ForeignKey(
-        RawMaterialBatch,
-        on_delete=models.CASCADE,
-        null=True, blank=True
+class ProductionRunShipment(models.Model):
+    """
+    When a production run is shipped, it is recorded here and
+    drops off the Kanban board. Acts as a completed-lifecycle archive.
+    """
+    production_run = models.OneToOneField(
+        ProductionRun, on_delete=models.PROTECT, related_name='shipment'
     )
-    product_batch = models.ForeignKey(
-        ProductBatch,
-        on_delete=models.CASCADE,
-        null=True, blank=True
+    order_line = models.ForeignKey(
+        ClientOrderLine, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        help_text="The order line this shipment fulfils (if any)"
     )
-    production_run = models.ForeignKey(
-        ProductionRun,
-        on_delete=models.CASCADE,
-        null=True, blank=True
-    )
-    location = models.ForeignKey(Location, on_delete=models.PROTECT)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    expected_completion = models.DateField()                          # ← DATE only (was DateTimeField)
-    actual_completion = models.DateField(null=True, blank=True)       # ← DATE only
+    quantity_shipped = models.DecimalField(max_digits=15, decimal_places=3)
+    shipped_at = models.DateTimeField(default=timezone.now)
+    notes = models.TextField(blank=True)
 
     def __str__(self):
-        return self.description
+        return f"Shipment: {self.production_run.reference} × {self.quantity_shipped}"
+
+    class Meta:
+        ordering = ['-shipped_at']

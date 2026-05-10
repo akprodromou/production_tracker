@@ -1,23 +1,25 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.views import View
-from django.db.models import Sum, Q, Prefetch
+from django.db.models import Sum, Q, Prefetch, Count
 from django.db.models.functions import Coalesce
 from django.db.models import DecimalField
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.utils import timezone
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+import json
 
 from .models import (
     Unit, Location, Material, RawMaterialBatch,
-    ProductBatch, MaterialTransaction, WorkflowTask,
+    ProductBatch, MaterialTransaction,
     Client, ClientOrder, ClientOrderLine,
-    ProductionRun, ProductionRunAllocation, ProductionComponent
+    ProductionRun, ProductionRunAllocation,
+    ProductionComponent, ProductionRunShipment
 )
 from .forms import (
     UnitForm, LocationForm, MaterialForm, RawMaterialBatchForm,
-    ProductBatchForm, WorkflowTaskForm, WorkflowTaskStatusForm,
+    ProductBatchForm,
     ReserveMaterialForm, ConsumeMaterialForm, ReleaseMaterialForm,
     ClientForm, ClientOrderForm, ClientOrderLineFormSet,
     ProductionRunForm, ProductionRunAllocationForm,
@@ -33,28 +35,33 @@ from .services import reserve_material, consume_material, release_material
 class DashboardView(View):
     def get(self, request):
         all_batches = list(RawMaterialBatch.objects.select_related('material', 'location'))
-        low_stock_batches = sorted(
-            [b for b in all_batches if b.available_quantity <= (b.total_quantity * Decimal('0.2'))],
+        low_stock = sorted(
+            [b for b in all_batches
+             if b.available_quantity <= (b.total_quantity * Decimal('0.2'))],
             key=lambda b: b.available_quantity
         )[:8]
 
         return render(request, 'dashboard.html', {
-            'total_materials':       Material.objects.count(),
-            'raw_materials':         Material.objects.filter(category__in=['RAW', 'PKG']).count(),
-            'finished_materials':    Material.objects.filter(category='FIN').count(),
-            'active_batches':        RawMaterialBatch.objects.count(),
-            'open_orders':           ClientOrder.objects.exclude(status__in=['FULFILLED', 'CANCELLED']).count(),
-            'active_production_runs': ProductionRun.objects.filter(status__in=['PLANNED', 'ACTIVE']).count(),
-            'pending_tasks':         WorkflowTask.objects.filter(status='PENDING').count(),
-            'in_progress_tasks':     WorkflowTask.objects.filter(status='IN_PROGRESS').count(),
-            'low_stock_batches':     low_stock_batches,
-            'recent_transactions':   MaterialTransaction.objects.select_related(
-                                         'raw_material_batch__material', 'product_batch'
-                                     ).order_by('-created_at')[:8],
-            'upcoming_tasks':        WorkflowTask.objects.select_related('location').exclude(
-                                         status='DONE'
-                                     ).order_by('expected_completion')[:6],
-            'recent_orders':         ClientOrder.objects.select_related('client').order_by('-created_at')[:6],
+            'total_materials':        Material.objects.count(),
+            'raw_materials':          Material.objects.filter(category__in=['RAW', 'PKG']).count(),
+            'finished_materials':     Material.objects.filter(category='FIN').count(),
+            'active_batches':         RawMaterialBatch.objects.count(),
+            'open_orders':            ClientOrder.objects.exclude(
+                                          status__in=['FULFILLED', 'CANCELLED']
+                                      ).count(),
+            'active_production_runs': ProductionRun.objects.filter(
+                                          status__in=['PLANNED', 'ACTIVE']
+                                      ).count(),
+            'low_stock_batches':      low_stock,
+            'recent_transactions':    MaterialTransaction.objects.select_related(
+                                          'raw_material_batch__material', 'product_batch'
+                                      ).order_by('-created_at')[:8],
+            'recent_orders':          ClientOrder.objects.select_related(
+                                          'client'
+                                      ).order_by('-created_at')[:6],
+            'recent_product_batches': ProductBatch.objects.select_related(
+                                          'material', 'location'
+                                      ).order_by('-created_at')[:6],
         })
 
 
@@ -132,6 +139,23 @@ class LocationListView(View):
         return render(request, 'locations/list.html', {'locations': qs})
 
 
+class LocationDetailView(View):
+    """Shows all raw material batches and product batches stored at this location."""
+    def get(self, request, pk):
+        location = get_object_or_404(Location, pk=pk)
+        raw_batches = RawMaterialBatch.objects.filter(
+            location=location
+        ).select_related('material__unit').order_by('-created_at')
+        product_batches = ProductBatch.objects.filter(
+            location=location
+        ).select_related('material__unit').order_by('-created_at')
+        return render(request, 'locations/detail.html', {
+            'location':      location,
+            'raw_batches':   raw_batches,
+            'product_batches': product_batches,
+        })
+
+
 class LocationCreateView(View):
     def get(self, request):
         return render(request, 'locations/form.html', {
@@ -202,10 +226,21 @@ class MaterialListView(View):
 class MaterialDetailView(View):
     def get(self, request, pk):
         m = get_object_or_404(Material.objects.select_related('unit'), pk=pk)
+        # For finished products: show production runs with component breakdown
+        runs = []
+        if m.category == 'FIN':
+            runs = ProductionRun.objects.filter(
+                material=m
+            ).prefetch_related(
+                Prefetch('components', queryset=ProductionComponent.objects.select_related('material'))
+            ).exclude(status='CANCELLED').order_by('-created_at')
         return render(request, 'materials/detail.html', {
             'material':       m,
-            'raw_batches':    RawMaterialBatch.objects.filter(material=m).select_related('location') if m.category in ('RAW', 'PKG') else [],
-            'product_batches': ProductBatch.objects.filter(material=m).select_related('location') if m.category == 'FIN' else [],
+            'raw_batches':    RawMaterialBatch.objects.filter(material=m).select_related('location')
+                              if m.category in ('RAW', 'PKG') else [],
+            'product_batches': ProductBatch.objects.filter(material=m).select_related('location')
+                               if m.category == 'FIN' else [],
+            'production_runs': runs,
         })
 
 
@@ -265,13 +300,19 @@ class MaterialDeleteView(View):
 class RawMaterialBatchListView(View):
     def get(self, request):
         qs = RawMaterialBatch.objects.select_related('material', 'location').all()
-        material_id = request.GET.get('material_id')
-        location_id = request.GET.get('location_id')
+        material_id = request.GET.get('material_id', '').strip()
+        location_id = request.GET.get('location_id', '').strip()
         q = request.GET.get('q', '').strip()
         if material_id:
-            qs = qs.filter(material_id=material_id)
+            try:
+                qs = qs.filter(material_id=int(material_id))
+            except (ValueError, TypeError):
+                pass
         if location_id:
-            qs = qs.filter(location_id=location_id)
+            try:
+                qs = qs.filter(location_id=int(location_id))
+            except (ValueError, TypeError):
+                pass
         if q:
             qs = qs.filter(lot_number__icontains=q)
         paginator = Paginator(qs.order_by('-created_at'), 25)
@@ -288,14 +329,17 @@ class RawMaterialBatchDetailView(View):
             RawMaterialBatch.objects.select_related('material', 'location'), pk=pk
         )
         return render(request, 'batches/detail.html', {
-            'batch':            batch,
-            'transactions':     MaterialTransaction.objects.filter(
-                                    raw_material_batch=batch
-                                ).select_related('product_batch').order_by('-created_at'),
-            'product_batches':  ProductBatch.objects.select_related('material').order_by('-created_at'),
-            'production_runs':  ProductionRun.objects.filter(
-                                    status__in=['PLANNED', 'ACTIVE']
-                                ).select_related('material').order_by('-created_at'),
+            'batch':           batch,
+            'transactions':    MaterialTransaction.objects.filter(
+                                   raw_material_batch=batch
+                               ).select_related('product_batch').order_by('-created_at'),
+            'product_batches': ProductBatch.objects.select_related('material').order_by('-created_at'),
+            'production_runs': ProductionRun.objects.filter(
+                                   status__in=['PLANNED', 'ACTIVE']
+                               ).select_related('material').order_by('-created_at'),
+            'open_orders':     ClientOrder.objects.exclude(
+                                   status__in=['FULFILLED', 'CANCELLED']
+                               ).select_related('client').order_by('-order_date'),
         })
 
 
@@ -343,13 +387,19 @@ class RawMaterialBatchDeleteView(View):
 class ProductBatchListView(View):
     def get(self, request):
         qs = ProductBatch.objects.select_related('material', 'location').all()
-        material_id = request.GET.get('material_id')
-        location_id = request.GET.get('location_id')
+        material_id = request.GET.get('material_id', '').strip()
+        location_id = request.GET.get('location_id', '').strip()
         q = request.GET.get('q', '').strip()
         if material_id:
-            qs = qs.filter(material_id=material_id)
+            try:
+                qs = qs.filter(material_id=int(material_id))
+            except (ValueError, TypeError):
+                pass
         if location_id:
-            qs = qs.filter(location_id=location_id)
+            try:
+                qs = qs.filter(location_id=int(location_id))
+            except (ValueError, TypeError):
+                pass
         if q:
             qs = qs.filter(batch_number__icontains=q)
         paginator = Paginator(qs.order_by('-created_at'), 25)
@@ -362,7 +412,9 @@ class ProductBatchListView(View):
 
 class ProductBatchDetailView(View):
     def get(self, request, pk):
-        batch = get_object_or_404(ProductBatch.objects.select_related('material', 'location'), pk=pk)
+        batch = get_object_or_404(
+            ProductBatch.objects.select_related('material', 'location'), pk=pk
+        )
         transactions = MaterialTransaction.objects.filter(
             product_batch=batch
         ).select_related('raw_material_batch__material').order_by('-created_at')
@@ -423,9 +475,9 @@ class MaterialTransactionListView(View):
         qs = MaterialTransaction.objects.select_related(
             'raw_material_batch__material', 'product_batch__material'
         ).order_by('-created_at')
-        batch_id         = request.GET.get('batch_id')
-        product_batch_id = request.GET.get('product_batch_id')
-        tx_type          = request.GET.get('transaction_type')
+        batch_id         = request.GET.get('batch_id', '').strip()
+        product_batch_id = request.GET.get('product_batch_id', '').strip()
+        tx_type          = request.GET.get('transaction_type', '').strip()
         reference        = request.GET.get('reference', '').strip()
         if batch_id:
             qs = qs.filter(raw_material_batch_id=batch_id)
@@ -452,7 +504,7 @@ class MaterialTransactionListView(View):
 
 
 # ─────────────────────────────────────────────
-# SERVICE ACTIONS
+# SERVICE ACTIONS  (reserve / consume / release)
 # ─────────────────────────────────────────────
 
 class ReserveMaterialView(View):
@@ -460,10 +512,13 @@ class ReserveMaterialView(View):
         form = ReserveMaterialForm(request.POST)
         if form.is_valid():
             try:
+                order_id  = request.POST.get('order_id', '').strip()
+                reference = f'ORDER-{order_id}' if order_id else ''
                 reserve_material(
                     form.cleaned_data['batch'].id,
                     form.cleaned_data['product_batch'],
                     form.cleaned_data['quantity'],
+                    reference=reference,
                 )
                 messages.success(request, f"Reserved {form.cleaned_data['quantity']} units.")
             except ValidationError as e:
@@ -481,10 +536,13 @@ class ConsumeMaterialView(View):
         form = ConsumeMaterialForm(request.POST)
         if form.is_valid():
             try:
+                order_id  = request.POST.get('order_id', '').strip()
+                reference = f'ORDER-{order_id}' if order_id else ''
                 consume_material(
                     form.cleaned_data['batch'].id,
                     form.cleaned_data['product_batch'],
                     form.cleaned_data['quantity'],
+                    reference=reference,
                 )
                 messages.success(request, f"Consumed {form.cleaned_data['quantity']} units.")
             except ValidationError as e:
@@ -502,10 +560,13 @@ class ReleaseMaterialView(View):
         form = ReleaseMaterialForm(request.POST)
         if form.is_valid():
             try:
+                order_id  = request.POST.get('order_id', '').strip()
+                reference = f'ORDER-{order_id}' if order_id else ''
                 release_material(
                     form.cleaned_data['batch'].id,
                     form.cleaned_data['product_batch'],
                     form.cleaned_data['quantity'],
+                    reference=reference,
                 )
                 messages.success(request, f"Released {form.cleaned_data['quantity']} units.")
             except ValidationError as e:
@@ -591,18 +652,21 @@ class ClientOrderListView(View):
     def get(self, request):
         qs = ClientOrder.objects.select_related('client').all()
         status  = request.GET.get('status')
-        client  = request.GET.get('client_id')
+        client  = request.GET.get('client_id', '').strip()
         q       = request.GET.get('q', '').strip()
         if status:
             qs = qs.filter(status=status)
         if client:
-            qs = qs.filter(client_id=client)
+            try:
+                qs = qs.filter(client_id=int(client))
+            except (ValueError, TypeError):
+                pass
         if q:
             qs = qs.filter(Q(reference__icontains=q) | Q(client__name__icontains=q))
         paginator = Paginator(qs.order_by('-order_date'), 25)
         return render(request, 'client_orders/order_list.html', {
-            'orders':      paginator.get_page(request.GET.get('page')),
-            'all_clients': Client.objects.order_by('name'),
+            'orders':         paginator.get_page(request.GET.get('page')),
+            'all_clients':    Client.objects.order_by('name'),
             'status_choices': ClientOrder.STATUS_CHOICES,
         })
 
@@ -659,7 +723,7 @@ class ClientOrderEditView(View):
             'form':     ClientOrderForm(instance=order),
             'formset':  ClientOrderLineFormSet(instance=order),
             'form_title': f'Edit Order: {order.reference}', 'submit_label': 'Save Changes',
-            'order': order,
+            'order':    order,
         })
 
     def post(self, request, pk):
@@ -697,19 +761,22 @@ class ClientOrderDeleteView(View):
 class ProductionRunListView(View):
     def get(self, request):
         qs = ProductionRun.objects.select_related('material', 'location').all()
-        status      = request.GET.get('status')
-        material_id = request.GET.get('material_id')
+        status      = request.GET.get('status', '').strip()
+        material_id = request.GET.get('material_id', '').strip()
         q           = request.GET.get('q', '').strip()
         if status:
             qs = qs.filter(status=status)
         if material_id:
-            qs = qs.filter(material_id=material_id)
+            try:
+                qs = qs.filter(material_id=int(material_id))
+            except (ValueError, TypeError):
+                pass
         if q:
             qs = qs.filter(reference__icontains=q)
         paginator = Paginator(qs.order_by('-created_at'), 25)
         return render(request, 'production_runs/list.html', {
-            'runs':          paginator.get_page(request.GET.get('page')),
-            'all_materials': Material.objects.filter(category='FIN').order_by('name'),
+            'runs':           paginator.get_page(request.GET.get('page')),
+            'all_materials':  Material.objects.filter(category='FIN').order_by('name'),
             'status_choices': ProductionRun.STATUS_CHOICES,
         })
 
@@ -717,25 +784,26 @@ class ProductionRunListView(View):
 class ProductionRunDetailView(View):
     def get(self, request, pk):
         run = get_object_or_404(
-            ProductionRun.objects.select_related('material', 'location', 'product_batch').prefetch_related(
+            ProductionRun.objects.select_related(
+                'material', 'location', 'product_batch'
+            ).prefetch_related(
                 Prefetch('components', queryset=ProductionComponent.objects.select_related(
-                    'material', 'raw_material_batch'
-                )),
+                    'material__unit', 'raw_material_batch'
+                ).order_by('material__name')),
                 Prefetch('allocations', queryset=ProductionRunAllocation.objects.select_related(
                     'order_line__order__client', 'order_line__material'
                 )),
             ), pk=pk
         )
         allocation_form = ProductionRunAllocationForm(production_run=run)
-        component_formset = ProductionComponentFormSet(instance=run, prefix='comp')
         return render(request, 'production_runs/detail.html', {
-            'run':               run,
-            'allocation_form':   allocation_form,
-            'component_formset': component_formset,
+            'run':             run,
+            'allocation_form': allocation_form,
+            'component_status_choices': ProductionComponent.STATUS_CHOICES,
         })
 
     def post(self, request, pk):
-        run = get_object_or_404(ProductionRun, pk=pk)
+        run    = get_object_or_404(ProductionRun, pk=pk)
         action = request.POST.get('action')
 
         if action == 'update_status':
@@ -752,82 +820,137 @@ class ProductionRunDetailView(View):
         elif action == 'add_allocation':
             form = ProductionRunAllocationForm(request.POST, production_run=run)
             if form.is_valid():
-                allocation = form.save(commit=False)
-                allocation.production_run = run
-                try:
-                    allocation.save()
+                qty        = form.cleaned_data['quantity_allocated']
+                order_line = form.cleaned_data['order_line']
+                # Validate capacity manually — avoids FK-not-set issue in model.clean()
+                existing = run.allocations.aggregate(
+                    total=Coalesce(Sum('quantity_allocated'), Decimal('0'), output_field=DecimalField())
+                )['total']
+                if existing + qty > run.planned_quantity:
+                    messages.error(
+                        request,
+                        f"Allocation exceeds run capacity. Available: {run.planned_quantity - existing}"
+                    )
+                elif ProductionRunAllocation.objects.filter(
+                    production_run=run, order_line=order_line
+                ).exists():
+                    messages.error(request, "This order line is already allocated to this run.")
+                else:
+                    ProductionRunAllocation.objects.create(
+                        production_run=run,
+                        order_line=order_line,
+                        quantity_allocated=qty,
+                        notes=form.cleaned_data.get('notes', ''),
+                    )
                     messages.success(request, 'Allocation added.')
-                except ValidationError as e:
-                    messages.error(request, e.message)
             else:
                 for errs in form.errors.values():
                     for e in errs:
                         messages.error(request, e)
 
-        elif action == 'save_components':
-            formset = ProductionComponentFormSet(request.POST, instance=run, prefix='comp')
-            if formset.is_valid():
-                formset.save()
-                messages.success(request, 'Components saved.')
-            else:
-                for form in formset:
-                    for errs in form.errors.values():
-                        for e in errs:
-                            messages.error(request, e)
+        elif action == 'ship':
+            qty = request.POST.get('quantity_shipped', '').strip()
+            order_line_id = request.POST.get('order_line_id', '').strip()
+            try:
+                qty_dec = Decimal(qty)
+                if qty_dec <= 0:
+                    raise ValueError
+                order_line = ClientOrderLine.objects.get(pk=int(order_line_id)) if order_line_id else None
+                ProductionRunShipment.objects.create(
+                    production_run=run,
+                    order_line=order_line,
+                    quantity_shipped=qty_dec,
+                    notes=request.POST.get('ship_notes', ''),
+                )
+                run.status = 'COMPLETED'
+                run.actual_end = timezone.now().date()
+                run.save()
+                messages.success(request, f'Run {run.reference} shipped and moved to history.')
+                return redirect('production-run-list')
+            except (ValueError, InvalidOperation):
+                messages.error(request, 'Invalid quantity for shipment.')
+            except ClientOrderLine.DoesNotExist:
+                messages.error(request, 'Order line not found.')
 
         return redirect('production-run-detail', pk=pk)
 
 
 class ProductionRunCreateView(View):
     def get(self, request):
-        form      = ProductionRunForm()
-        formset   = ProductionComponentFormSet(prefix='comp')
-        # Pre-fill material if coming from an order line
+        form    = ProductionRunForm()
+        formset = ProductionComponentFormSet(prefix='comp')
         if request.GET.get('material'):
             form.initial['material'] = request.GET['material']
+        raw_mats = list(Material.objects.filter(
+            category__in=['RAW', 'PKG']
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'production_runs/form.html', {
             'form': form, 'formset': formset,
-            'form_title': 'New Production Run', 'submit_label': 'Create Run'
+            'form_title': 'New Production Run', 'submit_label': 'Create Run',
+            'all_raw_materials_json': json.dumps(raw_mats),
         })
 
     def post(self, request):
         form    = ProductionRunForm(request.POST)
         formset = ProductionComponentFormSet(request.POST, prefix='comp')
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid():
             run = form.save()
-            formset.instance = run
-            formset.save()
+            # Components are optional — save only if formset is valid
+            if formset.is_valid():
+                formset.instance = run
+                formset.save()
             messages.success(request, f'Production run {run.reference} created.')
             return redirect('production-run-detail', pk=run.pk)
+        raw_mats = list(Material.objects.filter(
+            category__in=['RAW', 'PKG']
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'production_runs/form.html', {
             'form': form, 'formset': formset,
-            'form_title': 'New Production Run', 'submit_label': 'Create Run'
+            'form_title': 'New Production Run', 'submit_label': 'Create Run',
+            'all_raw_materials_json': json.dumps(raw_mats),
         })
 
 
 class ProductionRunEditView(View):
     def get(self, request, pk):
         run = get_object_or_404(ProductionRun, pk=pk)
+        raw_mats = list(Material.objects.filter(
+            category__in=['RAW', 'PKG']
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'production_runs/form.html', {
-            'form': ProductionRunForm(instance=run),
+            'form':    ProductionRunForm(instance=run),
             'formset': ProductionComponentFormSet(instance=run, prefix='comp'),
             'form_title': f'Edit Run: {run.reference}', 'submit_label': 'Save Changes',
-            'run': run,
+            'run':     run,
+            'all_raw_materials_json': json.dumps(raw_mats),
         })
 
     def post(self, request, pk):
         run     = get_object_or_404(ProductionRun, pk=pk)
         form    = ProductionRunForm(request.POST, instance=run)
         formset = ProductionComponentFormSet(request.POST, instance=run, prefix='comp')
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid():
             form.save()
-            formset.save()
-            messages.success(request, 'Production run updated.')
+            if formset.is_valid():
+                formset.save()
+                messages.success(request, 'Production run updated.')
+            else:
+                messages.success(request, 'Production run updated.')
+                for f in formset.forms:
+                    for field, errs in f.errors.items():
+                        for e in errs:
+                            messages.warning(request, f'Component row — {field}: {e}')
+                for e in formset.non_form_errors():
+                    messages.warning(request, f'Components: {e}')
             return redirect('production-run-detail', pk=pk)
+        raw_mats = list(Material.objects.filter(
+            category__in=['RAW', 'PKG']
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'production_runs/form.html', {
             'form': form, 'formset': formset,
             'form_title': f'Edit Run: {run.reference}', 'submit_label': 'Save Changes',
-            'run': run,
+            'run':  run,
+            'all_raw_materials_json': json.dumps(raw_mats),
         })
 
 
@@ -845,7 +968,7 @@ class ProductionRunDeleteView(View):
 
 class ProductionRunAllocationDeleteView(View):
     def post(self, request, pk):
-        alloc = get_object_or_404(ProductionRunAllocation, pk=pk)
+        alloc  = get_object_or_404(ProductionRunAllocation, pk=pk)
         run_pk = alloc.production_run.pk
         alloc.delete()
         messages.success(request, 'Allocation removed.')
@@ -853,109 +976,138 @@ class ProductionRunAllocationDeleteView(View):
 
 
 class ProductionComponentUpdateView(View):
-    """Quick status update for a single component — used from the run detail page."""
+    """Quick status update for a single component."""
     def post(self, request, pk):
-        component = get_object_or_404(ProductionComponent, pk=pk)
+        component  = get_object_or_404(ProductionComponent, pk=pk)
         new_status = request.POST.get('status')
         if new_status in dict(ProductionComponent.STATUS_CHOICES):
             component.status = new_status
-            if new_status in ('IN_WAREHOUSE', 'RESERVED', 'CONSUMED') and not component.actual_date:
+            if new_status in ('IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT') \
+                    and not component.actual_date:
                 component.actual_date = timezone.now().date()
             component.save()
-            messages.success(request, f'{component.material.name} status updated to {component.get_status_display()}.')
+            messages.success(
+                request,
+                f'{component.material.name} → {component.get_status_display()}'
+            )
         return redirect('production-run-detail', pk=component.production_run.pk)
 
 
 # ─────────────────────────────────────────────
-# WORKFLOW TASKS
+# ALLOCATIONS TABLE
 # ─────────────────────────────────────────────
 
-class WorkflowTaskListView(View):
+class AllocationListView(View):
+    """Shows all ProductionRunAllocation records in one filterable table."""
     def get(self, request):
-        qs = WorkflowTask.objects.select_related(
-            'location', 'raw_material_batch', 'product_batch', 'production_run'
-        ).all()
-        status_filter = request.GET.get('status', '').upper()
-        location_id   = request.GET.get('location_id')
-        q             = request.GET.get('q', '').strip()
-        if status_filter:
-            qs = qs.filter(status=status_filter)
-        if location_id:
-            qs = qs.filter(location_id=location_id)
-        if q:
-            qs = qs.filter(description__icontains=q)
-        paginator = Paginator(qs.order_by('status', 'expected_completion'), 25)
-        return render(request, 'workflow_tasks/list.html', {
-            'tasks':         paginator.get_page(request.GET.get('page')),
-            'all_locations': Location.objects.order_by('name'),
+        qs = ProductionRunAllocation.objects.select_related(
+            'production_run__material',
+            'order_line__order__client',
+            'order_line__material',
+        ).order_by('-created_at')
+
+        run_id   = request.GET.get('run_id', '').strip()
+        order_id = request.GET.get('order_id', '').strip()
+        if run_id:
+            try:
+                qs = qs.filter(production_run_id=int(run_id))
+            except (ValueError, TypeError):
+                pass
+        if order_id:
+            try:
+                qs = qs.filter(order_line__order_id=int(order_id))
+            except (ValueError, TypeError):
+                pass
+
+        paginator = Paginator(qs, 50)
+        return render(request, 'allocations/list.html', {
+            'allocations':   paginator.get_page(request.GET.get('page')),
+            'all_runs':      ProductionRun.objects.select_related('material').order_by('-created_at'),
+            'all_orders':    ClientOrder.objects.select_related('client').order_by('-order_date'),
         })
 
 
-class WorkflowTaskCreateView(View):
+# ─────────────────────────────────────────────
+# PRODUCTION BOARD  (Kanban by component status)
+# ─────────────────────────────────────────────
+
+# Status priority order for deriving board_status
+COMPONENT_STATUS_PRIORITY = [
+    'PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT'
+]
+
+BOARD_STATUS_META = {
+    'PENDING':          {'label': 'Pending',            'color': 'grey'},
+    'ORDERED':          {'label': 'Ordered',            'color': 'blue'},
+    'IN_WAREHOUSE_RAW': {'label': 'In Warehouse (Raw)', 'color': 'orange'},
+    'IN_PROCESS':       {'label': 'In Process',         'color': 'warn'},
+    'FINAL_PRODUCT':    {'label': 'Final Product',      'color': 'green'},
+}
+
+
+class ProductionBoardView(View):
+    """
+    Kanban board of production runs grouped by their bottleneck component status.
+    Shipped (completed) runs are excluded — they appear in ShipmentHistoryView.
+    """
     def get(self, request):
-        return render(request, 'workflow_tasks/form.html', {
-            'form': WorkflowTaskForm(), 'form_title': 'New Task', 'submit_label': 'Create Task'
+        # Load all non-shipped, non-cancelled runs with their components
+        runs = list(
+            ProductionRun.objects.filter(
+                status__in=['PLANNED', 'ACTIVE', 'COMPLETED']
+            ).exclude(
+                pk__in=ProductionRunShipment.objects.values_list('production_run_id', flat=True)
+            ).select_related('material').prefetch_related(
+                Prefetch('components', queryset=ProductionComponent.objects.select_related('material'))
+            )
+        )
+
+        # Group runs by board_status
+        columns = {s: [] for s in COMPONENT_STATUS_PRIORITY}
+        for run in runs:
+            bs = run.board_status
+            if bs in columns:
+                columns[bs].append(run)
+
+        return render(request, 'production_runs/board.html', {
+            'columns':          columns,
+            'status_priority':  COMPONENT_STATUS_PRIORITY,
+            'status_meta':      BOARD_STATUS_META,
         })
 
     def post(self, request):
-        form = WorkflowTaskForm(request.POST)
-        if form.is_valid():
-            task = form.save()
-            messages.success(request, 'Task created.')
-            return redirect('workflow-task-detail', pk=task.pk)
-        return render(request, 'workflow_tasks/form.html', {
-            'form': form, 'form_title': 'New Task', 'submit_label': 'Create Task'
+        """Ship a run — moves it to history."""
+        run_pk = request.POST.get('run_id')
+        run    = get_object_or_404(ProductionRun, pk=run_pk)
+        qty    = request.POST.get('quantity_shipped', '').strip()
+        order_line_id = request.POST.get('order_line_id', '').strip()
+        try:
+            qty_dec    = Decimal(qty)
+            order_line = ClientOrderLine.objects.get(pk=int(order_line_id)) \
+                         if order_line_id else None
+            ProductionRunShipment.objects.create(
+                production_run=run,
+                order_line=order_line,
+                quantity_shipped=qty_dec,
+                notes=request.POST.get('ship_notes', ''),
+            )
+            run.status   = 'COMPLETED'
+            run.actual_end = timezone.now().date()
+            run.save()
+            messages.success(request, f'{run.reference} shipped — moved to history.')
+        except Exception as ex:
+            messages.error(request, f'Shipment error: {ex}')
+        return redirect('production-board')
+
+
+class ShipmentHistoryView(View):
+    """Read-only archive of shipped production runs."""
+    def get(self, request):
+        qs = ProductionRunShipment.objects.select_related(
+            'production_run__material',
+            'order_line__order__client',
+        ).order_by('-shipped_at')
+        paginator = Paginator(qs, 25)
+        return render(request, 'production_runs/shipment_history.html', {
+            'shipments': paginator.get_page(request.GET.get('page')),
         })
-
-
-class WorkflowTaskDetailView(View):
-    def get(self, request, pk):
-        task = get_object_or_404(
-            WorkflowTask.objects.select_related(
-                'location', 'raw_material_batch__material',
-                'product_batch__material', 'production_run'
-            ), pk=pk
-        )
-        return render(request, 'workflow_tasks/detail.html', {'task': task})
-
-
-class WorkflowTaskEditView(View):
-    def get(self, request, pk):
-        task = get_object_or_404(WorkflowTask, pk=pk)
-        return render(request, 'workflow_tasks/form.html', {
-            'form': WorkflowTaskForm(instance=task),
-            'form_title': f'Edit Task #{task.pk}', 'submit_label': 'Save Changes'
-        })
-
-    def post(self, request, pk):
-        task = get_object_or_404(WorkflowTask, pk=pk)
-        form = WorkflowTaskForm(request.POST, instance=task)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Task updated.')
-            return redirect('workflow-task-detail', pk=pk)
-        return render(request, 'workflow_tasks/form.html', {
-            'form': form, 'form_title': f'Edit Task #{task.pk}', 'submit_label': 'Save Changes'
-        })
-
-
-class WorkflowTaskDeleteView(View):
-    def post(self, request, pk):
-        task = get_object_or_404(WorkflowTask, pk=pk)
-        task.delete()
-        messages.success(request, 'Task deleted.')
-        return redirect('workflow-task-list')
-
-
-class WorkflowTaskStatusView(View):
-    def post(self, request, pk):
-        task = get_object_or_404(WorkflowTask, pk=pk)
-        new_status = request.POST.get('status')
-        if new_status in ('PENDING', 'IN_PROGRESS', 'DONE'):
-            task.status = new_status
-            if new_status == 'DONE' and not task.actual_completion:
-                task.actual_completion = timezone.now().date()
-            task.save()
-            messages.success(request, f'Task marked as {task.get_status_display()}.')
-        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
-        return redirect(next_url or 'workflow-task-list')

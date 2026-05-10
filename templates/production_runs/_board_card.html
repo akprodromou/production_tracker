@@ -1,0 +1,36 @@
+{# Expects `run` in context. Included by board.html for each column. #}
+<div class="run-card" onclick="window.location='{% url 'production-run-detail' run.pk %}'">
+  <div class="run-card-ref">{{ run.reference }}</div>
+  <div class="run-card-name">{{ run.material.name }}</div>
+
+  <div class="run-card-components">
+    {% for comp in run.components.all %}
+    <div class="comp-line">
+      <span class="comp-dot dot-{{ comp.status }}"></span>
+      <span class="comp-name">{{ comp.material.name }}</span>
+      <span class="comp-st">
+        {% if comp.status == 'PENDING' %}Pending
+        {% elif comp.status == 'ORDERED' %}Ordered
+        {% elif comp.status == 'IN_WAREHOUSE_RAW' %}In Warehouse
+        {% elif comp.status == 'IN_PROCESS' %}In Process
+        {% else %}Final Product
+        {% endif %}
+      </span>
+    </div>
+    {% empty %}
+    <span style="font-size:11px;color:var(--muted)">No components defined</span>
+    {% endfor %}
+  </div>
+
+  <div class="run-card-footer">
+    <span style="font-size:11px;color:var(--muted)">
+      {{ run.planned_quantity }} units
+      {% if run.planned_end %} · {{ run.planned_end|date:"M d" }}{% endif %}
+    </span>
+    <button
+      class="btn btn-success btn-sm"
+      onclick="event.stopPropagation(); openShipModal({{ run.pk }}, '{{ run.reference|escapejs }}', {{ run.planned_quantity }})">
+      Ship →
+    </button>
+  </div>
+</div>

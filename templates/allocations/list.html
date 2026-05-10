@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Allocations — InventoryOS{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Allocations{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Production Allocations</h1>
+    <p>How production runs are allocated to client order lines — and how much is unallocated (for stock)</p>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Production Run</label>
+      <select name="run_id">
+        <option value="">All runs</option>
+        {% for run in all_runs %}
+        <option value="{{ run.pk }}" {% if request.GET.run_id == run.pk|stringformat:'s' %}selected{% endif %}>
+          {{ run.reference }} — {{ run.material.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Client Order</label>
+      <select name="order_id">
+        <option value="">All orders</option>
+        {% for o in all_orders %}
+        <option value="{{ o.pk }}" {% if request.GET.order_id == o.pk|stringformat:'s' %}selected{% endif %}>
+          {{ o.reference }} — {{ o.client.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="padding-bottom:1px">
+      <button type="submit" class="btn btn-secondary">Filter</button>
+      <a href="{% url 'allocation-list' %}" class="btn btn-ghost">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if allocations %}
+    <table>
+      <thead>
+        <tr>
+          <th>Production Run</th>
+          <th>Product</th>
+          <th>Run Qty</th>
+          <th>Unallocated</th>
+          <th>Order</th>
+          <th>Client</th>
+          <th>Line Product</th>
+          <th>Qty Allocated</th>
+          <th>Allocated</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alloc in allocations %}
+        <tr>
+          <td class="td-mono">
+            <a href="{% url 'production-run-detail' alloc.production_run.pk %}" style="color:var(--accent);text-decoration:none">
+              {{ alloc.production_run.reference }}
+            </a>
+          </td>
+          <td>{{ alloc.production_run.material.name }}</td>
+          <td class="td-mono">{{ alloc.production_run.planned_quantity }}</td>
+          <td class="td-mono">
+            {% if alloc.production_run.unallocated_quantity > 0 %}
+              <span style="color:var(--warn)">{{ alloc.production_run.unallocated_quantity }}</span>
+            {% else %}
+              <span class="text-muted">0</span>
+            {% endif %}
+          </td>
+          <td class="td-mono">
+            <a href="{% url 'order-detail' alloc.order_line.order.pk %}" style="color:var(--accent);text-decoration:none">
+              {{ alloc.order_line.order.reference }}
+            </a>
+          </td>
+          <td>{{ alloc.order_line.order.client.name }}</td>
+          <td>{{ alloc.order_line.material.name }}</td>
+          <td class="td-mono" style="color:var(--accent2)">{{ alloc.quantity_allocated }}</td>
+          <td class="text-muted" style="font-size:12px">{{ alloc.created_at|date:"Y-m-d" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "partials/_pagination.html" with page_obj=allocations %}
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">🔗</div>
+      <h3>No allocations found</h3>
+      <p>Allocate a production run to an order line from the Production Run detail page.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

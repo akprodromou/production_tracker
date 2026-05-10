@@ -7,7 +7,7 @@ from django.db.models import DecimalField
 
 from .models import (
     Unit, Location, Material, RawMaterialBatch,
-    ProductBatch, MaterialTransaction, WorkflowTask,
+    ProductBatch, MaterialTransaction,
     Client, ClientOrder, ClientOrderLine,
     ProductionRun, ProductionRunAllocation, ProductionComponent
 )
@@ -424,7 +424,7 @@ class ProductionComponentForm(forms.ModelForm):
     class Meta:
         model = ProductionComponent
         fields = [
-            'material', 'quantity_required', 'quantity_available',
+            'material', 'quantity_required',
             'status', 'raw_material_batch', 'expected_date', 'actual_date', 'notes'
         ]
         widgets = {
@@ -455,41 +455,3 @@ ProductionComponentFormSet = forms.inlineformset_factory(
 )
 
 
-# ─────────────────────────────────────────────
-# WORKFLOW TASKS
-# ─────────────────────────────────────────────
-
-class WorkflowTaskForm(forms.ModelForm):
-    class Meta:
-        model = WorkflowTask
-        fields = [
-            'description', 'raw_material_batch', 'product_batch',
-            'production_run', 'location', 'status',
-            'expected_completion', 'actual_completion'
-        ]
-        widgets = {
-            'expected_completion': forms.DateInput(attrs={'type': 'date'}),
-            'actual_completion':   forms.DateInput(attrs={'type': 'date'}),
-        }
-
-    def clean(self):
-        cleaned = super().clean()
-        status = cleaned.get('status')
-        if status == 'DONE' and not cleaned.get('actual_completion'):
-            cleaned['actual_completion'] = timezone.now().date()
-        return cleaned
-
-
-class WorkflowTaskStatusForm(forms.ModelForm):
-    class Meta:
-        model = WorkflowTask
-        fields = ['status', 'actual_completion']
-        widgets = {
-            'actual_completion': forms.DateInput(attrs={'type': 'date'}),
-        }
-
-    def clean(self):
-        cleaned = super().clean()
-        if cleaned.get('status') == 'DONE' and not cleaned.get('actual_completion'):
-            cleaned['actual_completion'] = timezone.now().date()
-        return cleaned

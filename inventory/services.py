@@ -8,7 +8,7 @@ from decimal import Decimal
 from .models import RawMaterialBatch, MaterialTransaction
 
 
-def reserve_material(batch_id, product_batch, quantity):
+def reserve_material(batch_id, product_batch, quantity, reference=""):
     with transaction.atomic():
         batch = RawMaterialBatch.objects.select_for_update().get(id=batch_id)
 
@@ -24,11 +24,12 @@ def reserve_material(batch_id, product_batch, quantity):
             raw_material_batch=batch,
             product_batch=product_batch,
             transaction_type='RESERVED',
-            quantity=quantity
+            quantity=quantity,
+            reference=reference,
         )
 
 
-def consume_material(batch_id, product_batch, quantity):
+def consume_material(batch_id, product_batch, quantity, reference=""):
     with transaction.atomic():
         batch = RawMaterialBatch.objects.select_for_update().get(id=batch_id)
 
@@ -57,11 +58,12 @@ def consume_material(batch_id, product_batch, quantity):
             raw_material_batch=batch,
             product_batch=product_batch,
             transaction_type='CONSUMED',
-            quantity=quantity
+            quantity=quantity,
+            reference=reference,
         )
 
 
-def release_material(batch_id, product_batch, quantity):
+def release_material(batch_id, product_batch, quantity, reference=""):
     with transaction.atomic():
         batch = RawMaterialBatch.objects.select_for_update().get(id=batch_id)
 
@@ -97,5 +99,6 @@ def release_material(batch_id, product_batch, quantity):
             raw_material_batch=batch,
             product_batch=product_batch,
             transaction_type='RELEASED',
-            quantity=quantity
+            quantity=quantity,
+            reference=reference,
         )

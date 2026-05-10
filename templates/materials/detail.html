@@ -6,6 +6,85 @@
   {{ material.sku }}
 {% endblock %}
 
+{% block extra_head %}
+<style>
+  /* Component tree */
+  .tree { padding: 14px 18px; }
+  .tree-run { margin-bottom: 20px; }
+  .tree-run:last-child { margin-bottom: 0; }
+  .tree-run-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .tree-run-header:hover { border-color: var(--accent); }
+  .tree-run-ref  { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .tree-run-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .tree-run-qty  { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .tree-components {
+    padding-left: 24px;
+    border-left: 2px solid var(--border);
+    margin-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tree-comp {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    background: var(--surface2);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    font-size: 13px;
+    position: relative;
+  }
+  .tree-comp::before {
+    content: '├─';
+    position: absolute;
+    left: -22px;
+    color: var(--border);
+    font-family: monospace;
+    font-size: 12px;
+  }
+  .tree-comp:last-child::before { content: '└─'; }
+  .tree-comp-name { flex: 1; }
+  .tree-comp-qty  { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .tree-comp-status { }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  .sp-PENDING          { background: rgba(107,114,128,.15); color: var(--muted); }
+  .sp-ORDERED          { background: rgba(79,142,247,.15);  color: var(--accent); }
+  .sp-IN_WAREHOUSE_RAW { background: rgba(245,166,35,.15);  color: var(--warn); }
+  .sp-IN_PROCESS       { background: rgba(245,158,11,.15);  color: #f59e0b; }
+  .sp-FINAL_PRODUCT    { background: rgba(45,212,160,.15);  color: var(--accent2); }
+
+  .sd-PENDING          { background: var(--muted); }
+  .sd-ORDERED          { background: var(--accent); }
+  .sd-IN_WAREHOUSE_RAW { background: var(--warn); }
+  .sd-IN_PROCESS       { background: #f59e0b; }
+  .sd-FINAL_PRODUCT    { background: var(--accent2); }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <div>
@@ -14,7 +93,7 @@
   </div>
   <div class="page-actions">
     <a href="{% url 'material-edit' material.pk %}" class="btn btn-secondary">Edit</a>
-    <button class="btn btn-danger" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
+    <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
   </div>
 </div>
 
@@ -27,23 +106,114 @@
         <div class="stat-label">Category</div>
         {% if material.category == 'RAW' %}<span class="badge badge-blue">Raw Material</span>
         {% elif material.category == 'PKG' %}<span class="badge badge-orange">Packaging</span>
-        {% else %}<span class="badge badge-green">Finished Product</span>
-        {% endif %}
+        {% else %}<span class="badge badge-green">Finished Product</span>{% endif %}
       </div>
       <div>
         <div class="stat-label">Unit</div>
-        <span style="font-family:var(--mono)">{{ material.unit.name }}</span>
+        <span class="text-mono">{{ material.unit.name }}</span>
       </div>
       <div>
         <div class="stat-label">SKU</div>
-        <span style="font-family:var(--mono)">{{ material.sku }}</span>
+        <span class="text-mono">{{ material.sku }}</span>
       </div>
     </div>
   </div>
 </div>
 
-{# ── LINKED BATCHES ── #}
-{% if material.category in 'RAW,PKG' %}
+{% if material.category == 'FIN' %}
+
+{# ── PRODUCTION RUN HIERARCHY ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Production Orders — Component Breakdown</span>
+    <a href="{% url 'production-run-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Run</a>
+  </div>
+  {% if production_runs %}
+  <div class="tree">
+    {% for run in production_runs %}
+    <div class="tree-run">
+      <a href="{% url 'production-run-detail' run.pk %}" style="text-decoration:none">
+        <div class="tree-run-header">
+          <span class="tree-run-ref">{{ run.reference }}</span>
+          <span class="tree-run-name">{{ run.material.name }}</span>
+          <span>
+            {% if run.status == 'PLANNED' %}<span class="badge badge-grey">Planned</span>
+            {% elif run.status == 'ACTIVE' %}<span class="badge badge-blue">Active</span>
+            {% elif run.status == 'COMPLETED' %}<span class="badge badge-green">Completed</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
+          </span>
+          <span class="tree-run-qty">{{ run.planned_quantity }} units</span>
+          {% if run.planned_end %}
+          <span class="text-muted" style="font-size:12px">due {{ run.planned_end|date:"Y-m-d" }}</span>
+          {% endif %}
+        </div>
+      </a>
+
+      {% if run.components.all %}
+      <div class="tree-components">
+        {% for comp in run.components.all %}
+        <div class="tree-comp">
+          <span class="tree-comp-name">{{ comp.material.name }}</span>
+          <span class="tree-comp-qty">{{ comp.quantity_required }} {{ comp.material.unit.name }}</span>
+          <span class="tree-comp-status">
+            <span class="status-pill sp-{{ comp.status }}">
+              <span class="status-dot sd-{{ comp.status }}"></span>
+              {{ comp.get_status_display }}
+            </span>
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding-left:42px;font-size:12px;color:var(--muted);margin-top:4px">
+        No components defined for this run
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">⚙️</div>
+    <h3>No production runs for this product</h3>
+    <p>Create a production run to start tracking component status.</p>
+  </div>
+  {% endif %}
+</div>
+
+{# ── PRODUCT BATCHES ── #}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Product Batches</span>
+    <a href="{% url 'product-batch-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Batch</a>
+  </div>
+  <div class="table-wrap">
+    {% if product_batches %}
+    <table>
+      <thead>
+        <tr><th>Batch #</th><th>Location</th><th>Qty Produced</th><th>Date</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for pb in product_batches %}
+        <tr>
+          <td class="td-mono"><a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a></td>
+          <td>{{ pb.location.name }}</td>
+          <td class="td-mono">{{ pb.quantity_produced }}</td>
+          <td class="text-muted" style="font-size:12px">{{ pb.created_at|date:"Y-m-d" }}</td>
+          <td><a href="{% url 'product-batch-detail' pb.pk %}" class="btn btn-ghost btn-sm">→</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">🏭</div><h3>No product batches yet</h3></div>
+    {% endif %}
+  </div>
+</div>
+
+{% else %}
+
+{# ── RAW MATERIAL BATCHES ── #}
 <div class="card">
   <div class="card-header">
     <span class="card-title">Raw Material Batches</span>
@@ -73,41 +243,13 @@
     {% endif %}
   </div>
 </div>
-{% else %}
-<div class="card">
-  <div class="card-header">
-    <span class="card-title">Product Batches</span>
-    <a href="{% url 'product-batch-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Batch</a>
-  </div>
-  <div class="table-wrap">
-    {% if product_batches %}
-    <table>
-      <thead>
-        <tr><th>Batch #</th><th>Location</th><th>Qty Produced</th><th>Date</th><th></th></tr>
-      </thead>
-      <tbody>
-        {% for pb in product_batches %}
-        <tr>
-          <td class="td-mono"><a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a></td>
-          <td>{{ pb.location.name }}</td>
-          <td class="td-mono">{{ pb.quantity_produced }}</td>
-          <td class="text-muted" style="font-size:12px">{{ pb.created_at|date:"Y-m-d" }}</td>
-          <td><a href="{% url 'product-batch-detail' pb.pk %}" class="btn btn-ghost btn-sm">→</a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="empty"><div class="empty-icon">🏭</div><h3>No product batches yet</h3></div>
-    {% endif %}
-  </div>
-</div>
+
 {% endif %}
 
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal">
     <h3>⚠ Confirm Delete</h3>
-    <p>Delete material <strong style="color:var(--text)">{{ material.name }}</strong>? This cannot be undone.</p>
+    <p>Delete <strong style="color:var(--text)">{{ material.name }}</strong>? This cannot be undone.</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
       <form method="post" action="{% url 'material-delete' material.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
@@ -115,11 +257,6 @@
   </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
-<script>
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
-</script>
+<script>document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });</script>
 {% endblock %}

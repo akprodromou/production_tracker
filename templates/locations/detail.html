@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ location.name }} — Location{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'location-list' %}">Locations</a><span>/</span>
+  {{ location.name }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ location.name }}</h1>
+    <p>
+      {% if location.is_external %}<span class="badge badge-orange">External</span>
+      {% else %}<span class="badge badge-blue">Internal</span>{% endif %}
+      &nbsp; All stock currently assigned to this location
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'location-edit' location.pk %}" class="btn btn-secondary">Edit</a>
+  </div>
+</div>
+
+{# ── SUMMARY STRIP ── #}
+<div class="stat-grid stat-grid-3 mb-3">
+  <div class="stat-card">
+    <div class="stat-label">Raw Material Batches</div>
+    <div class="stat-value">{{ raw_batches|length }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Product Batches</div>
+    <div class="stat-value">{{ product_batches|length }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Items</div>
+    <div class="stat-value">{{ raw_batches|length|add:product_batches|length }}</div>
+  </div>
+</div>
+
+{# ── RAW MATERIAL BATCHES ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Raw Material Batches</span>
+    <a href="{% url 'batch-create' %}?location={{ location.pk }}" class="btn btn-primary btn-sm">+ New Batch Here</a>
+  </div>
+  <div class="table-wrap">
+    {% if raw_batches %}
+    <table>
+      <thead>
+        <tr><th>Lot Number</th><th>Material</th><th>SKU</th><th>Total</th><th>Available</th><th>Reserved</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for b in raw_batches %}
+        <tr>
+          <td class="td-mono">
+            <a href="{% url 'batch-detail' b.pk %}" style="color:var(--accent);text-decoration:none">{{ b.lot_number }}</a>
+          </td>
+          <td>{{ b.material.name }}</td>
+          <td class="td-mono text-muted">{{ b.material.sku }}</td>
+          <td class="td-mono">{{ b.total_quantity }} {{ b.material.unit.name }}</td>
+          <td>
+            {% if b.available_quantity > 0 %}
+              <span class="badge badge-green">{{ b.available_quantity }}</span>
+            {% else %}
+              <span class="badge badge-red">{{ b.available_quantity }}</span>
+            {% endif %}
+          </td>
+          <td><span class="badge badge-orange">{{ b.reserved_quantity }}</span></td>
+          <td><a href="{% url 'batch-detail' b.pk %}" class="btn btn-ghost btn-sm">→</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty" style="padding:24px">
+      <div class="empty-icon">📦</div>
+      <h3>No raw material batches at this location</h3>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# ── PRODUCT BATCHES ── #}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Finished Product Batches</span>
+    <a href="{% url 'product-batch-create' %}?location={{ location.pk }}" class="btn btn-primary btn-sm">+ New Batch Here</a>
+  </div>
+  <div class="table-wrap">
+    {% if product_batches %}
+    <table>
+      <thead>
+        <tr><th>Batch Number</th><th>Product</th><th>SKU</th><th>Qty Produced</th><th>Date</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for pb in product_batches %}
+        <tr>
+          <td class="td-mono">
+            <a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a>
+          </td>
+          <td>{{ pb.material.name }}</td>
+          <td class="td-mono text-muted">{{ pb.material.sku }}</td>
+          <td class="td-mono">{{ pb.quantity_produced }} {{ pb.material.unit.name }}</td>
+          <td class="text-muted" style="font-size:12px">{{ pb.created_at|date:"Y-m-d" }}</td>
+          <td><a href="{% url 'product-batch-detail' pb.pk %}" class="btn btn-ghost btn-sm">→</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty" style="padding:24px">
+      <div class="empty-icon">🏭</div>
+      <h3>No finished product batches at this location</h3>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

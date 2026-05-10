@@ -8,32 +8,44 @@
 
 {% block extra_head %}
 <style>
-  .component-row {
+  .component-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 160px;
-    gap: 12px;
-    align-items: center;
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--border);
+    grid-template-columns: 2fr 1fr 1fr 1fr 180px;
+    gap: 0;
   }
-  .component-row:last-child { border-bottom: none; }
-  .component-row:hover { background: var(--surface2); }
-  .component-header {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 160px;
-    gap: 12px;
+  .comp-header, .comp-row {
+    display: contents;
+  }
+  .comp-header > span {
     padding: 8px 18px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
     border-bottom: 1px solid var(--border);
   }
+  .comp-cell {
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(42,47,61,.4);
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+  }
+  .comp-row:last-child .comp-cell { border-bottom: none; }
+  .comp-row:hover .comp-cell { background: var(--surface2); }
   .status-select {
+    width: 100%;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
     font-size: 12px;
-    padding: 4px 8px;
-    width: 100%;
+    padding: 5px 8px;
+    cursor: pointer;
   }
+  .status-select:focus { outline: none; border-color: var(--accent); }
 </style>
 {% endblock %}
 
@@ -44,9 +56,8 @@
     <p>{{ run.material.name }} · {{ run.location.name }}</p>
   </div>
   <div class="page-actions">
-    {# Status transitions #}
     {% if run.status == 'PLANNED' %}
-    <form method="post"><{% csrf_token %}<input type="hidden" name="action" value="update_status"><input type="hidden" name="status" value="ACTIVE">
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_status"><input type="hidden" name="status" value="ACTIVE">
       <button type="submit" class="btn btn-primary">▶ Start Run</button>
     </form>
     {% elif run.status == 'ACTIVE' %}
@@ -56,96 +67,110 @@
     {% endif %}
     {% if run.status not in 'COMPLETED,CANCELLED' %}
     <form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_status"><input type="hidden" name="status" value="CANCELLED">
-      <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+      <button type="submit" class="btn btn-danger btn-sm">Cancel Run</button>
     </form>
     {% endif %}
     <a href="{% url 'production-run-edit' run.pk %}" class="btn btn-secondary">Edit</a>
   </div>
 </div>
 
-{# ── RUN META ── #}
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px" class="mb-3">
+{# ── RUN STATUS + META ── #}
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px" class="mb-3">
   <div class="stat-card">
-    <div class="stat-label">Status</div>
-    {% if run.status == 'PLANNED' %}<span class="badge badge-grey">Planned</span>
-    {% elif run.status == 'ACTIVE' %}<span class="badge badge-blue">Active</span>
-    {% elif run.status == 'COMPLETED' %}<span class="badge badge-green">Completed</span>
-    {% else %}<span class="badge badge-red">Cancelled</span>
+    <div class="stat-label">Run Status</div>
+    {% if run.status == 'PLANNED' %}<span class="badge badge-grey" style="font-size:13px;padding:4px 12px">Planned</span>
+    {% elif run.status == 'ACTIVE' %}<span class="badge badge-blue" style="font-size:13px;padding:4px 12px">Active</span>
+    {% elif run.status == 'COMPLETED' %}<span class="badge badge-green" style="font-size:13px;padding:4px 12px">Completed</span>
+    {% else %}<span class="badge badge-red" style="font-size:13px;padding:4px 12px">Cancelled</span>
     {% endif %}
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Board Stage</div>
+    {% with bs=run.board_status %}
+    {% if bs == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+    {% elif bs == 'ORDERED' %}<span class="badge badge-blue">Ordered</span>
+    {% elif bs == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-orange">In Warehouse</span>
+    {% elif bs == 'IN_PROCESS' %}<span class="badge badge-warn" style="background:rgba(245,158,11,.15);color:#f59e0b">In Process</span>
+    {% elif bs == 'FINAL_PRODUCT' %}<span class="badge badge-green">Final Product</span>
+    {% endif %}
+    {% endwith %}
+    <div class="stat-sub">derived from components</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Planned Qty</div>
     <div class="stat-value">{{ run.planned_quantity }}</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label">Allocated to Orders</div>
+    <div class="stat-label">Allocated</div>
     <div class="stat-value" style="color:var(--accent2)">{{ run.allocated_quantity }}</div>
     <div class="stat-sub">{{ run.unallocated_quantity }} unallocated</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Planned Window</div>
-    <div style="font-size:13px;font-family:var(--mono)">
-      {{ run.planned_start|date:"Y-m-d"|default:"—" }} → {{ run.planned_end|date:"Y-m-d"|default:"—" }}
+    <div style="font-size:12px;font-family:var(--mono)">
+      {{ run.planned_start|date:"Y-m-d"|default:"—" }}<br>→ {{ run.planned_end|date:"Y-m-d"|default:"—" }}
     </div>
   </div>
 </div>
 
-{# ── COMPONENT STATUS — the core feature ── #}
+{# ── COMPONENT STATUS ── #}
 <div class="card mb-3">
   <div class="card-header">
     <span class="card-title">Component Status</span>
-    <span class="text-muted" style="font-size:11px">Bottles delivered? Caps still coming? Track it here.</span>
+    <span class="text-muted" style="font-size:11px">Change status via dropdown — saves immediately</span>
   </div>
 
   {% if run.components.all %}
-  <div class="component-header">
-    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Material</span>
-    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Required</span>
-    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Available</span>
-    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Expected</span>
-    <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Status</span>
+  <div class="component-grid">
+    <div class="comp-header">
+      <span>Material</span>
+      <span>Required</span>
+      <span>Available</span>
+      <span>Expected</span>
+      <span>Status</span>
+    </div>
+    {% for comp in run.components.all %}
+    <div class="comp-row">
+      <div class="comp-cell" style="flex-direction:column;align-items:flex-start;gap:2px">
+        <strong>{{ comp.material.name }}</strong>
+        <span class="text-mono text-muted" style="font-size:11px">{{ comp.material.sku }}</span>
+        {% if comp.raw_material_batch %}
+        <a href="{% url 'batch-detail' comp.raw_material_batch.pk %}" style="font-size:11px;color:var(--accent);text-decoration:none">
+          LOT: {{ comp.raw_material_batch.lot_number }}
+        </a>
+        {% endif %}
+      </div>
+      <div class="comp-cell td-mono">{{ comp.quantity_required }} {{ comp.material.unit.name }}</div>
+      <div class="comp-cell td-mono">
+        {% if comp.quantity_shortfall > 0 %}
+          <span style="color:var(--danger)">{{ comp.quantity_available }}</span>
+          <span class="text-muted" style="font-size:11px;margin-left:4px">(short {{ comp.quantity_shortfall }})</span>
+        {% else %}
+          <span style="color:var(--accent2)">{{ comp.quantity_available }}</span>
+        {% endif %}
+      </div>
+      <div class="comp-cell text-muted" style="font-size:12px">{{ comp.expected_date|date:"Y-m-d"|default:"—" }}</div>
+      <div class="comp-cell">
+        <form method="post" action="{% url 'component-status' comp.pk %}" style="width:100%">
+          {% csrf_token %}
+          <select name="status" class="status-select" onchange="this.form.submit()">
+            {% for val, label in component_status_choices %}
+            <option value="{{ val }}" {% if comp.status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
   </div>
-
-  {% for comp in run.components.all %}
-  <div class="component-row">
-    <div>
-      <strong style="font-size:13px">{{ comp.material.name }}</strong><br>
-      <span class="text-mono text-muted">{{ comp.material.sku }}</span>
-      {% if comp.raw_material_batch %}
-      <br><a href="{% url 'batch-detail' comp.raw_material_batch.pk %}" style="font-size:11px;color:var(--accent);text-decoration:none">
-        LOT: {{ comp.raw_material_batch.lot_number }}
-      </a>
-      {% endif %}
-      {% if comp.notes %}<br><span class="text-muted" style="font-size:11px">{{ comp.notes }}</span>{% endif %}
-    </div>
-    <div class="td-mono">{{ comp.quantity_required }} {{ comp.material.unit.name }}</div>
-    <div class="td-mono">
-      {% if comp.quantity_shortfall > 0 %}
-        <span style="color:var(--danger)">{{ comp.quantity_available }}</span>
-        <span class="text-muted" style="font-size:11px">(short {{ comp.quantity_shortfall }})</span>
-      {% else %}
-        <span style="color:var(--accent2)">{{ comp.quantity_available }}</span>
-      {% endif %}
-    </div>
-    <div class="text-muted" style="font-size:12px">{{ comp.expected_date|date:"Y-m-d"|default:"—" }}</div>
-    <div>
-      <form method="post" action="{% url 'component-status' comp.pk %}" style="display:flex;gap:6px;align-items:center">
-        {% csrf_token %}
-        <select name="status" class="status-select" onchange="this.form.submit()">
-          {% for val, label in comp.STATUS_CHOICES %}
-          <option value="{{ val }}" {% if comp.status == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </form>
-    </div>
-  </div>
-  {% endfor %}
-
   {% else %}
   <div class="empty" style="padding:28px">
     <div class="empty-icon">📦</div>
     <h3>No components defined</h3>
-    <p>Edit this run to add the raw materials and packaging required.</p>
+    <p>
+      <a href="{% url 'production-run-edit' run.pk %}" style="color:var(--accent)">Edit this run</a>
+      to add the raw materials and packaging required.
+    </p>
   </div>
   {% endif %}
 </div>
@@ -160,7 +185,7 @@
     <div class="table-wrap mb-3">
       <table>
         <thead>
-          <tr><th>Order</th><th>Client</th><th>Line Product</th><th>Qty Allocated</th><th></th></tr>
+          <tr><th>Order</th><th>Client</th><th>Product</th><th>Qty Allocated</th><th>Order Line Status</th><th></th></tr>
         </thead>
         <tbody>
           {% for alloc in run.allocations.all %}
@@ -174,6 +199,14 @@
             <td>{{ alloc.order_line.material.name }}</td>
             <td class="td-mono">{{ alloc.quantity_allocated }}</td>
             <td>
+              {% if alloc.order_line.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+              {% elif alloc.order_line.status == 'ALLOCATED' %}<span class="badge badge-blue">Allocated</span>
+              {% elif alloc.order_line.status == 'PARTIAL' %}<span class="badge badge-orange">Partial</span>
+              {% elif alloc.order_line.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
+              {% else %}<span class="badge badge-red">Cancelled</span>
+              {% endif %}
+            </td>
+            <td>
               <form method="post" action="{% url 'allocation-delete' alloc.pk %}">
                 {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm">Remove</button>
               </form>
@@ -185,7 +218,7 @@
     </div>
     {% endif %}
 
-    {# Add allocation form #}
+    {# Add allocation #}
     {% if run.status != 'COMPLETED' and run.status != 'CANCELLED' %}
     <form method="post">
       {% csrf_token %}
@@ -213,7 +246,6 @@
   </div>
 </div>
 
-{# ── NOTES ── #}
 {% if run.notes %}
 <div class="card">
   <div class="card-header"><span class="card-title">Notes</span></div>

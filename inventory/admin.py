@@ -1,26 +1,26 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.utils.html import format_html
-from decimal import Decimal
 
 from .models import (
     Unit, Location, Material, RawMaterialBatch,
-    ProductBatch, MaterialTransaction, WorkflowTask,
+    ProductBatch, MaterialTransaction,
     Client, ClientOrder, ClientOrderLine,
-    ProductionRun, ProductionRunAllocation, ProductionComponent
+    ProductionRun, ProductionRunAllocation,
+    ProductionComponent, ProductionRunShipment,
 )
 
 
 @admin.register(Unit)
 class UnitAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name']
+    list_display  = ['id', 'name']
     search_fields = ['name']
 
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'is_external']
-    list_filter  = ['is_external']
+    list_display  = ['id', 'name', 'is_external']
+    list_filter   = ['is_external']
     search_fields = ['name']
 
 
@@ -32,10 +32,10 @@ class MaterialAdmin(admin.ModelAdmin):
 
 
 class MaterialTransactionInline(admin.TabularInline):
-    model         = MaterialTransaction
-    extra         = 0
+    model           = MaterialTransaction
+    extra           = 0
     readonly_fields = ['transaction_type', 'quantity', 'product_batch', 'reference', 'created_at']
-    can_delete    = False
+    can_delete      = False
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -43,15 +43,15 @@ class MaterialTransactionInline(admin.TabularInline):
 
 @admin.register(RawMaterialBatch)
 class RawMaterialBatchAdmin(admin.ModelAdmin):
-    list_display  = ['id', 'lot_number', 'material', 'location', 'total_quantity', 'available_qty', 'created_at']
-    list_filter   = ['material__category', 'location']
-    search_fields = ['lot_number', 'material__name', 'material__sku']
+    list_display    = ['id', 'lot_number', 'material', 'location', 'total_quantity', 'available_qty', 'created_at']
+    list_filter     = ['material__category', 'location']
+    search_fields   = ['lot_number', 'material__name', 'material__sku']
     readonly_fields = ['id', 'created_at', 'available_qty', 'produced_qty', 'reserved_qty', 'consumed_qty', 'released_qty']
-    inlines       = [MaterialTransactionInline]
+    inlines         = [MaterialTransactionInline]
 
     @admin.display(description='Available')
     def available_qty(self, obj):
-        qty = obj.available_quantity
+        qty   = obj.available_quantity
         color = 'green' if qty > 0 else 'red'
         return format_html('<span style="color:{};font-weight:bold">{}</span>', color, qty)
 
@@ -70,22 +70,22 @@ class RawMaterialBatchAdmin(admin.ModelAdmin):
 
 @admin.register(MaterialTransaction)
 class MaterialTransactionAdmin(admin.ModelAdmin):
-    list_display  = ['id', 'transaction_type', 'quantity', 'raw_material_batch', 'product_batch', 'created_at']
+    list_display  = ['id', 'transaction_type', 'quantity', 'raw_material_batch', 'product_batch', 'reference', 'created_at']
     list_filter   = ['transaction_type']
     search_fields = ['raw_material_batch__lot_number', 'product_batch__batch_number', 'reference']
-    readonly_fields = list_display + ['reference']
+    readonly_fields = ['id', 'transaction_type', 'quantity', 'raw_material_batch', 'product_batch', 'reference', 'created_at']
 
-    def has_add_permission(self, request): return False
+    def has_add_permission(self, request):        return False
     def has_delete_permission(self, request, obj=None): return False
     def has_change_permission(self, request, obj=None): return False
 
 
 class ProductBatchTransactionInline(admin.TabularInline):
-    model      = MaterialTransaction
-    fk_name    = 'product_batch'
-    extra      = 0
+    model           = MaterialTransaction
+    fk_name         = 'product_batch'
+    extra           = 0
     readonly_fields = ['raw_material_batch', 'transaction_type', 'quantity', 'reference', 'created_at']
-    can_delete = False
+    can_delete      = False
 
     def has_add_permission(self, request, obj=None): return False
 
@@ -116,14 +116,11 @@ class ClientOrderLineInline(admin.TabularInline):
 
 @admin.register(ClientOrder)
 class ClientOrderAdmin(admin.ModelAdmin):
-    list_display  = ['id', 'reference', 'client', 'status', 'order_date', 'required_by', 'total_lines']
-    list_filter   = ['status', 'client']
-    search_fields = ['reference', 'client__name']
+    list_display    = ['id', 'reference', 'client', 'status', 'order_date', 'required_by']
+    list_filter     = ['status', 'client']
+    search_fields   = ['reference', 'client__name']
     readonly_fields = ['id', 'created_at']
-    inlines       = [ClientOrderLineInline]
-
-    @admin.display(description='Lines')
-    def total_lines(self, obj): return obj.total_lines
+    inlines         = [ClientOrderLineInline]
 
 
 @admin.register(ClientOrderLine)
@@ -151,12 +148,12 @@ class ProductionRunAllocationInline(admin.TabularInline):
 
 @admin.register(ProductionRun)
 class ProductionRunAdmin(admin.ModelAdmin):
-    list_display  = ['id', 'reference', 'material', 'status', 'planned_quantity', 'allocated_qty', 'planned_start', 'planned_end']
-    list_filter   = ['status', 'material']
-    search_fields = ['reference', 'material__name']
+    list_display    = ['id', 'reference', 'material', 'status', 'planned_quantity', 'allocated_qty', 'planned_start', 'planned_end']
+    list_filter     = ['status', 'material']
+    search_fields   = ['reference', 'material__name']
     readonly_fields = ['id', 'created_at']
-    inlines       = [ProductionComponentInline, ProductionRunAllocationInline]
-    actions       = ['mark_active', 'mark_completed', 'mark_cancelled']
+    inlines         = [ProductionComponentInline, ProductionRunAllocationInline]
+    actions         = ['mark_active', 'mark_completed', 'mark_cancelled']
 
     @admin.display(description='Allocated')
     def allocated_qty(self, obj): return obj.allocated_quantity
@@ -187,29 +184,9 @@ class ProductionRunAllocationAdmin(admin.ModelAdmin):
     search_fields = ['production_run__reference', 'order_line__order__reference']
 
 
-# ─────────────────────────────────────────────
-# WORKFLOW TASKS
-# ─────────────────────────────────────────────
-
-@admin.register(WorkflowTask)
-class WorkflowTaskAdmin(admin.ModelAdmin):
-    list_display  = ['id', 'description', 'status_badge', 'location', 'expected_completion', 'actual_completion']
-    list_filter   = ['status', 'location']
-    search_fields = ['description']
-    actions       = ['mark_in_progress', 'mark_done']
-
-    @admin.display(description='Status')
-    def status_badge(self, obj):
-        colours = {'PENDING': 'orange', 'IN_PROGRESS': 'blue', 'DONE': 'green'}
-        return format_html(
-            '<span style="color:{};font-weight:bold">{}</span>',
-            colours.get(obj.status, 'grey'), obj.get_status_display()
-        )
-
-    @admin.action(description='Mark as In Progress')
-    def mark_in_progress(self, request, qs):
-        qs.exclude(status='DONE').update(status='IN_PROGRESS')
-
-    @admin.action(description='Mark as Done')
-    def mark_done(self, request, qs):
-        qs.exclude(status='DONE').update(status='DONE', actual_completion=timezone.now().date())
+@admin.register(ProductionRunShipment)
+class ProductionRunShipmentAdmin(admin.ModelAdmin):
+    list_display  = ['id', 'production_run', 'quantity_shipped', 'order_line', 'shipped_at']
+    list_filter   = ['shipped_at']
+    search_fields = ['production_run__reference']
+    readonly_fields = ['id', 'shipped_at']

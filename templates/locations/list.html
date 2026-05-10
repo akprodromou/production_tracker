@@ -4,24 +4,23 @@
 
 {% block content %}
 <div class="page-header">
-  <div>
-    <h1>Locations</h1>
-    <p>Warehouse, production, and external storage sites</p>
-  </div>
+  <div><h1>Locations</h1><p>Warehouse, production, and external storage sites</p></div>
   <div class="page-actions">
     <a href="{% url 'location-create' %}" class="btn btn-primary">+ New Location</a>
   </div>
 </div>
 
 <div class="filter-bar">
-  <div class="form-group">
-    <label>Type</label>
-    <select onchange="window.location='?is_external='+this.value" style="min-width:150px">
-      <option value="" {% if not request.GET.is_external %}selected{% endif %}>All locations</option>
-      <option value="true"  {% if request.GET.is_external == 'true' %}selected{% endif %}>External only</option>
-      <option value="false" {% if request.GET.is_external == 'false' %}selected{% endif %}>Internal only</option>
-    </select>
-  </div>
+  <form method="get" style="display:contents">
+    <div class="form-group">
+      <label>Type</label>
+      <select name="is_external" onchange="this.form.submit()">
+        <option value="" {% if not request.GET.is_external %}selected{% endif %}>All locations</option>
+        <option value="true"  {% if request.GET.is_external == 'true' %}selected{% endif %}>External only</option>
+        <option value="false" {% if request.GET.is_external == 'false' %}selected{% endif %}>Internal only</option>
+      </select>
+    </div>
+  </form>
 </div>
 
 <div class="card">
@@ -29,27 +28,26 @@
     {% if locations %}
     <table>
       <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Type</th>
-          <th style="text-align:right">Actions</th>
-        </tr>
+        <tr><th>#</th><th>Name</th><th>Type</th><th>Raw Batches</th><th>Product Batches</th><th style="text-align:right">Actions</th></tr>
       </thead>
       <tbody>
         {% for loc in locations %}
         <tr>
           <td class="td-mono text-muted">{{ loc.id }}</td>
-          <td><strong>{{ loc.name }}</strong></td>
           <td>
-            {% if loc.is_external %}
-              <span class="badge badge-orange">External</span>
-            {% else %}
-              <span class="badge badge-blue">Internal</span>
-            {% endif %}
+            <a href="{% url 'location-detail' loc.pk %}" style="color:var(--text);text-decoration:none;font-weight:500">
+              {{ loc.name }}
+            </a>
           </td>
           <td>
+            {% if loc.is_external %}<span class="badge badge-orange">External</span>
+            {% else %}<span class="badge badge-blue">Internal</span>{% endif %}
+          </td>
+          <td class="td-mono text-muted">{{ loc.rawmaterialbatch_set.count }}</td>
+          <td class="td-mono text-muted">{{ loc.productbatch_set.count }}</td>
+          <td>
             <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'location-detail' loc.pk %}" class="btn btn-ghost btn-sm">View</a>
               <a href="{% url 'location-edit' loc.pk %}" class="btn btn-ghost btn-sm">Edit</a>
               <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ loc.name }}','{% url 'location-delete' loc.pk %}')">Delete</button>
             </div>
@@ -71,7 +69,7 @@
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal">
     <h3>⚠ Confirm Delete</h3>
-    <p>Delete location <strong id="deleteTarget" style="color:var(--text)"></strong>? This cannot be undone.</p>
+    <p>Delete location <strong id="deleteTarget" style="color:var(--text)"></strong>?</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
       <form method="post" id="deleteForm">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
@@ -79,7 +77,6 @@
   </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script>
 function openDeleteModal(name, url) {
@@ -87,8 +84,6 @@ function openDeleteModal(name, url) {
   document.getElementById('deleteForm').action = url;
   document.getElementById('deleteModal').classList.add('open');
 }
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
+document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
 </script>
 {% endblock %}

@@ -7,7 +7,7 @@
 <div class="page-header">
   <div>
     <h1>Dashboard</h1>
-    <p>System overview — stock levels, open orders, pending tasks</p>
+    <p>System overview — stock levels, open orders</p>
   </div>
 </div>
 
@@ -27,11 +27,6 @@
     <div class="stat-label">Open Mfg Orders</div>
     <div class="stat-value">{{ open_orders }}</div>
     <div class="stat-sub">{{ cancelled_orders }} cancelled</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Pending Tasks</div>
-    <div class="stat-value" style="color:var(--warn)">{{ pending_tasks }}</div>
-    <div class="stat-sub">{{ in_progress_tasks }} in progress</div>
   </div>
 </div>
 
@@ -112,45 +107,6 @@
     </div>
   </div>
 
-  {# ── UPCOMING TASKS ── #}
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Upcoming Tasks</span>
-      <a href="{% url 'workflow-task-list' %}" class="btn btn-ghost btn-sm">View all →</a>
-    </div>
-    <div class="table-wrap">
-      {% if upcoming_tasks %}
-      <table>
-        <thead>
-          <tr><th>Task</th><th>Status</th><th>Due</th></tr>
-        </thead>
-        <tbody>
-          {% for t in upcoming_tasks %}
-          <tr>
-            <td>
-              <a href="{% url 'workflow-task-detail' t.pk %}" style="color:var(--text);text-decoration:none">
-                {{ t.description|truncatechars:40 }}
-              </a>
-            </td>
-            <td>
-              {% if t.status == 'PENDING' %}<span class="badge badge-orange">Pending</span>
-              {% elif t.status == 'IN_PROGRESS' %}<span class="badge badge-blue">In Progress</span>
-              {% else %}<span class="badge badge-green">Done</span>
-              {% endif %}
-            </td>
-            <td style="font-size:11px" class="text-muted">{{ t.expected_completion|date:"M d, H:i" }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="empty">
-        <div class="empty-icon">🎉</div>
-        <h3>No pending tasks</h3>
-      </div>
-      {% endif %}
-    </div>
-  </div>
 
   {# ── RECENT PRODUCT BATCHES ── #}
   <div class="card">

@@ -12,12 +12,53 @@
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr auto;
     gap: 10px;
-    align-items: end;
+    align-items: start;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
   }
   .comp-row:last-child { border-bottom: none; }
+
+  /* Material search overlay */
+  .mat-wrap { position: relative; }
+  .mat-search {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .mat-search:focus { border-color: var(--accent); }
+  .mat-drop {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0; right: 0;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    z-index: 200;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .mat-drop.open { display: block; }
+  .mat-opt {
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .mat-opt:hover { background: rgba(79,142,247,.15); }
+  .mat-opt-sku { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 </style>
+<script>
+const MAT_DATA = {{ all_raw_materials_json|safe }};
+</script>
 {% endblock %}
 
 {% block content %}
@@ -25,7 +66,7 @@
   <div><h1>{{ form_title }}</h1></div>
 </div>
 
-<form method="post">
+<form method="post" id="runForm">
   {% csrf_token %}
 
   {% if form.non_field_errors %}
@@ -55,8 +96,7 @@
           <label>Status</label>{{ form.status }}
         </div>
         <div class="form-group">
-          <label>Actual Quantity <span class="text-muted">(on completion)</span></label>
-          {{ form.actual_quantity }}
+          <label>Actual Quantity</label>{{ form.actual_quantity }}
         </div>
       </div>
       <div class="form-grid form-grid-2 mt-3">
@@ -70,7 +110,10 @@
   </div>
 
   <div class="card mb-3">
-    <div class="card-header"><span class="card-title">Components Required</span></div>
+    <div class="card-header">
+      <span class="card-title">Components Required</span>
+      <span class="text-muted" style="font-size:11px">Type to search by name or SKU</span>
+    </div>
     <div class="card-body">
       {{ formset.management_form }}
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px">
@@ -83,8 +126,15 @@
       <div id="comp-container">
         {% for cf in formset %}
         <div class="comp-row">
-          <div>
-            {{ cf.material }}
+          <div class="mat-wrap">
+            {# Search input — visual only #}
+            <input type="text" class="mat-search"
+              placeholder="Search material or SKU…"
+              autocomplete="off"
+              value="{% if cf.instance.pk and cf.instance.material_id %}{{ cf.instance.material.name }} ({{ cf.instance.material.sku }}){% endif %}">
+            <div class="mat-drop"></div>
+            {# Real select — hidden, submitted with form #}
+            <div style="display:none">{{ cf.material }}</div>
             {% for h in cf.hidden_fields %}{{ h }}{% endfor %}
             {% if cf.material.errors %}<ul class="errorlist">{% for e in cf.material.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
           </div>
@@ -114,22 +164,86 @@
 
 {% block extra_js %}
 <script>
+// ── Autocomplete ────────────────────────────────────────────────
+
+function attachAutocomplete(row) {
+  const searchInput = row.querySelector('.mat-search');
+  const drop        = row.querySelector('.mat-drop');
+  // The hidden <select> rendered by Django
+  const hiddenSel   = row.querySelector('select[name$="-material"]');
+  if (!searchInput || !drop || !hiddenSel) return;
+
+  function renderDrop(query) {
+    const q = query.toLowerCase().trim();
+    const results = q
+      ? MAT_DATA.filter(m => m.name.toLowerCase().includes(q) || m.sku.toLowerCase().includes(q))
+      : MAT_DATA;
+    drop.innerHTML = '';
+    if (!results.length) {
+      drop.innerHTML = '<div class="mat-opt" style="color:var(--muted)">No results</div>';
+      return;
+    }
+    results.slice(0, 25).forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'mat-opt';
+      div.innerHTML = `<span style="flex:1">${m.name}</span><span class="mat-opt-sku">${m.sku}</span>`;
+      div.addEventListener('mousedown', e => {
+        e.preventDefault();
+        // Set the hidden select
+        for (let opt of hiddenSel.options) {
+          if (parseInt(opt.value) === m.id) { opt.selected = true; break; }
+        }
+        searchInput.value = `${m.name} (${m.sku})`;
+        drop.classList.remove('open');
+      });
+      drop.appendChild(div);
+    });
+  }
+
+  searchInput.addEventListener('focus', () => { renderDrop(searchInput.value); drop.classList.add('open'); });
+  searchInput.addEventListener('input', () => { renderDrop(searchInput.value); drop.classList.add('open'); });
+  searchInput.addEventListener('blur',  () => setTimeout(() => drop.classList.remove('open'), 150));
+}
+
+// Init all existing rows
+document.querySelectorAll('.comp-row').forEach(attachAutocomplete);
+
+
+// ── Dynamic add/remove ──────────────────────────────────────────
+
 const compContainer = document.getElementById('comp-container');
 const compTotal     = document.getElementById('id_comp-TOTAL_FORMS');
-const addCompBtn    = document.getElementById('add-comp-btn');
 
-addCompBtn.addEventListener('click', function() {
-  const idx  = parseInt(compTotal.value);
-  const tpl  = compContainer.children[0].outerHTML
-    .replace(/comp-0-/g, `comp-${idx}-`)
-    .replace(/comp-\d+-/g, `comp-${idx}-`);
-  compContainer.insertAdjacentHTML('beforeend', tpl);
-  compTotal.value = idx + 1;
-  const newRow = compContainer.lastElementChild;
+document.getElementById('add-comp-btn').addEventListener('click', function() {
+  const idx    = parseInt(compTotal.value);
+  const srcRow = compContainer.querySelector('.comp-row');
+  const newRow = srcRow.cloneNode(true);
+
+  // Re-index all name/id attributes
+  newRow.innerHTML = newRow.innerHTML
+    .replace(/comp-\d+-/g, `comp-${idx}-`)
+    .replace(/id_comp-\d+-/g, `id_comp-${idx}-`);
+
+  // Clear values
   newRow.querySelectorAll('input[type=text],input[type=number],input[type=date]')
-    .forEach(el => el.value = '');
-  newRow.querySelector('.remove-comp')
-    ?.addEventListener('click', () => newRow.remove());
+        .forEach(el => el.value = '');
+  newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Swap delete label for remove button on new rows
+  const delLabel = newRow.querySelector('label');
+  if (delLabel && delLabel.textContent.trim().includes('Del')) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-ghost btn-sm remove-comp';
+    btn.style.color = 'var(--danger)';
+    btn.textContent = '✕';
+    delLabel.replaceWith(btn);
+  }
+
+  compContainer.appendChild(newRow);
+  compTotal.value = idx + 1;
+  attachAutocomplete(newRow);
+  newRow.querySelector('.remove-comp')?.addEventListener('click', () => newRow.remove());
 });
 
 document.querySelectorAll('.remove-comp').forEach(btn =>
