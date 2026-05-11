@@ -112,7 +112,7 @@ class MaterialTransaction(models.Model):
 
     raw_material_batch = models.ForeignKey(
         'RawMaterialBatch',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name='transactions'
     )
     product_batch = models.ForeignKey(

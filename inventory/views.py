@@ -28,6 +28,30 @@ from .forms import (
 from .services import reserve_material, consume_material, release_material
 
 
+def _deletion_blocked_msg(exc):
+    """
+    Converts a Django ProtectedError into a readable message
+    listing exactly which related objects are blocking deletion.
+    """
+    from django.db.models.deletion import ProtectedError
+    if isinstance(exc, ProtectedError):
+        blocked = exc.protected_objects
+        # Group by model name
+        by_model = {}
+        for obj in blocked:
+            name = obj.__class__.__name__
+            by_model.setdefault(name, []).append(str(obj))
+        parts = []
+        for model_name, objs in by_model.items():
+            sample = ', '.join(objs[:3])
+            if len(objs) > 3:
+                sample += f' … and {len(objs) - 3} more'
+            parts.append(f'{model_name}: {sample}')
+        return 'Cannot delete — referenced by: ' + ' | '.join(parts)
+    return f'Cannot delete: {exc}'
+
+
+
 # ─────────────────────────────────────────────
 # DASHBOARD
 # ─────────────────────────────────────────────
@@ -375,8 +399,8 @@ class RawMaterialBatchDeleteView(View):
         try:
             batch.delete()
             messages.success(request, f'Batch "{lot}" deleted.')
-        except Exception:
-            messages.error(request, f'Cannot delete batch "{lot}".')
+        except Exception as e:
+            messages.error(request, _deletion_blocked_msg(e))
         return redirect('batch-list')
 
 
@@ -461,8 +485,8 @@ class ProductBatchDeleteView(View):
         try:
             pb.delete()
             messages.success(request, f'Product batch "{bn}" deleted.')
-        except Exception:
-            messages.error(request, f'Cannot delete "{bn}".')
+        except Exception as e:
+            messages.error(request, _deletion_blocked_msg(e))
         return redirect('product-batch-list')
 
 
@@ -961,9 +985,22 @@ class ProductionRunDeleteView(View):
         try:
             run.delete()
             messages.success(request, f'Production run "{ref}" deleted.')
-        except Exception:
-            messages.error(request, f'Cannot delete "{ref}".')
+        except Exception as e:
+            messages.error(request, _deletion_blocked_msg(e))
         return redirect('production-run-list')
+
+
+class ProductionComponentDeleteView(View):
+    def post(self, request, pk):
+        component = get_object_or_404(ProductionComponent, pk=pk)
+        run_pk    = component.production_run.pk
+        name      = component.material.name
+        try:
+            component.delete()
+            messages.success(request, f'{name} removed from production run.')
+        except Exception as e:
+            messages.error(request, _deletion_blocked_msg(e))
+        return redirect('production-run-edit', pk=run_pk)
 
 
 class ProductionRunAllocationDeleteView(View):

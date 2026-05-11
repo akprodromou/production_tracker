@@ -12,13 +12,33 @@
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr auto;
     gap: 10px;
-    align-items: start;
+    align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
   }
   .comp-row:last-child { border-bottom: none; }
 
-  /* Material search overlay */
+  /* Apply base input styling to all inputs/selects inside comp-rows */
+  .comp-row input[type=number],
+  .comp-row input[type=date],
+  .comp-row select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .15s;
+  }
+  .comp-row input:focus,
+  .comp-row select:focus { border-color: var(--accent); }
+  .comp-row select option { background: var(--surface2); color: var(--text); }
+
+  /* Material search */
   .mat-wrap { position: relative; }
   .mat-search {
     width: 100%;
@@ -30,6 +50,7 @@
     padding: 8px 12px;
     outline: none;
     box-sizing: border-box;
+    transition: border-color .15s;
   }
   .mat-search:focus { border-color: var(--accent); }
   .mat-drop {
@@ -55,6 +76,18 @@
   }
   .mat-opt:hover { background: rgba(79,142,247,.15); }
   .mat-opt-sku { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+  /* Delete / remove button alignment in comp rows */
+  .comp-row .remove-comp,
+  .comp-row label[style*="danger"] {
+    margin-top: 8px;
+    white-space: nowrap;
+  }
+  .comp-del-wrap {
+    display: flex;
+    align-items: center;
+    padding-top: 8px;
+  }
 </style>
 <script>
 const MAT_DATA = {{ all_raw_materials_json|safe }};
@@ -64,6 +97,13 @@ const MAT_DATA = {{ all_raw_materials_json|safe }};
 {% block content %}
 <div class="page-header">
   <div><h1>{{ form_title }}</h1></div>
+  {% if run %}
+  <div class="page-actions">
+    <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">
+      Delete Run
+    </button>
+  </div>
+  {% endif %}
 </div>
 
 <form method="post" id="runForm">
@@ -127,13 +167,11 @@ const MAT_DATA = {{ all_raw_materials_json|safe }};
         {% for cf in formset %}
         <div class="comp-row">
           <div class="mat-wrap">
-            {# Search input — visual only #}
             <input type="text" class="mat-search"
               placeholder="Search material or SKU…"
               autocomplete="off"
               value="{% if cf.instance.pk and cf.instance.material_id %}{{ cf.instance.material.name }} ({{ cf.instance.material.sku }}){% endif %}">
             <div class="mat-drop"></div>
-            {# Real select — hidden, submitted with form #}
             <div style="display:none">{{ cf.material }}</div>
             {% for h in cf.hidden_fields %}{{ h }}{% endfor %}
             {% if cf.material.errors %}<ul class="errorlist">{% for e in cf.material.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
@@ -141,35 +179,81 @@ const MAT_DATA = {{ all_raw_materials_json|safe }};
           <div>{{ cf.quantity_required }}</div>
           <div>{{ cf.status }}</div>
           <div>{{ cf.expected_date }}</div>
-          <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+          <div style="display:flex;align-items:center;padding-top:6px">
             {% if cf.instance.pk %}
-              <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--danger)">{{ cf.DELETE }} Del</label>
+              {# Saved component — button opens confirmation modal #}
+              <button type="button" class="btn btn-danger btn-sm"
+                onclick="openCompDeleteModal({{ cf.instance.pk }}, '{{ cf.instance.material.name|escapejs }}')">
+                Delete
+              </button>
+              {# Keep hidden DELETE checkbox so formset stays valid — we never check it #}
+              <div style="display:none">{{ cf.DELETE }}</div>
             {% else %}
-              <button type="button" class="btn btn-ghost btn-sm remove-comp" style="color:var(--danger)">✕</button>
+              {# Unsaved row — just remove from DOM #}
+              <button type="button" class="btn btn-danger btn-sm remove-comp">Remove</button>
             {% endif %}
           </div>
         </div>
         {% endfor %}
       </div>
-      <button type="button" id="add-comp-btn" class="btn btn-ghost btn-sm" style="margin-top:12px">+ Add Component</button>
+      <button type="button" id="add-comp-btn" class="btn btn-ghost btn-sm" style="margin-top:12px">
+        + Add Component
+      </button>
     </div>
   </div>
 
   <div class="form-actions">
     <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
-    <a href="{% url 'production-run-list' %}" class="btn btn-secondary">Cancel</a>
+    <a href="{% if run %}{% url 'production-run-detail' run.pk %}{% else %}{% url 'production-run-list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
   </div>
+
 </form>
+
+{# ── Component delete modal — must be OUTSIDE the main form ── #}
+<div class="modal-backdrop" id="compDeleteModal">
+  <div class="modal">
+    <h3>⚠ Remove Component</h3>
+    <p>Remove <strong id="compDeleteName" style="color:var(--text)"></strong> from this production run? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('compDeleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" id="compDeleteForm">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Remove Component</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{# ── DELETE MODAL — only shown when editing an existing run ── #}
+{% if run %}
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>
+      Delete production run <strong style="color:var(--text)">{{ run.reference }}</strong>?
+      This will also remove all components and allocations linked to it. This cannot be undone.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">
+        Cancel
+      </button>
+      <form method="post" action="{% url 'production-run-delete' run.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// ── Autocomplete ────────────────────────────────────────────────
+// ── Autocomplete ─────────────────────────────────────────────────
 
 function attachAutocomplete(row) {
   const searchInput = row.querySelector('.mat-search');
   const drop        = row.querySelector('.mat-drop');
-  // The hidden <select> rendered by Django
   const hiddenSel   = row.querySelector('select[name$="-material"]');
   if (!searchInput || !drop || !hiddenSel) return;
 
@@ -189,7 +273,6 @@ function attachAutocomplete(row) {
       div.innerHTML = `<span style="flex:1">${m.name}</span><span class="mat-opt-sku">${m.sku}</span>`;
       div.addEventListener('mousedown', e => {
         e.preventDefault();
-        // Set the hidden select
         for (let opt of hiddenSel.options) {
           if (parseInt(opt.value) === m.id) { opt.selected = true; break; }
         }
@@ -205,11 +288,10 @@ function attachAutocomplete(row) {
   searchInput.addEventListener('blur',  () => setTimeout(() => drop.classList.remove('open'), 150));
 }
 
-// Init all existing rows
 document.querySelectorAll('.comp-row').forEach(attachAutocomplete);
 
 
-// ── Dynamic add/remove ──────────────────────────────────────────
+// ── Add / remove rows ─────────────────────────────────────────────
 
 const compContainer = document.getElementById('comp-container');
 const compTotal     = document.getElementById('id_comp-TOTAL_FORMS');
@@ -219,19 +301,21 @@ document.getElementById('add-comp-btn').addEventListener('click', function() {
   const srcRow = compContainer.querySelector('.comp-row');
   const newRow = srcRow.cloneNode(true);
 
-  // Re-index all name/id attributes
-  newRow.innerHTML = newRow.innerHTML
-    .replace(/comp-\d+-/g, `comp-${idx}-`)
-    .replace(/id_comp-\d+-/g, `id_comp-${idx}-`);
+  newRow.innerHTML = newRow.innerHTML.replace(
+    /comp-\d+-/g, `comp-${idx}-`
+  ).replace(
+    /id_comp-\d+-/g, `id_comp-${idx}-`
+  );
 
-  // Clear values
-  newRow.querySelectorAll('input[type=text],input[type=number],input[type=date]')
+  // Clear all values
+  newRow.querySelectorAll('input[type=text], input[type=number], input[type=date]')
         .forEach(el => el.value = '');
   newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  newRow.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
 
-  // Swap delete label for remove button on new rows
+  // Swap delete label → remove button on new rows
   const delLabel = newRow.querySelector('label');
-  if (delLabel && delLabel.textContent.trim().includes('Del')) {
+  if (delLabel && delLabel.textContent.includes('Del')) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'btn btn-ghost btn-sm remove-comp';
@@ -249,5 +333,20 @@ document.getElementById('add-comp-btn').addEventListener('click', function() {
 document.querySelectorAll('.remove-comp').forEach(btn =>
   btn.addEventListener('click', function() { this.closest('.comp-row').remove(); })
 );
+
+// Delete modal
+document.getElementById('deleteModal')?.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+// Component delete modal
+function openCompDeleteModal(compPk, name) {
+  document.getElementById('compDeleteName').textContent = name;
+  document.getElementById('compDeleteForm').action = '/production-runs/components/' + compPk + '/delete/';
+  document.getElementById('compDeleteModal').classList.add('open');
+}
+document.getElementById('compDeleteModal')?.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
 </script>
 {% endblock %}

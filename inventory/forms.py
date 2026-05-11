@@ -378,6 +378,10 @@ class ProductionRunForm(forms.ModelForm):
         self.fields['actual_start'].required = False
         self.fields['actual_end'].required = False
         self.fields['actual_quantity'].required = False
+        # Default planned_start to today on new runs only
+        if not self.instance.pk:
+            from django.utils import timezone
+            self.fields['planned_start'].initial = timezone.now().date()
 
     def clean_reference(self):
         ref = self.cleaned_data['reference'].strip()

@@ -69,6 +69,8 @@ urlpatterns = [
     # Production sub-resources
     path('production-runs/allocations/<int:pk>/delete/',
          views.ProductionRunAllocationDeleteView.as_view(), name='allocation-delete'),
+    path('production-runs/components/<int:pk>/delete/',
+         views.ProductionComponentDeleteView.as_view(), name='component-delete'),
     path('production-runs/components/<int:pk>/status/',
          views.ProductionComponentUpdateView.as_view(), name='component-status'),
 
