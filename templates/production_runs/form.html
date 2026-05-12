@@ -80,7 +80,7 @@
   /* Delete / remove button alignment in comp rows */
   .comp-row .remove-comp,
   .comp-row label[style*="danger"] {
-    margin-top: 8px;
+    margin-top: 0px;
     white-space: nowrap;
   }
   .comp-del-wrap {
@@ -88,6 +88,7 @@
     align-items: center;
     padding-top: 8px;
   }
+
 </style>
 <script>
 const MAT_DATA = {{ all_raw_materials_json|safe }};
@@ -179,7 +180,7 @@ const MAT_DATA = {{ all_raw_materials_json|safe }};
           <div>{{ cf.quantity_required }}</div>
           <div>{{ cf.status }}</div>
           <div>{{ cf.expected_date }}</div>
-          <div style="display:flex;align-items:center;padding-top:6px">
+          <div style="display:flex;align-items:center;padding-top:0px">
             {% if cf.instance.pk %}
               {# Saved component — button opens confirmation modal #}
               <button type="button" class="btn btn-danger btn-sm"
