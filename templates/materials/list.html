@@ -19,9 +19,9 @@
       <label>Category</label>
       <select name="category">
         <option value="">All categories</option>
-        <option value="RAW" {% if request.GET.category == 'RAW' %}selected{% endif %}>Raw Material</option>
-        <option value="PKG" {% if request.GET.category == 'PKG' %}selected{% endif %}>Packaging</option>
-        <option value="FIN" {% if request.GET.category == 'FIN' %}selected{% endif %}>Finished Product</option>
+        {% for code, label in category_choices %}
+        <option value="{{ code }}" {% if request.GET.category == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
       </select>
     </div>
     <div class="form-group">
@@ -56,7 +56,10 @@
           <td>
             {% if m.category == 'RAW' %}<span class="badge badge-blue">Raw</span>
             {% elif m.category == 'PKG' %}<span class="badge badge-orange">Packaging</span>
-            {% else %}<span class="badge badge-green">Finished</span>
+            {% elif m.category == 'FIN' %}<span class="badge badge-green">Finished</span>
+            {% elif m.category == 'CON' %}<span class="badge badge-grey">Consumable</span>
+            {% elif m.category == 'FXD' %}<span class="badge badge-grey">Fixed Cost</span>
+            {% else %}<span class="badge badge-grey">{{ m.get_category_display }}</span>
             {% endif %}
           </td>
           <td class="text-muted">{{ m.unit.name }}</td>

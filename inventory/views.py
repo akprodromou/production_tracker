@@ -243,7 +243,8 @@ class MaterialListView(View):
             qs = qs.filter(Q(name__icontains=q) | Q(sku__icontains=q))
         paginator = Paginator(qs.order_by('name'), 25)
         return render(request, 'materials/list.html', {
-            'materials': paginator.get_page(request.GET.get('page'))
+            'materials':        paginator.get_page(request.GET.get('page')),
+            'category_choices': Material.CATEGORY_CHOICES,
         })
 
 
@@ -616,6 +617,16 @@ class ClientListView(View):
         paginator = Paginator(qs.order_by('name'), 25)
         return render(request, 'client_orders/client_list.html', {
             'clients': paginator.get_page(request.GET.get('page'))
+        })
+
+
+class ClientDetailView(View):
+    def get(self, request, pk):
+        client = get_object_or_404(Client, pk=pk)
+        orders = ClientOrder.objects.filter(client=client).prefetch_related('lines').order_by('-order_date')
+        return render(request, 'client_orders/client_detail.html', {
+            'client': client,
+            'orders': orders,
         })
 
 

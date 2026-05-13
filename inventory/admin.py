@@ -104,7 +104,7 @@ class ProductBatchAdmin(admin.ModelAdmin):
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display  = ['id', 'name', 'contact_email', 'contact_phone', 'created_at']
+    list_display  = ['id', 'code', 'name', 'tin', 'country', 'created_at']
     search_fields = ['name', 'contact_email']
 
 

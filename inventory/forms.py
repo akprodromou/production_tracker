@@ -89,11 +89,17 @@ class RawMaterialBatchForm(forms.ModelForm):
 
     def clean_lot_number(self):
         lot = self.cleaned_data['lot_number'].strip()
-        qs = RawMaterialBatch.objects.filter(lot_number__iexact=lot)
-        if self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise forms.ValidationError(f"Lot number '{lot}' already exists.")
+        material = self.cleaned_data.get('material')
+        if material:
+            qs = RawMaterialBatch.objects.filter(
+                lot_number__iexact=lot, material=material
+            )
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError(
+                    f"Lot number '{lot}' already exists for this material."
+                )
         return lot
 
     def clean_total_quantity(self):
@@ -300,11 +306,13 @@ class ReleaseMaterialForm(forms.Form):
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ['name', 'contact_email', 'contact_phone', 'notes']
+        fields = ['code', 'name', 'tin', 'country', 'notes']
 
     def clean_name(self):
         return self.cleaned_data['name'].strip()
 
+    def clean_code(self):
+        return self.cleaned_data['code'].strip()
 
 class ClientOrderForm(forms.ModelForm):
     class Meta:

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }} — Clients{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'client-list' %}">Clients</a><span>/</span>
+  {{ client.name }}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ client.name }}</h1>
+    <p class="text-mono text-muted">{{ client.code }}</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'order-create' %}?client={{ client.pk }}" class="btn btn-primary">+ New Order</a>
+    <a href="{% url 'client-edit' client.pk %}" class="btn btn-secondary">Edit</a>
+  </div>
+</div>
+
+{# ── META ── #}
+<div class="card mb-3">
+  <div class="card-body" style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
+    <div><div class="stat-label">Code</div><span class="text-mono">{{ client.code|default:"—" }}</span></div>
+    <div><div class="stat-label">TIN</div><span class="text-mono">{{ client.tin|default:"—" }}</span></div>
+    <div><div class="stat-label">Country</div>{{ client.country|default:"—" }}</div>
+    <div><div class="stat-label">Client since</div><span class="text-mono">{{ client.created_at|date:"Y-m-d" }}</span></div>
+    {% if client.notes %}
+    <div style="grid-column:1/-1">
+      <div class="stat-label">Notes</div>
+      <span style="font-size:13px">{{ client.notes }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# ── ORDERS ── #}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Orders</span>
+    <span class="text-muted" style="font-size:11px">{{ orders|length }} total</span>
+  </div>
+  <div class="table-wrap">
+    {% if orders %}
+    <table>
+      <thead>
+        <tr><th>Reference</th><th>Status</th><th>Lines</th><th>Order Date</th><th>Required By</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="td-mono">
+            <a href="{% url 'order-detail' o.pk %}" style="color:var(--accent);text-decoration:none">{{ o.reference }}</a>
+          </td>
+          <td>
+            {% if o.status == 'DRAFT' %}<span class="badge badge-grey">Draft</span>
+            {% elif o.status == 'CONFIRMED' %}<span class="badge badge-blue">Confirmed</span>
+            {% elif o.status == 'IN_PRODUCTION' %}<span class="badge badge-orange">In Production</span>
+            {% elif o.status == 'PARTIALLY_FULFILLED' %}<span class="badge badge-orange">Partial</span>
+            {% elif o.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>
+            {% endif %}
+          </td>
+          <td class="td-mono">{{ o.lines.count }}</td>
+          <td class="text-muted" style="font-size:12px">{{ o.order_date|date:"Y-m-d" }}</td>
+          <td class="text-muted" style="font-size:12px">{{ o.required_by|date:"Y-m-d"|default:"—" }}</td>
+          <td><a href="{% url 'order-detail' o.pk %}" class="btn btn-ghost btn-sm">→</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">📄</div>
+      <h3>No orders yet</h3>
+      <p><a href="{% url 'order-create' %}" style="color:var(--accent)">Create the first order</a> for this client.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -48,6 +48,7 @@ urlpatterns = [
 
     # Clients
     path('clients/',                  views.ClientListView.as_view(),   name='client-list'),
+    path('clients/<int:pk>/',         views.ClientDetailView.as_view(),  name='client-detail'),
     path('clients/create/',           views.ClientCreateView.as_view(), name='client-create'),
     path('clients/<int:pk>/edit/',    views.ClientEditView.as_view(),   name='client-edit'),
     path('clients/<int:pk>/delete/',  views.ClientDeleteView.as_view(), name='client-delete'),

@@ -28,15 +28,16 @@
     {% if clients %}
     <table>
       <thead>
-        <tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th style="text-align:right">Actions</th></tr>
+        <tr><th>#</th><th>Code</th><th>Name</th><th>TIN</th><th>Country</th><th>Orders</th><th style="text-align:right">Actions</th></tr>
       </thead>
       <tbody>
         {% for c in clients %}
         <tr>
           <td class="td-mono text-muted">{{ c.id }}</td>
-          <td><strong>{{ c.name }}</strong></td>
-          <td class="text-muted">{{ c.contact_email|default:"—" }}</td>
-          <td class="text-muted">{{ c.contact_phone|default:"—" }}</td>
+          <td class="td-mono text-muted">{{ c.code|default:"—" }}</td>
+          <td><a href="{% url 'client-detail' c.pk %}" style="color:var(--text);text-decoration:none;font-weight:500">{{ c.name }}</a></td>
+          <td class="td-mono text-muted">{{ c.tin|default:"—" }}</td>
+          <td class="text-muted">{{ c.country|default:"—" }}</td>
           <td class="td-mono">{{ c.orders.count }}</td>
           <td>
             <div class="td-actions" style="justify-content:flex-end">

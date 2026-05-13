@@ -7,22 +7,27 @@
 {% endblock %}
 {% block content %}
 <div class="page-header"><div><h1>{{ form_title }}</h1></div></div>
-<div class="card" style="max-width:520px">
+<div class="card" style="max-width:580px">
   <div class="card-body">
     <form method="post">
       {% csrf_token %}
       <div class="form-grid">
-        <div class="form-group">
-          <label>Name</label>{{ form.name }}
-          {% if form.name.errors %}<ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-        </div>
         <div class="form-grid form-grid-2">
           <div class="form-group">
-            <label>Email</label>{{ form.contact_email }}
-            {% if form.contact_email.errors %}<ul class="errorlist">{% for e in form.contact_email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            <label>Code</label>{{ form.code }}
+            {% if form.code.errors %}<ul class="errorlist">{% for e in form.code.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
           </div>
           <div class="form-group">
-            <label>Phone</label>{{ form.contact_phone }}
+            <label>Name</label>{{ form.name }}
+            {% if form.name.errors %}<ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div class="form-group">
+            <label>TIN</label>{{ form.tin }}
+            {% if form.tin.errors %}<ul class="errorlist">{% for e in form.tin.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div class="form-group">
+            <label>Country</label>{{ form.country }}
+            {% if form.country.errors %}<ul class="errorlist">{% for e in form.country.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
           </div>
         </div>
         <div class="form-group">

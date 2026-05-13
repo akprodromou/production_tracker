@@ -305,6 +305,12 @@
     .form-group textarea:focus { border-color: var(--accent); }
     .form-group textarea { resize: vertical; min-height: 80px; }
     .form-group select option { background: var(--surface2); }
+    /* Prevent select dropdowns from exceeding their container */
+    select {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
     .form-help { font-size: 11px; color: var(--muted); }
     .form-error { font-size: 11px; color: var(--danger); }
     .errorlist { list-style: none; }

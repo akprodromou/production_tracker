@@ -27,6 +27,8 @@ class Material(models.Model):
         ('RAW', 'Raw Material'),
         ('PKG', 'Packaging'),
         ('FIN', 'Finished Product'),
+        ('CON', 'Consumables'),
+        ('FXC', 'Fixed Costs'),
     ]
     name = models.CharField(max_length=255)
     sku = models.CharField(max_length=50, unique=True)
@@ -39,13 +41,16 @@ class Material(models.Model):
 
 class RawMaterialBatch(models.Model):
     material = models.ForeignKey('Material', on_delete=models.PROTECT)
-    lot_number = models.CharField(max_length=100, unique=True)
+    lot_number = models.CharField(max_length=100)
     total_quantity = models.DecimalField(max_digits=15, decimal_places=3)
     created_at = models.DateTimeField(default=timezone.now)
     location = models.ForeignKey('Location', on_delete=models.PROTECT)
 
     def __str__(self):
         return f"{self.material.sku} | LOT: {self.lot_number}"
+
+    class Meta:
+        unique_together = [['material', 'lot_number']]
 
     @property
     def produced_quantity(self):
@@ -158,9 +163,10 @@ class MaterialTransaction(models.Model):
 # ─────────────────────────────────────────────
 
 class Client(models.Model):
+    code = models.CharField(max_length=50, unique=True, blank=True, null=True)
     name = models.CharField(max_length=255)
-    contact_email = models.EmailField(blank=True)
-    contact_phone = models.CharField(max_length=50, blank=True)
+    tin = models.CharField(max_length=50, blank=True, verbose_name='TIN')
+    country = models.CharField(max_length=100, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
