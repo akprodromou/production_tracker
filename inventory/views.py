@@ -715,7 +715,61 @@ class ClientOrderDetailView(View):
                 ))
             ), pk=pk
         )
-        return render(request, 'client_orders/order_detail.html', {'order': order})
+
+        # Bill of Quantities
+        from collections import defaultdict
+        run_ids = ProductionRunAllocation.objects.filter(
+            order_line__order=order
+        ).values_list('production_run_id', flat=True).distinct()
+
+        boq = defaultdict(lambda: {
+            'material': None,
+            'required': Decimal('0'),
+            'statuses': set(),
+        })
+
+        components = ProductionComponent.objects.filter(
+            production_run_id__in=run_ids
+        ).select_related('material__unit')
+
+        for comp in components:
+            m = comp.material
+            boq[m.pk]['material']  = m
+            boq[m.pk]['required'] += comp.quantity_required
+            boq[m.pk]['statuses'].add(comp.status)
+
+        STATUS_PRIORITY = [
+            'PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT'
+        ]
+        boq_rows = []
+        for entry in boq.values():
+            m = entry['material']
+            batches = RawMaterialBatch.objects.filter(material=m)
+            total_available = sum(b.available_quantity for b in batches)
+            total_reserved  = sum(b.reserved_quantity  for b in batches)
+            gap = entry['required'] - total_available
+            worst = min(
+                entry['statuses'],
+                key=lambda s: STATUS_PRIORITY.index(s) if s in STATUS_PRIORITY else 0
+            ) if entry['statuses'] else 'PENDING'
+            boq_rows.append({
+                'material':  m,
+                'required':  entry['required'],
+                'available': total_available,
+                'reserved':  total_reserved,
+                'gap':       gap,
+                'status':    worst,
+            })
+
+        boq_rows.sort(key=lambda r: (
+            STATUS_PRIORITY.index(r['status']) if r['status'] in STATUS_PRIORITY else 0,
+            r['material'].name
+        ))
+
+        return render(request, 'client_orders/order_detail.html', {
+            'order':    order,
+            'boq_rows': boq_rows,
+        })
 
     def post(self, request, pk):
         order = get_object_or_404(ClientOrder, pk=pk)

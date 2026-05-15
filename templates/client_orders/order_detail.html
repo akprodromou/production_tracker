@@ -54,6 +54,62 @@
   {% endif %}
 </div>
 
+
+{# ── BILL OF QUANTITIES ── #}
+{% if boq_rows %}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Raw Material Requirements</span>
+    <span class="text-muted" style="font-size:11px">Aggregated across all linked production runs</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>SKU</th>
+          <th>Unit</th>
+          <th>Required</th>
+          <th>In Stock</th>
+          <th>Reserved</th>
+          <th>Gap</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in boq_rows %}
+        <tr>
+          <td><strong>{{ row.material.name }}</strong></td>
+          <td class="td-mono text-muted">{{ row.material.sku }}</td>
+          <td class="text-muted">{{ row.material.unit.name }}</td>
+          <td class="td-mono">{{ row.required }}</td>
+          <td class="td-mono">{{ row.available }}</td>
+          <td class="td-mono" style="color:var(--warn)">{{ row.reserved }}</td>
+          <td class="td-mono">
+            {% if row.gap > 0 %}
+              <span style="color:var(--danger);font-weight:600">-{{ row.gap }}</span>
+            {% elif row.gap < 0 %}
+              <span style="color:var(--accent2)">+{{ row.gap|cut:"-" }}</span>
+            {% else %}
+              <span class="text-muted">0</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+            {% elif row.status == 'ORDERED' %}<span class="badge badge-blue">Ordered</span>
+            {% elif row.status == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-orange">In Warehouse</span>
+            {% elif row.status == 'IN_PROCESS' %}<span class="badge badge-warn" style="background:rgba(245,158,11,.15);color:#f59e0b">In Process</span>
+            {% elif row.status == 'FINAL_PRODUCT' %}<span class="badge badge-green">Final Product</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
 {# ── ORDER LINES ── #}
 <div class="card mb-3">
   <div class="card-header">
