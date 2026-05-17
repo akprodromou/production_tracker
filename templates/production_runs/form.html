@@ -92,6 +92,7 @@
 </style>
 <script>
 const MAT_DATA = {{ all_raw_materials_json|safe }};
+const FIN_DATA = {{ fin_materials_json|safe }};
 </script>
 {% endblock %}
 
@@ -123,7 +124,15 @@ const MAT_DATA = {{ all_raw_materials_json|safe }};
           {% if form.reference.errors %}<ul class="errorlist">{% for e in form.reference.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
         </div>
         <div class="form-group">
-          <label>Finished Product</label>{{ form.material }}
+          <label>Finished Product</label>
+          <div class="mat-wrap" id="fin-product-wrap">
+            <input type="text" class="mat-search" id="fin-product-search"
+              placeholder="Search finished product or SKU…"
+              autocomplete="off"
+              value="{% if form.instance.pk and form.instance.material_id %}{{ form.instance.material.name }} ({{ form.instance.material.sku }}){% endif %}">
+            <div class="mat-drop" id="fin-product-drop"></div>
+            <div style="display:none">{{ form.material }}</div>
+          </div>
           {% if form.material.errors %}<ul class="errorlist">{% for e in form.material.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
         </div>
         <div class="form-group">
@@ -339,6 +348,40 @@ document.querySelectorAll('.remove-comp').forEach(btn =>
 document.getElementById('deleteModal')?.addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
+
+// Finished product search
+(function() {
+  const input    = document.getElementById('fin-product-search');
+  const drop     = document.getElementById('fin-product-drop');
+  const hiddenSel = document.querySelector('#fin-product-wrap select');
+  if (!input || !drop || !hiddenSel) return;
+
+  function render(query) {
+    const q = query.toLowerCase().trim();
+    const results = q
+      ? FIN_DATA.filter(m => m.name.toLowerCase().includes(q) || m.sku.toLowerCase().includes(q))
+      : FIN_DATA;
+    drop.innerHTML = '';
+    results.slice(0, 30).forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'mat-opt';
+      div.innerHTML = '<span style="flex:1">' + m.name + '</span><span class="mat-opt-sku">' + m.sku + '</span>';
+      div.addEventListener('mousedown', e => {
+        e.preventDefault();
+        for (let opt of hiddenSel.options) {
+          if (parseInt(opt.value) === m.id) { opt.selected = true; break; }
+        }
+        input.value = m.name + ' (' + m.sku + ')';
+        drop.classList.remove('open');
+      });
+      drop.appendChild(div);
+    });
+  }
+
+  input.addEventListener('focus', () => { render(input.value); drop.classList.add('open'); });
+  input.addEventListener('input', () => { render(input.value); drop.classList.add('open'); });
+  input.addEventListener('blur',  () => setTimeout(() => drop.classList.remove('open'), 150));
+})();
 
 // Component delete modal
 function openCompDeleteModal(compPk, name) {

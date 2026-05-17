@@ -240,7 +240,11 @@ class MaterialListView(View):
         if category:
             qs = qs.filter(category=category)
         if q:
-            qs = qs.filter(Q(name__icontains=q) | Q(sku__icontains=q))
+            # Split query into words — each word must appear in name or sku
+            # e.g. "KR 50ml" matches "KR EVOO 50ml original"
+            terms = q.split()
+            for term in terms:
+                qs = qs.filter(Q(name__icontains=term) | Q(sku__icontains=term))
         paginator = Paginator(qs.order_by('name'), 25)
         return render(request, 'materials/list.html', {
             'materials':        paginator.get_page(request.GET.get('page')),
@@ -783,10 +787,15 @@ class ClientOrderDetailView(View):
 
 class ClientOrderCreateView(View):
     def get(self, request):
+        fin_materials = list(
+            Material.objects.filter(category='FIN').order_by('name').values('id', 'name', 'sku')
+        )
         return render(request, 'client_orders/order_form.html', {
-            'form':     ClientOrderForm(),
-            'formset':  ClientOrderLineFormSet(),
-            'form_title': 'New Client Order', 'submit_label': 'Create Order'
+            'form':               ClientOrderForm(),
+            'formset':            ClientOrderLineFormSet(),
+            'form_title':         'New Client Order',
+            'submit_label':       'Create Order',
+            'fin_materials_json': json.dumps(fin_materials),
         })
 
     def post(self, request):
@@ -798,21 +807,31 @@ class ClientOrderCreateView(View):
             formset.save()
             messages.success(request, f'Order {order.reference} created.')
             return redirect('order-detail', pk=order.pk)
+        fin_materials = list(
+            Material.objects.filter(category='FIN').order_by('name').values('id', 'name', 'sku')
+        )
         return render(request, 'client_orders/order_form.html', {
-            'form':     form,
-            'formset':  formset,
-            'form_title': 'New Client Order', 'submit_label': 'Create Order'
+            'form':               form,
+            'formset':            formset,
+            'form_title':         'New Client Order',
+            'submit_label':       'Create Order',
+            'fin_materials_json': json.dumps(fin_materials),
         })
 
 
 class ClientOrderEditView(View):
     def get(self, request, pk):
         order = get_object_or_404(ClientOrder, pk=pk)
+        fin_materials = list(
+            Material.objects.filter(category='FIN').order_by('name').values('id', 'name', 'sku')
+        )
         return render(request, 'client_orders/order_form.html', {
-            'form':     ClientOrderForm(instance=order),
-            'formset':  ClientOrderLineFormSet(instance=order),
-            'form_title': f'Edit Order: {order.reference}', 'submit_label': 'Save Changes',
-            'order':    order,
+            'form':               ClientOrderForm(instance=order),
+            'formset':            ClientOrderLineFormSet(instance=order),
+            'form_title':         f'Edit Order: {order.reference}',
+            'submit_label':       'Save Changes',
+            'order':              order,
+            'fin_materials_json': json.dumps(fin_materials),
         })
 
     def post(self, request, pk):
@@ -824,10 +843,16 @@ class ClientOrderEditView(View):
             formset.save()
             messages.success(request, 'Order updated.')
             return redirect('order-detail', pk=pk)
+        fin_materials = list(
+            Material.objects.filter(category='FIN').order_by('name').values('id', 'name', 'sku')
+        )
         return render(request, 'client_orders/order_form.html', {
-            'form': form, 'formset': formset,
-            'form_title': f'Edit Order: {order.reference}', 'submit_label': 'Save Changes',
-            'order': order,
+            'form':               form,
+            'formset':            formset,
+            'form_title':         f'Edit Order: {order.reference}',
+            'submit_label':       'Save Changes',
+            'order':              order,
+            'fin_materials_json': json.dumps(fin_materials),
         })
 
 
@@ -973,10 +998,14 @@ class ProductionRunCreateView(View):
         raw_mats = list(Material.objects.filter(
             category__in=['RAW', 'PKG']
         ).order_by('name').values('id', 'name', 'sku'))
+        fin_mats = list(Material.objects.filter(
+            category='FIN'
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'production_runs/form.html', {
             'form': form, 'formset': formset,
             'form_title': 'New Production Run', 'submit_label': 'Create Run',
             'all_raw_materials_json': json.dumps(raw_mats),
+            'fin_materials_json': json.dumps(fin_mats),
         })
 
     def post(self, request):
@@ -993,10 +1022,14 @@ class ProductionRunCreateView(View):
         raw_mats = list(Material.objects.filter(
             category__in=['RAW', 'PKG']
         ).order_by('name').values('id', 'name', 'sku'))
+        fin_mats = list(Material.objects.filter(
+            category='FIN'
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'production_runs/form.html', {
             'form': form, 'formset': formset,
             'form_title': 'New Production Run', 'submit_label': 'Create Run',
             'all_raw_materials_json': json.dumps(raw_mats),
+            'fin_materials_json': json.dumps(fin_mats),
         })
 
 
@@ -1006,12 +1039,16 @@ class ProductionRunEditView(View):
         raw_mats = list(Material.objects.filter(
             category__in=['RAW', 'PKG']
         ).order_by('name').values('id', 'name', 'sku'))
+        fin_mats = list(Material.objects.filter(
+            category='FIN'
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'production_runs/form.html', {
             'form':    ProductionRunForm(instance=run),
             'formset': ProductionComponentFormSet(instance=run, prefix='comp'),
             'form_title': f'Edit Run: {run.reference}', 'submit_label': 'Save Changes',
             'run':     run,
             'all_raw_materials_json': json.dumps(raw_mats),
+            'fin_materials_json':     json.dumps(fin_mats),
         })
 
     def post(self, request, pk):
@@ -1035,11 +1072,15 @@ class ProductionRunEditView(View):
         raw_mats = list(Material.objects.filter(
             category__in=['RAW', 'PKG']
         ).order_by('name').values('id', 'name', 'sku'))
+        fin_mats = list(Material.objects.filter(
+            category='FIN'
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'production_runs/form.html', {
             'form': form, 'formset': formset,
             'form_title': f'Edit Run: {run.reference}', 'submit_label': 'Save Changes',
             'run':  run,
             'all_raw_materials_json': json.dumps(raw_mats),
+            'fin_materials_json': json.dumps(fin_mats),
         })
 
 

@@ -17,8 +17,6 @@
     border-bottom: 1px solid var(--border);
   }
   .line-row:last-child { border-bottom: none; }
-  .line-row select,
-  .line-row input[type=text],
   .line-row input[type=number] {
     width: 100%;
     background: var(--surface2);
@@ -30,12 +28,51 @@
     padding: 8px 12px;
     outline: none;
     box-sizing: border-box;
+  }
+  .line-row input[type=number]:focus { border-color: var(--accent); }
+
+  /* Product search */
+  .prod-wrap { position: relative; }
+  .prod-search {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    box-sizing: border-box;
     transition: border-color .15s;
   }
-  .line-row select:focus,
-  .line-row input:focus { border-color: var(--accent); }
-  .line-row select option { background: var(--surface2); color: var(--text); }
+  .prod-search:focus { border-color: var(--accent); }
+  .prod-drop {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0; right: 0;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    z-index: 200;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .prod-drop.open { display: block; }
+  .prod-opt {
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .prod-opt:hover { background: rgba(79,142,247,.15); }
+  .prod-opt-sku { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
 </style>
+<script>
+const FIN_MATERIALS = {{ fin_materials_json|safe }};
+</script>
 {% endblock %}
 
 {% block content %}
@@ -86,15 +123,20 @@
     <div class="card-body">
       {{ formset.management_form }}
       <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px">
-        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Product</span>
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Product (search by name or SKU)</span>
         <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em">Qty Ordered</span>
         <span></span>
       </div>
       <div id="lines-container">
         {% for lf in formset %}
         <div class="line-row">
-          <div>
-            {{ lf.material }}
+          <div class="prod-wrap">
+            <input type="text" class="prod-search"
+              placeholder="Search product or SKU…"
+              autocomplete="off"
+              value="{% if lf.instance.pk and lf.instance.material_id %}{{ lf.instance.material.name }} ({{ lf.instance.material.sku }}){% endif %}">
+            <div class="prod-drop"></div>
+            <div style="display:none">{{ lf.material }}</div>
             {% for h in lf.hidden_fields %}{{ h }}{% endfor %}
             {% if lf.material.errors %}<ul class="errorlist">{% for e in lf.material.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
           </div>
@@ -106,7 +148,7 @@
             {% if lf.instance.pk %}
               <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--danger)">{{ lf.DELETE }} Remove</label>
             {% else %}
-              <button type="button" class="btn btn-ghost btn-sm remove-line" style="color:var(--danger)">✕</button>
+              <button type="button" class="btn btn-danger btn-sm remove-line">Remove</button>
             {% endif %}
           </div>
         </div>
@@ -125,55 +167,105 @@
 
 {% block extra_js %}
 <script>
-const linesContainer = document.getElementById('lines-container');
+// ── Product autocomplete ──────────────────────────────────────────
 
-// Find the TOTAL_FORMS input dynamically — works regardless of prefix
-const totalForms = document.querySelector('[id$="-TOTAL_FORMS"]');
+function attachProductSearch(row) {
+  const searchInput = row.querySelector('.prod-search');
+  const drop        = row.querySelector('.prod-drop');
+  const hiddenSel   = row.querySelector('select[name$="-material"]');
+  if (!searchInput || !drop || !hiddenSel) return;
+
+  function renderDrop(query) {
+    const q = query.toLowerCase().trim();
+    const results = q
+      ? FIN_MATERIALS.filter(m =>
+          m.name.toLowerCase().includes(q) || m.sku.toLowerCase().includes(q)
+        )
+      : FIN_MATERIALS;
+    drop.innerHTML = '';
+    if (!results.length) {
+      drop.innerHTML = '<div class="prod-opt" style="color:var(--muted)">No results</div>';
+      return;
+    }
+    results.slice(0, 30).forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'prod-opt';
+      div.innerHTML = `<span style="flex:1">${m.name}</span><span class="prod-opt-sku">${m.sku}</span>`;
+      div.addEventListener('mousedown', e => {
+        e.preventDefault();
+        for (let opt of hiddenSel.options) {
+          if (parseInt(opt.value) === m.id) { opt.selected = true; break; }
+        }
+        searchInput.value = `${m.name} (${m.sku})`;
+        drop.classList.remove('open');
+      });
+      drop.appendChild(div);
+    });
+  }
+
+  searchInput.addEventListener('focus', () => { renderDrop(searchInput.value); drop.classList.add('open'); });
+  searchInput.addEventListener('input', () => { renderDrop(searchInput.value); drop.classList.add('open'); });
+  searchInput.addEventListener('blur',  () => setTimeout(() => drop.classList.remove('open'), 150));
+}
+
+document.querySelectorAll('.line-row').forEach(attachProductSearch);
+
+
+// ── Add / remove lines ────────────────────────────────────────────
+
+const linesContainer = document.getElementById('lines-container');
+const totalForms     = document.querySelector('[id$="-TOTAL_FORMS"]');
 
 document.getElementById('add-line-btn').addEventListener('click', function() {
-  if (!totalForms) { console.error('Could not find TOTAL_FORMS input'); return; }
-  const prefix = totalForms.id.replace('-TOTAL_FORMS', ''); // e.g. "clientorderline_set"
+  if (!totalForms) { console.error('TOTAL_FORMS not found'); return; }
+  const prefix = totalForms.id.replace('-TOTAL_FORMS', '');
   const idx    = parseInt(totalForms.value);
 
-  // Clone first row as template
-  const srcRow = linesContainer.querySelector('.line-row');
-  if (!srcRow) { console.error('No source row to clone'); return; }
+  // Always clone the LAST row so existing selections are not disturbed
+  const rows   = linesContainer.querySelectorAll('.line-row');
+  const srcRow = rows[rows.length - 1];
+  if (!srcRow) return;
 
+  // Snapshot current select values in srcRow BEFORE cloning
+  // (cloneNode copies DOM state but innerHTML re-render loses it)
+  const srcSelects = srcRow.querySelectorAll('select');
+  const savedVals  = Array.from(srcSelects).map(s => s.value);
+
+  // Build new row HTML with re-indexed names/ids
   const newRow = srcRow.cloneNode(true);
+  // Find the current index in this row by inspecting its select name
+  const existingSelect = srcRow.querySelector('select[name*="-material"]');
+  const currentIdx = existingSelect
+    ? existingSelect.name.match(/-(\d+)-/)?.[1] ?? '0'
+    : '0';
+  // Replace that specific index with the new one — avoids false matches
+  const idxRe = new RegExp('(-' + currentIdx + '-)', 'g');
+  newRow.innerHTML = newRow.innerHTML.replace(idxRe, '-' + idx + '-');
 
-  // Re-index: replace old index (0) with new index
-  const oldPrefix0 = prefix + '-0-';
-  const newPrefixN = prefix + '-' + idx + '-';
-  newRow.innerHTML = newRow.innerHTML
-    .split(prefix + '-').join('PLACEHOLDER-')
-    .replace(/PLACEHOLDER-(\d+)-/g, (_, n) => prefix + '-' + idx + '-');
+  // Restore saved values on srcRow selects (cloneNode may have reset them)
+  srcRow.querySelectorAll('select').forEach((s, i) => { s.value = savedVals[i]; });
 
-  // Simpler: just replace any occurrence of prefix-<digits>- with prefix-idx-
-  newRow.innerHTML = newRow.innerHTML.replace(
-    new RegExp(prefix.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + '-\\d+-', 'g'),
-    prefix + '-' + idx + '-'
-  );
-
-  // Clear values
-  newRow.querySelectorAll('input[type=text], input[type=number]').forEach(el => el.value = '');
+  // Clear all fields in the NEW row
+  newRow.querySelectorAll('input[type=text]').forEach(el => el.value = '');
+  newRow.querySelectorAll('input[type=number]').forEach(el => el.value = '');
+  newRow.querySelectorAll('input[type=date]').forEach(el => el.value = '');
   newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
   newRow.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
 
-  // Replace delete label with remove button on new (unsaved) rows
+  // Replace delete label with remove button on the new row
   const delLabel = newRow.querySelector('label');
   if (delLabel) {
     const btn = document.createElement('button');
-    btn.type      = 'button';
-    btn.className = 'btn btn-ghost btn-sm remove-line';
-    btn.style.color = 'var(--danger)';
-    btn.textContent = '✕';
+    btn.type = 'button';
+    btn.className = 'btn btn-danger btn-sm remove-line';
+    btn.textContent = 'Remove';
     delLabel.replaceWith(btn);
   }
 
   linesContainer.appendChild(newRow);
   totalForms.value = idx + 1;
-
-  newRow.querySelector('.remove-line')?.addEventListener('click', removeLine);
+  attachProductSearch(newRow);
+  newRow.querySelector('.remove-line')?.addEventListener('click', () => newRow.remove());
 });
 
 function removeLine() { this.closest('.line-row').remove(); }
