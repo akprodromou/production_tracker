@@ -219,7 +219,7 @@
     {% endif %}
 
     {# Add allocation #}
-    {% if run.status != 'COMPLETED' and run.status != 'CANCELLED' %}
+    {% if run.status != 'CANCELLED' %}
     <form method="post">
       {% csrf_token %}
       <input type="hidden" name="action" value="add_allocation">

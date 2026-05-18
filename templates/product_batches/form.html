@@ -6,12 +6,54 @@
   {{ form_title }}
 {% endblock %}
 
+{% block extra_head %}
+<style>
+  .mat-wrap { position: relative; }
+  .mat-search {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .15s;
+  }
+  .mat-search:focus { border-color: var(--accent); }
+  .mat-drop {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0; right: 0;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    z-index: 200;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .mat-drop.open { display: block; }
+  .mat-opt {
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .mat-opt:hover { background: rgba(79,142,247,.15); }
+  .mat-opt-sku { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+</style>
+<script>
+const FIN_MATS = {{ fin_materials_json|safe }};
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
-  <div>
-    <h1>{{ form_title }}</h1>
-    <p>Register a new batch of finished goods</p>
-  </div>
+  <div><h1>{{ form_title }}</h1><p>Register a new batch of finished goods</p></div>
 </div>
 
 <div class="card" style="max-width:580px">
@@ -19,18 +61,28 @@
     <form method="post">
       {% csrf_token %}
       <div class="form-grid">
+
         <div class="form-group">
-          <label for="{{ form.material.id_for_label }}">Finished Product (SKU)</label>
-          {{ form.material }}
+          <label>Finished Product</label>
+          <div class="mat-wrap" id="fin-wrap">
+            <input type="text" class="mat-search" id="fin-search"
+              placeholder="Search by name or SKU…"
+              autocomplete="off"
+              value="{% if form.instance.pk and form.instance.material_id %}{{ form.instance.material.name }} ({{ form.instance.material.sku }}){% endif %}">
+            <div class="mat-drop" id="fin-drop"></div>
+            <div style="display:none">{{ form.material }}</div>
+          </div>
           {% if form.material.errors %}<ul class="errorlist">{% for e in form.material.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-          <span class="form-help">Only finished product materials are shown</span>
+          <span class="form-help">Only finished products shown</span>
         </div>
+
         <div class="form-group">
           <label for="{{ form.batch_number.id_for_label }}">Batch Number</label>
           {{ form.batch_number }}
           {% if form.batch_number.errors %}<ul class="errorlist">{% for e in form.batch_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
           <span class="form-help">Must be globally unique</span>
         </div>
+
         <div class="form-grid form-grid-2">
           <div class="form-group">
             <label for="{{ form.quantity_produced.id_for_label }}">Quantity Produced</label>
@@ -43,6 +95,7 @@
             {% if form.location.errors %}<ul class="errorlist">{% for e in form.location.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
           </div>
         </div>
+
       </div>
       <div class="form-actions mt-3">
         <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
@@ -51,4 +104,56 @@
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const input     = document.getElementById('fin-search');
+  const drop      = document.getElementById('fin-drop');
+  const hiddenSel = document.querySelector('#fin-wrap select');
+  if (!input || !drop || !hiddenSel) return;
+
+  if (hiddenSel.value && !input.value) {
+    const selected = FIN_MATS.find(m => m.id === parseInt(hiddenSel.value));
+    if (selected) input.value = selected.name + ' (' + selected.sku + ')';
+  }
+
+  function render(query) {
+    const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const results = terms.length
+      ? FIN_MATS.filter(m =>
+          terms.every(t =>
+            m.name.toLowerCase().includes(t) || m.sku.toLowerCase().includes(t)
+          )
+        )
+      : FIN_MATS;
+    drop.innerHTML = '';
+    if (!results.length) {
+      drop.innerHTML = '<div class="mat-opt" style="color:var(--muted)">No results</div>';
+      return;
+    }
+    results.slice(0, 30).forEach(function(m) {
+      const div = document.createElement('div');
+      div.className = 'mat-opt';
+      div.innerHTML =
+        '<span style="flex:1">' + m.name + '</span>' +
+        '<span class="mat-opt-sku">' + m.sku + '</span>';
+      div.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        for (let opt of hiddenSel.options) {
+          if (parseInt(opt.value) === m.id) { opt.selected = true; break; }
+        }
+        input.value = m.name + ' (' + m.sku + ')';
+        drop.classList.remove('open');
+      });
+      drop.appendChild(div);
+    });
+  }
+
+  input.addEventListener('focus', function() { render(input.value); drop.classList.add('open'); });
+  input.addEventListener('input', function() { render(input.value); drop.classList.add('open'); });
+  input.addEventListener('blur',  function() { setTimeout(function() { drop.classList.remove('open'); }, 150); });
+})();
+</script>
 {% endblock %}

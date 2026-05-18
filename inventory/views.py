@@ -377,8 +377,14 @@ class RawMaterialBatchCreateView(View):
         form = RawMaterialBatchForm()
         if request.GET.get('material'):
             form.initial['material'] = request.GET['material']
+        raw_mats = list(Material.objects.filter(
+            category__in=['RAW', 'PKG']
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'batches/form.html', {
-            'form': form, 'form_title': 'New Raw Material Batch', 'submit_label': 'Create Batch'
+            'form': form,
+            'form_title': 'New Raw Material Batch',
+            'submit_label': 'Create Batch',
+            'raw_materials_json': json.dumps(raw_mats),
         })
 
     def post(self, request):
@@ -392,8 +398,14 @@ class RawMaterialBatchCreateView(View):
             )
             messages.success(request, f'Batch {batch.lot_number} created.')
             return redirect('batch-detail', pk=batch.pk)
+        raw_mats = list(Material.objects.filter(
+            category__in=['RAW', 'PKG']
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'batches/form.html', {
-            'form': form, 'form_title': 'New Raw Material Batch', 'submit_label': 'Create Batch'
+            'form': form,
+            'form_title': 'New Raw Material Batch',
+            'submit_label': 'Create Batch',
+            'raw_materials_json': json.dumps(raw_mats),
         })
 
 
@@ -468,8 +480,14 @@ class ProductBatchCreateView(View):
         form = ProductBatchForm()
         if request.GET.get('material'):
             form.initial['material'] = request.GET['material']
+        fin_mats = list(Material.objects.filter(
+            category='FIN'
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'product_batches/form.html', {
-            'form': form, 'form_title': 'New Product Batch', 'submit_label': 'Create Batch'
+            'form': form,
+            'form_title': 'New Product Batch',
+            'submit_label': 'Create Batch',
+            'fin_materials_json': json.dumps(fin_mats),
         })
 
     def post(self, request):
@@ -478,8 +496,14 @@ class ProductBatchCreateView(View):
             pb = form.save()
             messages.success(request, f'Product batch {pb.batch_number} created.')
             return redirect('product-batch-detail', pk=pb.pk)
+        fin_mats = list(Material.objects.filter(
+            category='FIN'
+        ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'product_batches/form.html', {
-            'form': form, 'form_title': 'New Product Batch', 'submit_label': 'Create Batch'
+            'form': form,
+            'form_title': 'New Product Batch',
+            'submit_label': 'Create Batch',
+            'fin_materials_json': json.dumps(fin_mats),
         })
 
 
