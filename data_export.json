@@ -108,113 +108,11 @@
   }
 },
 {
-  "model": "inventory.material",
-  "pk": 1,
-  "fields": {
-    "name": "EVOO 500ml bottle",
-    "sku": "07891001",
-    "unit": 2,
-    "category": "PKG"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 2,
-  "fields": {
-    "name": "EVOO 500ml back sticker",
-    "sku": "07891013",
-    "unit": 2,
-    "category": "PKG"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 3,
-  "fields": {
-    "name": "EVOO 500ml cap",
-    "sku": "07891012",
-    "unit": 2,
-    "category": "PKG"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 4,
-  "fields": {
-    "name": "EVOO 500ml USA",
-    "sku": "07891004",
-    "unit": 2,
-    "category": "FIN"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 5,
-  "fields": {
-    "name": "Sun Dried Tomato Rusks",
-    "sku": "07891101",
-    "unit": 2,
-    "category": "FIN"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 6,
-  "fields": {
-    "name": "Sun Dried Tomato Rusks Packaging",
-    "sku": "07891021",
-    "unit": 2,
-    "category": "PKG"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 7,
-  "fields": {
-    "name": "Sun Dried Tomatoes",
-    "sku": "02891001",
-    "unit": 1,
-    "category": "RAW"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 8,
-  "fields": {
-    "name": "EVOO 200ml cap",
-    "sku": "02891002",
-    "unit": 2,
-    "category": "PKG"
-  }
-},
-{
-  "model": "inventory.material",
+  "model": "inventory.location",
   "pk": 9,
   "fields": {
-    "name": "EVOO 200ml bottle",
-    "sku": "02491001",
-    "unit": 2,
-    "category": "PKG"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 10,
-  "fields": {
-    "name": "EVOO 200ml Chili US",
-    "sku": "07861003",
-    "unit": 2,
-    "category": "FIN"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 13,
-  "fields": {
-    "name": "EVOO 200ml label chili US",
-    "sku": "04891001",
-    "unit": 2,
-    "category": "PKG"
+    "name": "Pepper-Decor CZ",
+    "is_external": true
   }
 },
 {
@@ -224,7 +122,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml Special Edition For Host",
     "sku": "02-0000056",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -234,17 +132,17 @@
     "name": "KR Βιολογικό παλαιωμένο βαλσάμικο ξύδι, bottle 200ml",
     "sku": "04-0000009",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
   "model": "inventory.material",
   "pk": 16,
   "fields": {
-    "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml-Christmas",
+    "name": "EU Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml-Christmas",
     "sku": "02-0000069",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -254,7 +152,7 @@
     "name": "Κρητικά κριτσίνια καρότου, 120gr",
     "sku": "ΕΙΔΗ-00000004",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -264,7 +162,7 @@
     "name": "Κρητικά κουλουράκια κανέλας, 120gr",
     "sku": "ΕΙΔΗ-00000005",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -274,7 +172,7 @@
     "name": "Κρητικά κουλουράκια μανταρινιού, 120gr",
     "sku": "ΕΙΔΗ-00000006",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -284,7 +182,7 @@
     "name": "Κρητικά παξιμαδάκια με γραβιέρα, 60gr",
     "sku": "ΕΙΔΗ-00000007",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -294,7 +192,7 @@
     "name": "Κρητικά παξιμαδάκια με ελαιόλαδο και ρίγανη, 60gr",
     "sku": "ΕΙΔΗ-00000008",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -304,7 +202,7 @@
     "name": "Κρητικά παξιμαδάκια με λιαστή ντομάτα και κρεμμύδι, 60gr",
     "sku": "ΕΙΔΗ-00000009",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -314,7 +212,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, can 250ml",
     "sku": "ΕΙΔΗ-00000010",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -324,7 +222,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml",
     "sku": "ΕΙΔΗ-00000011",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -334,7 +232,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, can 5ltr",
     "sku": "ΕΙΔΗ-00000012",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -344,7 +242,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml",
     "sku": "ΕΙΔΗ-00000013",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -354,7 +252,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml",
     "sku": "ΕΙΔΗ-00000014",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -364,7 +262,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml",
     "sku": "ΕΙΔΗ-00000015",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -374,7 +272,7 @@
     "name": "Βιολογικό παλαιωμένο βαλσάμικο ξύδι, bottle 200ml",
     "sku": "ΕΙΔΗ-00000016",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -384,7 +282,7 @@
     "name": "Ξύδι από χυμό εσπεριδοειδών, bottle 200ml",
     "sku": "ΕΙΔΗ-00000017",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -394,7 +292,7 @@
     "name": "Ξύδι από χυμό κόκκινων φρούτων, bottle 200ml",
     "sku": "ΕΙΔΗ-00000018",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -404,7 +302,7 @@
     "name": "US 3pk (Tomato-Graviera-Carrot)",
     "sku": "ΕΙΔΗ-00000019",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -414,7 +312,7 @@
     "name": "US Κρητικά κριτσίνια καρότου, 120gr",
     "sku": "ΕΙΔΗ-00000020",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -424,7 +322,7 @@
     "name": "US Κρητικά κουλουράκια κανέλας, 120gr",
     "sku": "ΕΙΔΗ-00000021",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -434,7 +332,7 @@
     "name": "US Κρητικά κουλουράκια μανταρινιού, 120gr",
     "sku": "ΕΙΔΗ-00000022",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -444,7 +342,7 @@
     "name": "US Κρητικά παξιμαδάκια με γραβιέρα, 60gr",
     "sku": "ΕΙΔΗ-00000023",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -454,7 +352,7 @@
     "name": "US Κρητικά παξιμαδάκια με ελαιόλαδο και ρίγανη, 60gr",
     "sku": "ΕΙΔΗ-00000024",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -464,7 +362,7 @@
     "name": "US Κρητικά παξιμαδάκια με λιαστή ντομάτα και κρεμμύδι, 60gr",
     "sku": "ΕΙΔΗ-00000025",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -474,7 +372,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, can 250ml",
     "sku": "ΕΙΔΗ-00000026",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -484,7 +382,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml",
     "sku": "ΕΙΔΗ-00000027",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -494,7 +392,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, can 5ltr",
     "sku": "ΕΙΔΗ-00000028",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -504,7 +402,7 @@
     "name": "US Βιολογικό παλαιωμένο βαλσάμικο ξύδι, bottle 200ml",
     "sku": "ΕΙΔΗ-00000029",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -514,7 +412,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml",
     "sku": "ΕΙΔΗ-00000030",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -524,7 +422,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml",
     "sku": "ΕΙΔΗ-00000031",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -534,7 +432,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml",
     "sku": "ΕΙΔΗ-00000032",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -544,7 +442,7 @@
     "name": "Δείγματα προϊόντων",
     "sku": "ΕΙΔΗ-00000033",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -764,7 +662,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, 50ml",
     "sku": "ΕΙΔΗ-00000068",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -914,7 +812,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 50ml",
     "sku": "ΕΙΔΗ-00000083",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -924,7 +822,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 50ml",
     "sku": "ΕΙΔΗ-00000084",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -934,7 +832,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 50ml",
     "sku": "ΕΙΔΗ-00000085",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -1634,7 +1532,7 @@
     "name": "Box of Wishes Gift box (Extra virgin olive oil - Cinnamon biscuits - Candles)",
     "sku": "ΕΙΔΗ-00000333",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -1704,7 +1602,7 @@
     "name": "UK Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic ( 6x50ml )",
     "sku": "ΕΙΔΗ-00000246",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2454,7 +2352,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml",
     "sku": "02-0000001",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2464,7 +2362,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml",
     "sku": "02-0000002",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2474,7 +2372,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, bottle 200ml",
     "sku": "02-0000003",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2484,7 +2382,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml",
     "sku": "02-0000004",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2494,7 +2392,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml",
     "sku": "02-0000005",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2504,7 +2402,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, 50ml_Valentine",
     "sku": "02-0000006",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2514,7 +2412,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Valentine",
     "sku": "02-0000007",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2524,7 +2422,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, can 100ml",
     "sku": "02-0000008",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2534,7 +2432,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, can 500ml (rectangle)",
     "sku": "02-0000009",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2554,7 +2452,7 @@
     "name": "US 3pk (Tomato-Graviera-Carrot)",
     "sku": "03-0000001",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2574,7 +2472,7 @@
     "name": "US Βιολογικό παλαιωμένο βαλσάμικο ξύδι, bottle 200ml",
     "sku": "04-0000002",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2584,7 +2482,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml",
     "sku": "02-0000010",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2594,7 +2492,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml",
     "sku": "02-0000011",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2604,7 +2502,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, bottle 200ml",
     "sku": "02-0000012",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2614,7 +2512,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml",
     "sku": "02-0000013",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2624,7 +2522,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml",
     "sku": "02-0000014",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2634,7 +2532,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml",
     "sku": "02-0000015",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2644,7 +2542,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Valentine",
     "sku": "02-0000016",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2654,7 +2552,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, can 250ml",
     "sku": "02-0000017",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2664,7 +2562,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, can 500ml",
     "sku": "02-0000018",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2674,7 +2572,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, can 5ltr",
     "sku": "02-0000019",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2684,7 +2582,7 @@
     "name": "US Κρητικά κουλουράκια κανέλας, 120gr",
     "sku": "03-0000002",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2694,7 +2592,7 @@
     "name": "US Κρητικά κουλουράκια μανταρινιού, 120gr",
     "sku": "03-0000003",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2704,7 +2602,7 @@
     "name": "US Κρητικά κριτσίνια καρότου, 120gr",
     "sku": "03-0000004",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2714,7 +2612,7 @@
     "name": "US Κρητικά παξιμαδάκια με γραβιέρα, 60gr",
     "sku": "03-0000005",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2724,7 +2622,7 @@
     "name": "US Κρητικά παξιμαδάκια με ελαιόλαδο και ρίγανη, 60gr",
     "sku": "03-0000006",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2734,7 +2632,7 @@
     "name": "US Κρητικά παξιμαδάκια με λιαστή ντομάτα και κρεμμύδι, 60gr",
     "sku": "03-0000007",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2744,7 +2642,7 @@
     "name": "US Ξύδι από χυμό εσπεριδοειδών, bottle 200ml",
     "sku": "04-0000003",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2754,7 +2652,7 @@
     "name": "US Ξύδι από χυμό κόκκινων φρούτων, bottle 200ml",
     "sku": "04-0000004",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2794,7 +2692,7 @@
     "name": "Βιολογικό παλαιωμένο βαλσάμικο ξύδι, bottle 200ml",
     "sku": "04-0000005",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2804,7 +2702,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml",
     "sku": "02-0000020",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2814,7 +2712,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml",
     "sku": "02-0000021",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2824,7 +2722,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml",
     "sku": "02-0000022",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2834,7 +2732,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml",
     "sku": "02-0000023",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2844,7 +2742,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με τρούφα, bottle 200ml",
     "sku": "02-0000024",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2854,7 +2752,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, 50ml",
     "sku": "02-0000025",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2864,7 +2762,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, 50ml_Valentine",
     "sku": "02-0000026",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2874,7 +2772,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml",
     "sku": "02-0000027",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2884,7 +2782,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Valentine",
     "sku": "02-0000028",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2894,7 +2792,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, can 250ml",
     "sku": "02-0000029",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2904,7 +2802,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, can 5ltr",
     "sku": "02-0000030",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2914,7 +2812,7 @@
     "name": "Κρητικά κουλουράκια κανέλας, 120gr",
     "sku": "03-0000008",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2924,7 +2822,7 @@
     "name": "Κρητικά κουλουράκια μανταρινιού, 120gr",
     "sku": "03-0000009",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2934,7 +2832,7 @@
     "name": "Κρητικά κριτσίνια καρότου, 120gr",
     "sku": "03-0000010",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2944,7 +2842,7 @@
     "name": "Κρητικά παξιμαδάκια με γραβιέρα, 60gr",
     "sku": "03-0000011",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2954,7 +2852,7 @@
     "name": "Κρητικά παξιμαδάκια με ελαιόλαδο και ρίγανη, 60gr",
     "sku": "03-0000012",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2964,7 +2862,7 @@
     "name": "Κρητικά παξιμαδάκια με λιαστή ντομάτα και κρεμμύδι, 60gr",
     "sku": "03-0000013",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2974,7 +2872,7 @@
     "name": "Ξύδι από χυμό εσπεριδοειδών, bottle 200ml",
     "sku": "04-0000006",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -2984,7 +2882,7 @@
     "name": "Ξύδι από χυμό κόκκινων φρούτων, bottle 200ml",
     "sku": "04-0000007",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3014,7 +2912,7 @@
     "name": "Συσκευασία δώρου (Evoo 500ml ,Red fruit vinegar bottle 200ml)",
     "sku": "04-0000008",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3024,7 +2922,7 @@
     "name": "Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic ( 4x50ml )",
     "sku": "02-0000031",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3044,7 +2942,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 50ml",
     "sku": "02-0000032",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3054,7 +2952,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, 50ml",
     "sku": "02-0000033",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3064,7 +2962,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 50ml",
     "sku": "02-0000034",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3074,7 +2972,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 50ml",
     "sku": "02-0000035",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3084,7 +2982,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, bottle 50ml",
     "sku": "02-0000036",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3094,7 +2992,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 50ml",
     "sku": "02-0000037",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3134,7 +3032,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο - Harvest of love 2x500ml",
     "sku": "02-0000038",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3164,7 +3062,7 @@
     "name": "Box of Wishes Gift box (Extra virgin olive oil - Cinnamon biscuits - Candles)",
     "sku": "02-0000039",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3174,7 +3072,7 @@
     "name": "US Συσκευασία δώρου evoo, evoochilli, basil, garlic, lemon, truffle (6x50ml) με sticker",
     "sku": "02-0000040",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3184,7 +3082,7 @@
     "name": "Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
     "sku": "02-0000041",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3604,7 +3502,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 50ml",
     "sku": "02-0000043",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3614,7 +3512,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 50ml",
     "sku": "02-0000044",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3624,7 +3522,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 50ml",
     "sku": "02-0000045",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3634,7 +3532,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, bottle 50ml",
     "sku": "02-0000046",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3644,7 +3542,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 50ml",
     "sku": "02-0000047",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3664,7 +3562,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Harvest of love yellow",
     "sku": "02-0000048",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3684,7 +3582,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Harvest of love blue",
     "sku": "02-0000049",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3974,7 +3872,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Harvest of love yellow",
     "sku": "02-0000050",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -3984,7 +3882,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Harvest of love blue",
     "sku": "02-0000051",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4034,7 +3932,7 @@
     "name": "AU Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
     "sku": "02-0000052",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4044,7 +3942,7 @@
     "name": "UK Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
     "sku": "02-0000053",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4054,7 +3952,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο - Harvest of love 2x500ml",
     "sku": "02-0000054",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4154,7 +4052,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Heart and paws Limited Edition",
     "sku": "02-0000088",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4404,7 +4302,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με τρούφα, Παλετοδεξαμενή IBC",
     "sku": "02-0000068",
     "unit": 6,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4464,7 +4362,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, can 250ml (rectangle)",
     "sku": "02-0000091",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4474,7 +4372,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, can 750ml (rectangle)",
     "sku": "02-0000092",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4484,7 +4382,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml-Christmas",
     "sku": "02-0000086",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4564,7 +4462,7 @@
     "name": "Παλαιωμένο βαλσάμικο ξύδι 200ml",
     "sku": "04-0000012",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4574,7 +4472,7 @@
     "name": "Λευκό παλαιωμένο βαλσάμικο ξύδι 200ml",
     "sku": "04-0000013",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4614,7 +4512,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml",
     "sku": "ΕΙΔΗ-00000173",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4624,7 +4522,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml",
     "sku": "ΕΙΔΗ-00000174",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4634,7 +4532,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml",
     "sku": "ΕΙΔΗ-00000175",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4644,7 +4542,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, bottle 200ml",
     "sku": "ΕΙΔΗ-00000176",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4654,7 +4552,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml",
     "sku": "ΕΙΔΗ-00000177",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4724,7 +4622,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Heart and paws Limited Edition",
     "sku": "02-0000089",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4744,7 +4642,7 @@
     "name": "KR Λευκό παλαιωμένο βαλσάμικο ξύδι 200ml",
     "sku": "04-0000014",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4754,7 +4652,7 @@
     "name": "KR Παλαιωμένο βαλσάμικο ξύδι 200ml",
     "sku": "04-0000015",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4824,7 +4722,7 @@
     "name": "US Παλαιωμένο βαλσάμικο ξύδι 200ml",
     "sku": "04-0000016",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4834,7 +4732,7 @@
     "name": "US Λευκό παλαιωμένο βαλσάμικο ξύδι 200ml",
     "sku": "04-0000017",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4844,7 +4742,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, can 100ml",
     "sku": "02-0000094",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4854,7 +4752,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με ντομάτα, bottle 200ml",
     "sku": "02-0000095",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4884,7 +4782,7 @@
     "name": "AU Παλαιωμένο βαλσάμικο ξύδι 200ml",
     "sku": "04-0000018",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4894,7 +4792,7 @@
     "name": "AU Λευκό παλαιωμένο βαλσάμικο ξύδι 200ml",
     "sku": "04-0000019",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4914,7 +4812,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, can 5ltr",
     "sku": "ΕΙΔΗ-00000223",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4924,7 +4822,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, can 5ltr",
     "sku": "ΕΙΔΗ-00000224",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4934,7 +4832,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, can 5ltr",
     "sku": "ΕΙΔΗ-00000225",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4944,7 +4842,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, can 5ltr",
     "sku": "ΕΙΔΗ-00000226",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -4954,7 +4852,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, can 5ltr",
     "sku": "ΕΙΔΗ-00000227",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5024,7 +4922,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 50ml EU",
     "sku": "ΕΙΔΗ-00000096",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5034,7 +4932,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 50ml EU",
     "sku": "ΕΙΔΗ-00000097",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5044,7 +4942,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 50ml EU",
     "sku": "ΕΙΔΗ-00000098",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5064,7 +4962,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, bottle 50ml EU",
     "sku": "ΕΙΔΗ-00000111",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5074,7 +4972,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 50ml EU",
     "sku": "ΕΙΔΗ-00000112",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5084,7 +4982,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, bottle 200ml",
     "sku": "ΕΙΔΗ-00000113",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5094,7 +4992,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml",
     "sku": "ΕΙΔΗ-00000114",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5104,7 +5002,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, can 500ml",
     "sku": "ΕΙΔΗ-00000115",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5114,7 +5012,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, can 500ml",
     "sku": "ΕΙΔΗ-00000116",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5124,7 +5022,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με μαύρη τρούφα, bottle 50ml",
     "sku": "ΕΙΔΗ-00000118",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5134,7 +5032,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 50ml",
     "sku": "ΕΙΔΗ-00000119",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5144,7 +5042,7 @@
     "name": "Συσκευασία δώρου (Evoo 500ml ,Red fruit vinegar bottle 200ml)",
     "sku": "ΕΙΔΗ-00000120",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5474,7 +5372,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, 50ml_Valentine",
     "sku": "ΕΙΔΗ-00000222",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5634,7 +5532,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml",
     "sku": "02-0000055",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5654,7 +5552,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, can 100ml",
     "sku": "ΕΙΔΗ-00000193",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5664,7 +5562,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, 50ml_Valentine",
     "sku": "ΕΙΔΗ-00000194",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5704,7 +5602,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο - Harvest of love 2x500ml",
     "sku": "02-0000087",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5904,7 +5802,7 @@
     "name": "Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic ( 4x50ml )",
     "sku": "ΕΙΔΗ-00000123",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5974,7 +5872,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, Παλετοδεξαμενή IBC",
     "sku": "02-0000042",
     "unit": 6,
-    "category": "FIN"
+    "category": "RAW"
   }
 },
 {
@@ -6024,7 +5922,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Harvest of love yellow",
     "sku": "02-0000077",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6034,7 +5932,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Harvest of love blue",
     "sku": "02-0000078",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6044,7 +5942,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο Χριστουγεννιάτικο δέντρο bottle 50ml",
     "sku": "02-0000079",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6054,7 +5952,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο Αστέρι bottle 50ml",
     "sku": "02-0000080",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6064,7 +5962,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο Χιονάνθρωπος bottle 50ml",
     "sku": "02-0000081",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6074,7 +5972,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο Τάρανδος bottle 50ml",
     "sku": "02-0000082",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6084,7 +5982,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο Καμπανακι bottle 50ml",
     "sku": "02-0000083",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6094,7 +5992,7 @@
     "name": "Συσκευασία δώρου evoo Χριστουγεννιάτικη έκδοση ( 6x50ml )",
     "sku": "02-0000084",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6104,7 +6002,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο Άγιος Βασίλης bottle 50ml",
     "sku": "02-0000085",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6154,7 +6052,7 @@
     "name": "US Ξύδι από χυμό εσπεριδοειδών, bottle 200ml",
     "sku": "ΕΙΔΗ-00000034",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6164,7 +6062,7 @@
     "name": "US Ξύδι από χυμό κόκκινων φρούτων, bottle 200ml",
     "sku": "ΕΙΔΗ-00000035",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6244,7 +6142,7 @@
     "name": "KR Bio Greek Mountain Tea",
     "sku": "08-0000000",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6254,7 +6152,7 @@
     "name": "KR Mountain tea and Mint",
     "sku": "08-0000001",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6264,7 +6162,7 @@
     "name": "KR Mountain tea and Lavender",
     "sku": "08-0000002",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6274,7 +6172,7 @@
     "name": "KR Mountain tea and Dittany",
     "sku": "08-0000003",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6484,7 +6382,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml",
     "sku": "ΕΙΔΗ-00000144",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6494,7 +6392,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με τρούφα, bottle 200ml",
     "sku": "ΕΙΔΗ-00000145",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6544,7 +6442,7 @@
     "name": "US Κρητικά παξιμαδάκια με λιαστή ντομάτα και κρεμμύδι, 70gr",
     "sku": "03-0000014",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6564,7 +6462,7 @@
     "name": "US Κρητικά παξιμαδάκια με γραβιέρα, 70gr",
     "sku": "03-0000015",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6584,7 +6482,7 @@
     "name": "US Κρητικά παξιμαδάκια με ελαιόλαδο και ρίγανη, 70gr",
     "sku": "03-0000016",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6644,7 +6542,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Valentine",
     "sku": "ΕΙΔΗ-00000170",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6654,7 +6552,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Valentine",
     "sku": "ΕΙΔΗ-00000171",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6664,7 +6562,7 @@
     "name": "KR Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Valentine",
     "sku": "ΕΙΔΗ-00000172",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6674,7 +6572,7 @@
     "name": "AU Συσκευασία δώρου (Evoo 500ml ,Organic aged balsamic vinegar, bottle 200ml)",
     "sku": "04-0000010",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6694,7 +6592,7 @@
     "name": "AU Βιολογικό παλαιωμένο βαλσάμικο ξύδι, bottle 200ml",
     "sku": "04-0000011",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6724,7 +6622,7 @@
     "name": "Greek Organic Olympus Mountain Tea 12 tea bags (15.6g)",
     "sku": "08-0000004",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6874,7 +6772,7 @@
     "name": "UK Greek Organic Olympus Mountain Tea 12 tea bags (15.6g)",
     "sku": "08-0000005",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6884,7 +6782,7 @@
     "name": "US Greek Organic Olympus Mountain Tea 12 tea bags (15.6g)",
     "sku": "08-0000006",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6894,7 +6792,7 @@
     "name": "Greek Organic Mountain Tea and Mint 12 tea bags (15.6g)",
     "sku": "08-0000007",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6904,7 +6802,7 @@
     "name": "UK Greek Organic Mountain Tea and Mint 12 tea bags (15.6g)",
     "sku": "08-0000008",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6914,7 +6812,7 @@
     "name": "US Greek Organic Mountain Tea and Mint 12 tea bags (15.6g)",
     "sku": "08-0000009",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6924,7 +6822,7 @@
     "name": "Greek Organic Mountain Tea and Dittany 12 tea bags (15.6g)",
     "sku": "08-0000010",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6934,7 +6832,7 @@
     "name": "UK Greek Organic Mountain Tea and Dittany 12 tea bags (15.6g)",
     "sku": "08-0000011",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6944,7 +6842,7 @@
     "name": "US Greek Organic Mountain Tea and Dittany 12 tea bags (15.6g)",
     "sku": "08-0000012",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6954,7 +6852,7 @@
     "name": "Greek Organic Mountain Tea and Lavender 12 tea bags (15.6g)",
     "sku": "08-0000013",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6964,7 +6862,7 @@
     "name": "UK Greek Organic Mountain Tea and Lavender 12 tea bags (15.6g)Lavender",
     "sku": "08-0000014",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6974,7 +6872,7 @@
     "name": "US Greek Organic Mountain Tea and Lavender 12 tea bags (15.6g)",
     "sku": "08-0000015",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6984,7 +6882,7 @@
     "name": "KR Bio Greek Mountain Tea",
     "sku": "08-0000016",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -6994,7 +6892,7 @@
     "name": "KR Mountain tea and Mint",
     "sku": "08-0000017",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7004,7 +6902,7 @@
     "name": "KR Mountain tea and Lavender",
     "sku": "08-0000018",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7014,7 +6912,7 @@
     "name": "KR Mountain tea and Dittany",
     "sku": "08-0000019",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7124,7 +7022,7 @@
     "name": "AU Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml_Valentine",
     "sku": "02-0000093",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7154,7 +7052,7 @@
     "name": "US Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml-Christmas",
     "sku": "02-0000070",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7224,7 +7122,7 @@
     "name": "AU Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml",
     "sku": "02-0000071",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7234,7 +7132,7 @@
     "name": "AU Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml",
     "sku": "02-0000072",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7244,7 +7142,7 @@
     "name": "AU Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml",
     "sku": "02-0000073",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7254,7 +7152,7 @@
     "name": "AU Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml",
     "sku": "02-0000074",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7264,7 +7162,7 @@
     "name": "AU Εξαιρετικό παρθένο ελαιόλαδο με τρούφα, bottle 200ml",
     "sku": "02-0000075",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7274,7 +7172,7 @@
     "name": "AU Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml",
     "sku": "02-0000076",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7304,7 +7202,7 @@
     "name": "US Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle (6x50ml)",
     "sku": "02-0000062",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7314,7 +7212,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο, Παλετοδεξαμενή IBC",
     "sku": "02-0000063",
     "unit": 6,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7324,7 +7222,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, Παλετοδεξαμενή IBC",
     "sku": "02-0000064",
     "unit": 6,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7334,7 +7232,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, Παλετοδεξαμενή IBC",
     "sku": "02-0000065",
     "unit": 6,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7344,7 +7242,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, Παλετοδεξαμενή IBC",
     "sku": "02-0000066",
     "unit": 6,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7354,7 +7252,7 @@
     "name": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, Παλετοδεξαμενή IBC",
     "sku": "02-0000067",
     "unit": 6,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7498,131 +7396,323 @@
   }
 },
 {
-  "model": "inventory.rawmaterialbatch",
-  "pk": 12,
+  "model": "inventory.material",
+  "pk": 742,
   "fields": {
-    "material": 1,
-    "lot_number": "001",
-    "total_quantity": "10000.000",
-    "created_at": "2026-05-11T18:20:44.291Z",
-    "location": 1
+    "name": "EU Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml-Snowman",
+    "sku": "999991",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.rawmaterialbatch",
-  "pk": 13,
+  "model": "inventory.material",
+  "pk": 743,
   "fields": {
-    "material": 2,
-    "lot_number": "002",
-    "total_quantity": "10000.000",
-    "created_at": "2026-05-11T18:23:58.766Z",
-    "location": 8
+    "name": "US Εξαιρετικό παρθένο ελαιόλαδο, bottle 500ml-Snowman",
+    "sku": "999992",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.rawmaterialbatch",
-  "pk": 14,
+  "model": "inventory.material",
+  "pk": 744,
   "fields": {
-    "material": 3,
-    "lot_number": "003",
-    "total_quantity": "10000.000",
-    "created_at": "2026-05-11T18:24:18.838Z",
-    "location": 1
+    "name": "Κριθαράκι EU 500gr",
+    "sku": "999993",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.productbatch",
-  "pk": 9,
+  "model": "inventory.material",
+  "pk": 745,
   "fields": {
-    "material": 4,
-    "batch_number": "001",
-    "quantity_produced": "10000.000",
-    "created_at": "2026-05-11T18:34:11.190Z",
-    "location": 7
+    "name": "Christmas Cards 2026",
+    "sku": "999995",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.materialtransaction",
-  "pk": 22,
+  "model": "inventory.material",
+  "pk": 746,
   "fields": {
-    "raw_material_batch": 12,
-    "product_batch": null,
-    "transaction_type": "PRODUCED",
-    "quantity": "10000.000",
-    "created_at": "2026-05-11T18:20:44.304Z",
-    "reference": ""
+    "name": "Festive gift box (Table Set) UK",
+    "sku": "9999980",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.materialtransaction",
-  "pk": 23,
+  "model": "inventory.material",
+  "pk": 747,
   "fields": {
-    "raw_material_batch": 13,
-    "product_batch": null,
-    "transaction_type": "PRODUCED",
-    "quantity": "10000.000",
-    "created_at": "2026-05-11T18:23:58.778Z",
-    "reference": ""
+    "name": "Festive gift box (Table Set) EU",
+    "sku": "999981",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.materialtransaction",
-  "pk": 24,
+  "model": "inventory.material",
+  "pk": 748,
   "fields": {
-    "raw_material_batch": 14,
-    "product_batch": null,
-    "transaction_type": "PRODUCED",
-    "quantity": "10000.000",
-    "created_at": "2026-05-11T18:24:18.849Z",
-    "reference": ""
+    "name": "Festive gift box (Table Set) US",
+    "sku": "999982",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.materialtransaction",
-  "pk": 27,
+  "model": "inventory.material",
+  "pk": 749,
   "fields": {
-    "raw_material_batch": 14,
-    "product_batch": 9,
-    "transaction_type": "RESERVED",
-    "quantity": "10000.000",
-    "created_at": "2026-05-11T18:35:59.388Z",
-    "reference": ""
+    "name": "Festive gift box (Table Set) AUS",
+    "sku": "999983",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.materialtransaction",
-  "pk": 28,
+  "model": "inventory.material",
+  "pk": 750,
   "fields": {
-    "raw_material_batch": 13,
-    "product_batch": 9,
-    "transaction_type": "RESERVED",
-    "quantity": "10000.000",
-    "created_at": "2026-05-11T18:36:40.145Z",
-    "reference": ""
+    "name": "Festive gift box (Table Set) Taiwan",
+    "sku": "999984",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.materialtransaction",
-  "pk": 29,
+  "model": "inventory.material",
+  "pk": 751,
   "fields": {
-    "raw_material_batch": 13,
-    "product_batch": 9,
-    "transaction_type": "CONSUMED",
-    "quantity": "10000.000",
-    "created_at": "2026-05-11T18:36:53.042Z",
-    "reference": ""
+    "name": "Festive gift box (Table Set) World Market",
+    "sku": "999985",
+    "unit": 2,
+    "category": "FIN"
   }
 },
 {
-  "model": "inventory.materialtransaction",
-  "pk": 30,
+  "model": "inventory.material",
+  "pk": 752,
   "fields": {
-    "raw_material_batch": 12,
-    "product_batch": 9,
-    "transaction_type": "RESERVED",
-    "quantity": "10000.000",
-    "created_at": "2026-05-11T18:42:03.896Z",
-    "reference": ""
+    "name": "Festive gift box (Table Set) Korea",
+    "sku": "999986",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 753,
+  "fields": {
+    "name": "Duo holiday packaging EU",
+    "sku": "999970",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 754,
+  "fields": {
+    "name": "Duo holiday packaging UK",
+    "sku": "999971",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 755,
+  "fields": {
+    "name": "Duo holiday packaging US",
+    "sku": "999972",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 756,
+  "fields": {
+    "name": "Duo holiday packaging AUS",
+    "sku": "999973",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 757,
+  "fields": {
+    "name": "Duo holiday packaging Taiwan",
+    "sku": "999974",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 758,
+  "fields": {
+    "name": "Keepsake box (Feast Box) EU",
+    "sku": "999975",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 759,
+  "fields": {
+    "name": "AUS Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
+    "sku": "999960",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 760,
+  "fields": {
+    "name": "TAIWAN Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
+    "sku": "999961",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 761,
+  "fields": {
+    "name": "KR Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
+    "sku": "999962",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 762,
+  "fields": {
+    "name": "US Εξαιρετικό παρθένο ελαιόλαδο garlic, can 100ml",
+    "sku": "999963",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 763,
+  "fields": {
+    "name": "US Εξαιρετικό παρθένο ελαιόλαδο chili, can 100ml",
+    "sku": "999964",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 764,
+  "fields": {
+    "name": "Christmas Box EVOO + rusks packaging (World Market)",
+    "sku": "999965",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 765,
+  "fields": {
+    "name": "Christmas Box EVOOs Minis - set of 4 packaging (World Market)",
+    "sku": "999966",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 766,
+  "fields": {
+    "name": "Mini bottle 50ml original (Snowman bottle) US",
+    "sku": "999967",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 767,
+  "fields": {
+    "name": "Mini bottle 50ml original (Pink bell bottle) US",
+    "sku": "999968",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 768,
+  "fields": {
+    "name": "Mini bottle 50ml original (Raindeer bottle) US",
+    "sku": "999969",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 769,
+  "fields": {
+    "name": "Mini bottle 50ml original (Red Santa bottle) US",
+    "sku": "999950",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 770,
+  "fields": {
+    "name": "Mini bottle 50ml original (Green Christmas bottle) US",
+    "sku": "999951",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 771,
+  "fields": {
+    "name": "Mini bottle 50ml original (Yellow Star bottle) US",
+    "sku": "999952",
+    "unit": 2,
+    "category": "FIN"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 772,
+  "fields": {
+    "name": "EU Lbl back olive oil snowman 500ml",
+    "sku": "999953",
+    "unit": 2,
+    "category": "PKG"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 773,
+  "fields": {
+    "name": "EU box olive oil snowman 500ml",
+    "sku": "999954",
+    "unit": 2,
+    "category": "PKG"
   }
 },
 {
@@ -10050,25 +10140,37 @@
   }
 },
 {
+  "model": "inventory.client",
+  "pk": 203,
+  "fields": {
+    "code": "ΠΕΛΑ-10000000",
+    "name": "B2B general",
+    "tin": "-",
+    "country": "-",
+    "notes": "",
+    "created_at": "2026-05-17T09:10:22.963Z"
+  }
+},
+{
   "model": "inventory.clientorder",
-  "pk": 5,
+  "pk": 6,
   "fields": {
-    "reference": "Gift Box 1 Christmas US",
-    "client": 2,
+    "reference": "Rudolf Christmas Order",
+    "client": 203,
     "status": "CONFIRMED",
-    "order_date": "2026-05-11",
-    "required_by": "2026-08-11",
-    "notes": "Testing the notes section.",
-    "created_at": "2026-05-11T18:20:00.012Z"
+    "order_date": "2026-04-20",
+    "required_by": "2026-07-15",
+    "notes": "",
+    "created_at": "2026-05-17T10:00:44.590Z"
   }
 },
 {
   "model": "inventory.clientorderline",
-  "pk": 8,
+  "pk": 11,
   "fields": {
-    "order": 5,
-    "material": 10,
-    "quantity_ordered": "10000.000",
+    "order": 6,
+    "material": 279,
+    "quantity_ordered": "8030.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -10076,11 +10178,11 @@
 },
 {
   "model": "inventory.clientorderline",
-  "pk": 9,
+  "pk": 12,
   "fields": {
-    "order": 5,
-    "material": 5,
-    "quantity_ordered": "10000.000",
+    "order": 6,
+    "material": 707,
+    "quantity_ordered": "4950.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -10088,11 +10190,551 @@
 },
 {
   "model": "inventory.clientorderline",
-  "pk": 10,
+  "pk": 13,
   "fields": {
-    "order": 5,
-    "material": 4,
-    "quantity_ordered": "10000.000",
+    "order": 6,
+    "material": 742,
+    "quantity_ordered": "7645.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 14,
+  "fields": {
+    "order": 6,
+    "material": 743,
+    "quantity_ordered": "3300.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 15,
+  "fields": {
+    "order": 6,
+    "material": 16,
+    "quantity_ordered": "10395.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 16,
+  "fields": {
+    "order": 6,
+    "material": 274,
+    "quantity_ordered": "330.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 17,
+  "fields": {
+    "order": 6,
+    "material": 449,
+    "quantity_ordered": "1980.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 18,
+  "fields": {
+    "order": 6,
+    "material": 475,
+    "quantity_ordered": "1100.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 19,
+  "fields": {
+    "order": 6,
+    "material": 379,
+    "quantity_ordered": "1100.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 20,
+  "fields": {
+    "order": 6,
+    "material": 269,
+    "quantity_ordered": "1980.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 21,
+  "fields": {
+    "order": 6,
+    "material": 287,
+    "quantity_ordered": "330.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 22,
+  "fields": {
+    "order": 6,
+    "material": 264,
+    "quantity_ordered": "2739.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 23,
+  "fields": {
+    "order": 6,
+    "material": 744,
+    "quantity_ordered": "330.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 24,
+  "fields": {
+    "order": 6,
+    "material": 263,
+    "quantity_ordered": "2739.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 25,
+  "fields": {
+    "order": 6,
+    "material": 664,
+    "quantity_ordered": "330.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 26,
+  "fields": {
+    "order": 6,
+    "material": 745,
+    "quantity_ordered": "13152.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 27,
+  "fields": {
+    "order": 6,
+    "material": 747,
+    "quantity_ordered": "1000.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 28,
+  "fields": {
+    "order": 6,
+    "material": 746,
+    "quantity_ordered": "400.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 29,
+  "fields": {
+    "order": 6,
+    "material": 748,
+    "quantity_ordered": "1000.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 30,
+  "fields": {
+    "order": 6,
+    "material": 749,
+    "quantity_ordered": "100.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 31,
+  "fields": {
+    "order": 6,
+    "material": 753,
+    "quantity_ordered": "1500.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 32,
+  "fields": {
+    "order": 6,
+    "material": 754,
+    "quantity_ordered": "500.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 33,
+  "fields": {
+    "order": 6,
+    "material": 755,
+    "quantity_ordered": "1500.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 34,
+  "fields": {
+    "order": 6,
+    "material": 756,
+    "quantity_ordered": "150.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 35,
+  "fields": {
+    "order": 6,
+    "material": 758,
+    "quantity_ordered": "300.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 36,
+  "fields": {
+    "order": 6,
+    "material": 297,
+    "quantity_ordered": "3006.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 37,
+  "fields": {
+    "order": 6,
+    "material": 598,
+    "quantity_ordered": "3905.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 38,
+  "fields": {
+    "order": 6,
+    "material": 766,
+    "quantity_ordered": "825.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 39,
+  "fields": {
+    "order": 6,
+    "material": 600,
+    "quantity_ordered": "3905.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 40,
+  "fields": {
+    "order": 6,
+    "material": 767,
+    "quantity_ordered": "825.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 41,
+  "fields": {
+    "order": 6,
+    "material": 599,
+    "quantity_ordered": "3905.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 42,
+  "fields": {
+    "order": 6,
+    "material": 602,
+    "quantity_ordered": "3905.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 43,
+  "fields": {
+    "order": 6,
+    "material": 769,
+    "quantity_ordered": "4132.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 44,
+  "fields": {
+    "order": 6,
+    "material": 596,
+    "quantity_ordered": "3905.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 45,
+  "fields": {
+    "order": 6,
+    "material": 770,
+    "quantity_ordered": "4132.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 46,
+  "fields": {
+    "order": 6,
+    "material": 597,
+    "quantity_ordered": "3905.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 47,
+  "fields": {
+    "order": 6,
+    "material": 771,
+    "quantity_ordered": "4132.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 48,
+  "fields": {
+    "order": 6,
+    "material": 310,
+    "quantity_ordered": "750.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 49,
+  "fields": {
+    "order": 6,
+    "material": 396,
+    "quantity_ordered": "300.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 50,
+  "fields": {
+    "order": 6,
+    "material": 722,
+    "quantity_ordered": "750.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 51,
+  "fields": {
+    "order": 6,
+    "material": 759,
+    "quantity_ordered": "250.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 52,
+  "fields": {
+    "order": 6,
+    "material": 760,
+    "quantity_ordered": "250.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 53,
+  "fields": {
+    "order": 6,
+    "material": 761,
+    "quantity_ordered": "2000.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 54,
+  "fields": {
+    "order": 6,
+    "material": 476,
+    "quantity_ordered": "5490.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 55,
+  "fields": {
+    "order": 6,
+    "material": 762,
+    "quantity_ordered": "5490.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 56,
+  "fields": {
+    "order": 6,
+    "material": 763,
+    "quantity_ordered": "5490.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 57,
+  "fields": {
+    "order": 6,
+    "material": 764,
+    "quantity_ordered": "2490.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 58,
+  "fields": {
+    "order": 6,
+    "material": 765,
+    "quantity_ordered": "3006.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -10100,80 +10742,128 @@
 },
 {
   "model": "inventory.productionrun",
-  "pk": 6,
+  "pk": 8,
   "fields": {
-    "reference": "EVOO 500ml USA Christmas 2026",
-    "material": 4,
-    "planned_quantity": "10000.000",
+    "reference": "Snowman Pepper 2026 run 1",
+    "material": 742,
+    "planned_quantity": "3738.000",
     "actual_quantity": null,
     "status": "ACTIVE",
-    "planned_start": "2026-07-15",
-    "planned_end": "2026-10-15",
-    "actual_start": "2026-05-11",
+    "planned_start": "2026-05-17",
+    "planned_end": "2026-06-10",
+    "actual_start": null,
     "actual_end": null,
-    "location": 7,
-    "notes": "Testing the production notes section.",
-    "created_at": "2026-05-11T18:31:26.748Z",
+    "location": 9,
+    "notes": "",
+    "created_at": "2026-05-17T19:31:24.517Z",
     "product_batch": null
   }
 },
 {
   "model": "inventory.productionrunallocation",
-  "pk": 5,
+  "pk": 6,
   "fields": {
-    "production_run": 6,
-    "order_line": 10,
-    "quantity_allocated": "10000.000",
-    "created_at": "2026-05-11T18:41:21.225Z",
+    "production_run": 8,
+    "order_line": 13,
+    "quantity_allocated": "3300.000",
+    "created_at": "2026-05-17T19:46:37.789Z",
     "notes": ""
   }
 },
 {
   "model": "inventory.productioncomponent",
-  "pk": 10,
+  "pk": 16,
   "fields": {
-    "production_run": 6,
-    "material": 2,
-    "quantity_required": "10000.000",
+    "production_run": 8,
+    "material": 589,
+    "quantity_required": "3738.000",
     "quantity_available": "0.000",
-    "status": "ORDERED",
+    "status": "PENDING",
     "raw_material_batch": null,
-    "expected_date": "2026-09-15",
+    "expected_date": null,
     "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-11T18:43:04.701Z"
+    "updated_at": "2026-05-17T19:40:43.162Z"
   }
 },
 {
   "model": "inventory.productioncomponent",
-  "pk": 11,
+  "pk": 17,
   "fields": {
-    "production_run": 6,
-    "material": 1,
-    "quantity_required": "10000.000",
+    "production_run": 8,
+    "material": 584,
+    "quantity_required": "3738.000",
     "quantity_available": "0.000",
-    "status": "IN_WAREHOUSE_RAW",
+    "status": "PENDING",
     "raw_material_batch": null,
-    "expected_date": "2026-09-01",
-    "actual_date": "2026-05-11",
+    "expected_date": null,
+    "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-11T18:42:39.423Z"
+    "updated_at": "2026-05-17T19:40:43.164Z"
   }
 },
 {
   "model": "inventory.productioncomponent",
-  "pk": 12,
+  "pk": 18,
   "fields": {
-    "production_run": 6,
-    "material": 3,
-    "quantity_required": "10000.000",
+    "production_run": 8,
+    "material": 441,
+    "quantity_required": "3738.000",
     "quantity_available": "0.000",
-    "status": "IN_WAREHOUSE_RAW",
+    "status": "PENDING",
     "raw_material_batch": null,
-    "expected_date": "2026-08-20",
-    "actual_date": "2026-05-11",
+    "expected_date": null,
+    "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-11T18:42:41.570Z"
+    "updated_at": "2026-05-17T19:40:43.165Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 19,
+  "fields": {
+    "production_run": 8,
+    "material": 740,
+    "quantity_required": "3738.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-17T19:40:43.167Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 20,
+  "fields": {
+    "production_run": 8,
+    "material": 772,
+    "quantity_required": "3738.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-17T19:43:08.100Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 21,
+  "fields": {
+    "production_run": 8,
+    "material": 773,
+    "quantity_required": "3738.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-17T19:44:54.079Z"
   }
 }
 ]
