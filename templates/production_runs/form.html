@@ -93,6 +93,24 @@
 <script>
 const MAT_DATA = {{ all_raw_materials_json|safe }};
 const FIN_DATA = {{ fin_materials_json|safe }};
+
+// Pre-populate finished product from ?material=N
+(function() {
+  const prefillEl = document.getElementById('fin-prefill-id');
+  if (!prefillEl) return;
+  const input     = document.getElementById('fin-product-search');
+  const hiddenSel = document.querySelector('#fin-product-wrap select');
+  if (!input || !hiddenSel || input.value) return;
+  const prefillId  = parseInt(prefillEl.value);
+  const prefillMat = FIN_DATA.find(m => m.id === prefillId);
+  if (prefillMat) {
+    input.value = prefillMat.name + ' (' + prefillMat.sku + ')';
+    for (let opt of hiddenSel.options) {
+      if (parseInt(opt.value) === prefillMat.id) { opt.selected = true; break; }
+    }
+  }
+})();
+
 </script>
 {% endblock %}
 
@@ -130,6 +148,10 @@ const FIN_DATA = {{ fin_materials_json|safe }};
               placeholder="Search finished product or SKU…"
               autocomplete="off"
               value="{% if form.instance.pk and form.instance.material_id %}{{ form.instance.material.name }} ({{ form.instance.material.sku }}){% endif %}">
+            {# Pre-populate hint for ?material=N case — read by JS below #}
+            {% if form.initial.material %}
+            <input type="hidden" id="fin-prefill-id" value="{{ form.initial.material }}">
+            {% endif %}
             <div class="mat-drop" id="fin-product-drop"></div>
             <div style="display:none">{{ form.material }}</div>
           </div>
@@ -311,11 +333,16 @@ document.getElementById('add-comp-btn').addEventListener('click', function() {
   const srcRow = compContainer.querySelector('.comp-row');
   const newRow = srcRow.cloneNode(true);
 
-  newRow.innerHTML = newRow.innerHTML.replace(
-    /comp-\d+-/g, `comp-${idx}-`
-  ).replace(
-    /id_comp-\d+-/g, `id_comp-${idx}-`
-  );
+  // Read current index from source row to avoid prefix mismatch
+  const srcInput = srcRow.querySelector('input[name*="-quantity_required"]');
+  const currentIdx = srcInput
+    ? (srcInput.name.match(/-([0-9]+)-/) || [null, '0'])[1]
+    : '0';
+  const reIdx   = new RegExp('-' + currentIdx + '-', 'g');
+  const reIdIdx = new RegExp('_' + currentIdx + '_', 'g');
+  newRow.innerHTML = newRow.innerHTML
+    .replace(reIdx,   '-' + idx + '-')
+    .replace(reIdIdx, '_' + idx + '_');
 
   // Clear all values
   newRow.querySelectorAll('input[type=text], input[type=number], input[type=date]')
@@ -392,5 +419,23 @@ function openCompDeleteModal(compPk, name) {
 document.getElementById('compDeleteModal')?.addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
+
+// Pre-populate finished product from ?material=N
+(function() {
+  const prefillEl = document.getElementById('fin-prefill-id');
+  if (!prefillEl) return;
+  const input     = document.getElementById('fin-product-search');
+  const hiddenSel = document.querySelector('#fin-product-wrap select');
+  if (!input || !hiddenSel || input.value) return;
+  const prefillId  = parseInt(prefillEl.value);
+  const prefillMat = FIN_DATA.find(m => m.id === prefillId);
+  if (prefillMat) {
+    input.value = prefillMat.name + ' (' + prefillMat.sku + ')';
+    for (let opt of hiddenSel.options) {
+      if (parseInt(opt.value) === prefillMat.id) { opt.selected = true; break; }
+    }
+  }
+})();
+
 </script>
 {% endblock %}

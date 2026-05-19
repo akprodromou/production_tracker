@@ -69,7 +69,12 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LANGUAGE_CODE = 'en-us'
+# core/settings.py
+
+LANGUAGE_CODE = 'en-gb'  
 TIME_ZONE = 'Europe/Athens'
 USE_I18N = True
 USE_TZ = True
+
+
+USE_L10N = True

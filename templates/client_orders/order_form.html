@@ -72,6 +72,23 @@
 </style>
 <script>
 const FIN_MATERIALS = {{ fin_materials_json|safe }};
+
+// Mark existing lines for deletion
+document.querySelectorAll('.delete-line').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var checkboxId = this.getAttribute('data-checkbox');
+    var checkbox   = document.getElementById(checkboxId);
+    if (checkbox) {
+      checkbox.checked = true;
+      var row = this.closest('.line-row');
+      if (row) {
+        row.style.opacity = '0.4';
+        row.style.pointerEvents = 'none';
+        this.textContent = 'Removing…';
+      }
+    }
+  });
+});
 </script>
 {% endblock %}
 
@@ -146,7 +163,12 @@ const FIN_MATERIALS = {{ fin_materials_json|safe }};
           </div>
           <div style="display:flex;align-items:flex-end;padding-bottom:2px">
             {% if lf.instance.pk %}
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--danger)">{{ lf.DELETE }} Remove</label>
+              {# Hide the checkbox but keep it in the DOM so Django sees it on submit #}
+              <div style="display:none">{{ lf.DELETE }}</div>
+              <button type="button" class="btn btn-danger btn-sm delete-line"
+                data-checkbox="{{ lf.DELETE.id_for_label }}">
+                Remove
+              </button>
             {% else %}
               <button type="button" class="btn btn-danger btn-sm remove-line">Remove</button>
             {% endif %}
@@ -270,5 +292,22 @@ document.getElementById('add-line-btn').addEventListener('click', function() {
 
 function removeLine() { this.closest('.line-row').remove(); }
 document.querySelectorAll('.remove-line').forEach(btn => btn.addEventListener('click', removeLine));
+
+// Mark existing lines for deletion
+document.querySelectorAll('.delete-line').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var checkboxId = this.getAttribute('data-checkbox');
+    var checkbox   = document.getElementById(checkboxId);
+    if (checkbox) {
+      checkbox.checked = true;
+      var row = this.closest('.line-row');
+      if (row) {
+        row.style.opacity = '0.4';
+        row.style.pointerEvents = 'none';
+        this.textContent = 'Removing…';
+      }
+    }
+  });
+});
 </script>
 {% endblock %}
