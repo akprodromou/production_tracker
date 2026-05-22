@@ -319,8 +319,8 @@ class ClientOrderForm(forms.ModelForm):
         model = ClientOrder
         fields = ['reference', 'client', 'status', 'order_date', 'required_by', 'notes']
         widgets = {
-            'order_date':  forms.DateInput(attrs={'type': 'date'}),
-            'required_by': forms.DateInput(attrs={'type': 'date'}),
+            'order_date':  forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'required_by': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
         }
 
     def clean_reference(self):
@@ -353,10 +353,10 @@ ClientOrderLineFormSet = forms.inlineformset_factory(
     ClientOrder,
     ClientOrderLine,
     form=ClientOrderLineForm,
-    extra=1,
+    extra=0,
     can_delete=True,
-    min_num=1,
-    validate_min=True,
+    min_num=0,
+    validate_min=False,
 )
 
 
@@ -374,10 +374,10 @@ class ProductionRunForm(forms.ModelForm):
             'location', 'notes'
         ]
         widgets = {
-            'planned_start': forms.DateInput(attrs={'type': 'date'}),
-            'planned_end':   forms.DateInput(attrs={'type': 'date'}),
-            'actual_start':  forms.DateInput(attrs={'type': 'date'}),
-            'actual_end':    forms.DateInput(attrs={'type': 'date'}),
+            'planned_start': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'planned_end':   forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'actual_start':  forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'actual_end':    forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
         }
 
     def __init__(self, *args, **kwargs):
@@ -440,8 +440,8 @@ class ProductionComponentForm(forms.ModelForm):
             'status', 'raw_material_batch', 'expected_date', 'actual_date', 'notes'
         ]
         widgets = {
-            'expected_date': forms.DateInput(attrs={'type': 'date'}),
-            'actual_date':   forms.DateInput(attrs={'type': 'date'}),
+            'expected_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'actual_date':   forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
         }
 
     def __init__(self, *args, **kwargs):

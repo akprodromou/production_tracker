@@ -15,7 +15,8 @@ from .models import (
     ProductBatch, MaterialTransaction,
     Client, ClientOrder, ClientOrderLine,
     ProductionRun, ProductionRunAllocation,
-    ProductionComponent, ProductionRunShipment
+    ProductionComponent, ProductionRunShipment,
+    ProductBatchReservation
 )
 from .forms import (
     UnitForm, LocationForm, MaterialForm, RawMaterialBatchForm,
@@ -409,6 +410,33 @@ class RawMaterialBatchCreateView(View):
         })
 
 
+
+class RawMaterialBatchEditView(View):
+    def get(self, request, pk):
+        batch = get_object_or_404(RawMaterialBatch, pk=pk)
+        form  = RawMaterialBatchForm(instance=batch)
+        return render(request, 'batches/form.html', {
+            'form':         form,
+            'form_title':   f'Edit Batch: {batch.lot_number}',
+            'submit_label': 'Save Changes',
+            'batch':        batch,
+        })
+
+    def post(self, request, pk):
+        batch = get_object_or_404(RawMaterialBatch, pk=pk)
+        form  = RawMaterialBatchForm(request.POST, instance=batch)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Batch {batch.lot_number} updated.')
+            return redirect('batch-detail', pk=pk)
+        return render(request, 'batches/form.html', {
+            'form':         form,
+            'form_title':   f'Edit Batch: {batch.lot_number}',
+            'submit_label': 'Save Changes',
+            'batch':        batch,
+        })
+
+
 class RawMaterialBatchDeleteView(View):
     def post(self, request, pk):
         batch = get_object_or_404(RawMaterialBatch, pk=pk)
@@ -468,11 +496,87 @@ class ProductBatchDetailView(View):
                 summary[rb.pk]['reserved'] += tx.quantity
             elif tx.transaction_type == 'CONSUMED':
                 summary[rb.pk]['consumed'] += tx.quantity
+
+        reservations = ProductBatchReservation.objects.filter(
+            product_batch=batch
+        ).select_related('order_line__order__client', 'order_line__material')
+
+        total_reserved = sum(r.quantity_reserved for r in reservations)
+        available      = batch.quantity_produced - total_reserved
+
+        # Order lines eligible for reservation (FIN material matches batch material)
+        eligible_lines = ClientOrderLine.objects.filter(
+            material=batch.material
+        ).exclude(status='FULFILLED').select_related('order__client')
+
         return render(request, 'product_batches/detail.html', {
             'batch':               batch,
             'transactions':        transactions,
             'consumption_summary': list(summary.values()),
+            'reservations':        reservations,
+            'total_reserved':      total_reserved,
+            'available':           available,
+            'eligible_lines':      eligible_lines,
         })
+
+    def post(self, request, pk):
+        batch  = get_object_or_404(ProductBatch, pk=pk)
+        action = request.POST.get('action')
+
+        if action == 'reserve':
+            line_id  = request.POST.get('order_line_id')
+            qty_str  = request.POST.get('quantity_reserved', '').strip()
+            try:
+                line = ClientOrderLine.objects.get(pk=line_id)
+                qty  = Decimal(qty_str)
+                if qty <= 0:
+                    raise ValueError
+                # Check available
+                existing = ProductBatchReservation.objects.filter(
+                    product_batch=batch
+                ).aggregate(
+                    total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                )['total']
+                available = batch.quantity_produced - existing
+                if qty > available:
+                    messages.error(request, f'Only {available} units available.')
+                else:
+                    ProductBatchReservation.objects.create(
+                        product_batch=batch,
+                        order_line=line,
+                        quantity_reserved=qty,
+                        notes=request.POST.get('notes', ''),
+                    )
+                    # Update order line fulfilled quantity and status
+                    line.quantity_fulfilled = (line.quantity_fulfilled or Decimal('0')) + qty
+                    if line.quantity_fulfilled >= line.quantity_ordered:
+                        line.status = 'FULFILLED'
+                    else:
+                        line.status = 'PARTIAL'
+                    line.save()
+                    messages.success(request, f'Reserved {qty} units for {line.order.reference}.')
+            except (ClientOrderLine.DoesNotExist, ValueError, InvalidOperation):
+                messages.error(request, 'Invalid order line or quantity.')
+
+        elif action == 'delete_reservation':
+            res_id = request.POST.get('reservation_id')
+            try:
+                res = ProductBatchReservation.objects.get(pk=res_id, product_batch=batch)
+                line = res.order_line
+                qty  = res.quantity_reserved
+                res.delete()
+                # Reverse the fulfilled quantity
+                line.quantity_fulfilled = max(Decimal('0'), (line.quantity_fulfilled or Decimal('0')) - qty)
+                if line.quantity_fulfilled == 0:
+                    line.status = 'PENDING'
+                elif line.quantity_fulfilled < line.quantity_ordered:
+                    line.status = 'PARTIAL'
+                line.save()
+                messages.success(request, 'Reservation removed.')
+            except ProductBatchReservation.DoesNotExist:
+                messages.error(request, 'Reservation not found.')
+
+        return redirect('product-batch-detail', pk=pk)
 
 
 class ProductBatchCreateView(View):
@@ -503,6 +607,41 @@ class ProductBatchCreateView(View):
             'form': form,
             'form_title': 'New Product Batch',
             'submit_label': 'Create Batch',
+            'fin_materials_json': json.dumps(fin_mats),
+        })
+
+
+
+class ProductBatchEditView(View):
+    def get(self, request, pk):
+        batch = get_object_or_404(ProductBatch, pk=pk)
+        fin_mats = list(Material.objects.filter(
+            category='FIN'
+        ).order_by('name').values('id', 'name', 'sku'))
+        form = ProductBatchForm(instance=batch)
+        return render(request, 'product_batches/form.html', {
+            'form':               form,
+            'form_title':         f'Edit Batch: {batch.batch_number}',
+            'submit_label':       'Save Changes',
+            'batch':              batch,
+            'fin_materials_json': json.dumps(fin_mats),
+        })
+
+    def post(self, request, pk):
+        batch = get_object_or_404(ProductBatch, pk=pk)
+        fin_mats = list(Material.objects.filter(
+            category='FIN'
+        ).order_by('name').values('id', 'name', 'sku'))
+        form = ProductBatchForm(request.POST, instance=batch)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Batch {batch.batch_number} updated.')
+            return redirect('product-batch-detail', pk=pk)
+        return render(request, 'product_batches/form.html', {
+            'form':               form,
+            'form_title':         f'Edit Batch: {batch.batch_number}',
+            'submit_label':       'Save Changes',
+            'batch':              batch,
             'fin_materials_json': json.dumps(fin_mats),
         })
 
@@ -739,7 +878,8 @@ class ClientOrderDetailView(View):
         order = get_object_or_404(
             ClientOrder.objects.select_related('client').prefetch_related(
                 Prefetch('lines', queryset=ClientOrderLine.objects.select_related('material').prefetch_related(
-                    Prefetch('allocations', queryset=ProductionRunAllocation.objects.select_related('production_run'))
+                    Prefetch('allocations', queryset=ProductionRunAllocation.objects.select_related('production_run')),
+                    Prefetch('batch_reservations', queryset=ProductBatchReservation.objects.select_related('product_batch'))
                 ))
             ), pk=pk
         )
@@ -859,8 +999,22 @@ class ClientOrderEditView(View):
         })
 
     def post(self, request, pk):
-        order   = get_object_or_404(ClientOrder, pk=pk)
-        form    = ClientOrderForm(request.POST, instance=order)
+        order = get_object_or_404(ClientOrder, pk=pk)
+        form  = ClientOrderForm(request.POST, instance=order)
+
+        # Delete lines BEFORE formset validation to avoid required field errors
+        total = int(request.POST.get('lines-TOTAL_FORMS', 0))
+        for i in range(total):
+            if request.POST.get(f'lines-{i}-DELETE'):
+                line_id = request.POST.get(f'lines-{i}-id')
+                if line_id:
+                    try:
+                        ClientOrderLine.objects.filter(
+                            pk=int(line_id), order=order
+                        ).delete()
+                    except (ValueError, TypeError):
+                        pass
+
         formset = ClientOrderLineFormSet(request.POST, instance=order)
         if form.is_valid() and formset.is_valid():
             form.save()
@@ -1106,6 +1260,50 @@ class ProductionRunEditView(View):
             'all_raw_materials_json': json.dumps(raw_mats),
             'fin_materials_json': json.dumps(fin_mats),
         })
+
+
+
+class ProductionRunCopyView(View):
+    """Creates a copy of an existing production run with all its components."""
+    def post(self, request, pk):
+        original = get_object_or_404(ProductionRun, pk=pk)
+
+        # Generate a new reference based on the original
+        base_ref = original.reference
+        # Find a unique reference by appending -COPY, -COPY-2, etc.
+        new_ref  = f"{base_ref}-COPY"
+        counter  = 1
+        while ProductionRun.objects.filter(reference=new_ref).exists():
+            counter += 1
+            new_ref = f"{base_ref}-COPY-{counter}"
+
+        # Create the new run
+        new_run = ProductionRun.objects.create(
+            reference       = new_ref,
+            material        = original.material,
+            planned_quantity= original.planned_quantity,
+            status          = 'PLANNED',
+            location        = original.location,
+            notes           = original.notes,
+            # Reset dates — user sets these on the new run
+        )
+
+        # Copy all components
+        for comp in original.components.all():
+            ProductionComponent.objects.create(
+                production_run   = new_run,
+                material         = comp.material,
+                quantity_required= comp.quantity_required,
+                status           = 'PENDING',  # reset to pending
+                expected_date    = comp.expected_date,
+                notes            = comp.notes,
+            )
+
+        messages.success(
+            request,
+            f'Production run copied as {new_ref}. Update the reference and dates as needed.'
+        )
+        return redirect('production-run-edit', pk=new_run.pk)
 
 
 class ProductionRunDeleteView(View):

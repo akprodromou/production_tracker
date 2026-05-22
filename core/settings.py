@@ -71,10 +71,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # core/settings.py
 
-LANGUAGE_CODE = 'en-gb'  
+LANGUAGE_CODE = 'en-gb'
 TIME_ZONE = 'Europe/Athens'
 USE_I18N = True
 USE_TZ = True
+USE_L10N = False  # disable locale-based formatting
 
-
-USE_L10N = True
+DATE_INPUT_FORMATS = ['%Y-%m-%d']
+DATE_FORMAT = 'Y-m-d'

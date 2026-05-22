@@ -35,12 +35,14 @@ urlpatterns = [
     path('batches/',                   views.RawMaterialBatchListView.as_view(),   name='batch-list'),
     path('batches/create/',            views.RawMaterialBatchCreateView.as_view(), name='batch-create'),
     path('batches/<int:pk>/',          views.RawMaterialBatchDetailView.as_view(), name='batch-detail'),
+    path('batches/<int:pk>/edit/',     views.RawMaterialBatchEditView.as_view(),   name='batch-edit'),
     path('batches/<int:pk>/delete/',   views.RawMaterialBatchDeleteView.as_view(), name='batch-delete'),
 
     # Product Batches
     path('product-batches/',                  views.ProductBatchListView.as_view(),   name='product-batch-list'),
     path('product-batches/create/',           views.ProductBatchCreateView.as_view(), name='product-batch-create'),
     path('product-batches/<int:pk>/',         views.ProductBatchDetailView.as_view(), name='product-batch-detail'),
+    path('product-batches/<int:pk>/edit/',   views.ProductBatchEditView.as_view(),   name='product-batch-edit'),
     path('product-batches/<int:pk>/delete/',  views.ProductBatchDeleteView.as_view(), name='product-batch-delete'),
 
     # Transactions (read-only ledger)
@@ -65,6 +67,7 @@ urlpatterns = [
     path('production-runs/create/',         views.ProductionRunCreateView.as_view(), name='production-run-create'),
     path('production-runs/<int:pk>/',       views.ProductionRunDetailView.as_view(), name='production-run-detail'),
     path('production-runs/<int:pk>/edit/',  views.ProductionRunEditView.as_view(),   name='production-run-edit'),
+    path('production-runs/<int:pk>/copy/',   views.ProductionRunCopyView.as_view(),   name='production-run-copy'),
     path('production-runs/<int:pk>/delete/', views.ProductionRunDeleteView.as_view(), name='production-run-delete'),
 
     # Production sub-resources

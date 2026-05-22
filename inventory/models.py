@@ -410,3 +410,31 @@ class ProductionRunShipment(models.Model):
 
     class Meta:
         ordering = ['-shipped_at']
+
+class ProductBatchReservation(models.Model):
+    """
+    Reserves finished goods from a ProductBatch against a ClientOrderLine.
+    This is the finished-goods equivalent of MaterialTransaction RESERVED.
+    """
+    product_batch = models.ForeignKey(
+        ProductBatch,
+        on_delete=models.CASCADE,
+        related_name='reservations'
+    )
+    order_line = models.ForeignKey(
+        ClientOrderLine,
+        on_delete=models.CASCADE,
+        related_name='batch_reservations'
+    )
+    quantity_reserved = models.DecimalField(max_digits=15, decimal_places=3)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return (
+            f"{self.product_batch.batch_number} → "
+            f"{self.order_line.order.reference} × {self.quantity_reserved}"
+        )
+
+    class Meta:
+        ordering = ['-created_at']

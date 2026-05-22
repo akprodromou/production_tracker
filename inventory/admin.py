@@ -8,6 +8,7 @@ from .models import (
     Client, ClientOrder, ClientOrderLine,
     ProductionRun, ProductionRunAllocation,
     ProductionComponent, ProductionRunShipment,
+    ProductBatchReservation,
 )
 
 
@@ -190,3 +191,8 @@ class ProductionRunShipmentAdmin(admin.ModelAdmin):
     list_filter   = ['shipped_at']
     search_fields = ['production_run__reference']
     readonly_fields = ['id', 'shipped_at']
+
+@admin.register(ProductBatchReservation)
+class ProductBatchReservationAdmin(admin.ModelAdmin):
+    list_display  = ['id', 'product_batch', 'order_line', 'quantity_reserved', 'created_at']
+    search_fields = ['product_batch__batch_number', 'order_line__order__reference']

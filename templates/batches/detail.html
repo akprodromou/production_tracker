@@ -13,6 +13,7 @@
     <p>{{ batch.material.name }} · <span class="text-mono">{{ batch.material.sku }}</span> · {{ batch.location.name }}</p>
   </div>
   <div class="page-actions">
+    <a href="{% url 'batch-edit' batch.pk %}" class="btn btn-secondary">Edit</a>
     <button class="btn btn-success"   onclick="document.getElementById('reserveModal').classList.add('open')">Reserve</button>
     <button class="btn btn-warn"      onclick="document.getElementById('consumeModal').classList.add('open')">Consume</button>
     <button class="btn btn-secondary" onclick="document.getElementById('releaseModal').classList.add('open')">Release</button>

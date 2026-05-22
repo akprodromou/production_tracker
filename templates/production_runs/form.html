@@ -329,12 +329,18 @@ const compContainer = document.getElementById('comp-container');
 const compTotal     = document.getElementById('id_comp-TOTAL_FORMS');
 
 document.getElementById('add-comp-btn').addEventListener('click', function() {
-  const idx    = parseInt(compTotal.value);
-  const srcRow = compContainer.querySelector('.comp-row');
-  const newRow = srcRow.cloneNode(true);
+  const idx      = parseInt(compTotal.value);
+  // Always clone the LAST row so each new row gets a unique index
+  const rows     = compContainer.querySelectorAll('.comp-row');
+  const srcRow   = rows[rows.length - 1];
+  const newRow   = srcRow.cloneNode(true);
 
-  // Read current index from source row to avoid prefix mismatch
-  const srcInput = srcRow.querySelector('input[name*="-quantity_required"]');
+  // Snapshot select values in srcRow before innerHTML replacement resets them
+  const srcSelects   = srcRow.querySelectorAll('select');
+  const savedSelVals = Array.from(srcSelects).map(s => s.value);
+
+  // Read current index from the source row's input name
+  const srcInput   = srcRow.querySelector('input[name*="-quantity_required"]');
   const currentIdx = srcInput
     ? (srcInput.name.match(/-([0-9]+)-/) || [null, '0'])[1]
     : '0';
@@ -343,6 +349,11 @@ document.getElementById('add-comp-btn').addEventListener('click', function() {
   newRow.innerHTML = newRow.innerHTML
     .replace(reIdx,   '-' + idx + '-')
     .replace(reIdIdx, '_' + idx + '_');
+
+  // Restore srcRow select values (innerHTML replacement may have reset them)
+  srcRow.querySelectorAll('select').forEach(function(s, i) {
+    if (savedSelVals[i]) s.value = savedSelVals[i];
+  });
 
   // Clear all values
   newRow.querySelectorAll('input[type=text], input[type=number], input[type=date]')

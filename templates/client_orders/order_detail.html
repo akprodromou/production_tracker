@@ -141,9 +141,19 @@
               </a>
               <span class="text-muted">× {{ alloc.quantity_allocated }}</span>
             </div>
-            {% empty %}
-            <span class="text-muted" style="font-size:12px">Not allocated</span>
             {% endfor %}
+            {% for res in line.batch_reservations.all %}
+            <div style="font-size:12px;margin-bottom:3px">
+              <a href="{% url 'product-batch-detail' res.product_batch.pk %}" style="color:var(--accent2);text-decoration:none">
+                {{ res.product_batch.batch_number }}
+              </a>
+              <span class="text-muted">× {{ res.quantity_reserved }}</span>
+              <span class="badge badge-green" style="font-size:10px;padding:1px 5px">stock</span>
+            </div>
+            {% endfor %}
+            {% if not line.allocations.all and not line.batch_reservations.all %}
+            <span class="text-muted" style="font-size:12px">Not allocated</span>
+            {% endif %}
           </td>
           <td>
             {% if line.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>

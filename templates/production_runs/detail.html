@@ -71,6 +71,10 @@
     </form>
     {% endif %}
     <a href="{% url 'production-run-edit' run.pk %}" class="btn btn-secondary">Edit</a>
+    <form method="post" action="{% url 'production-run-copy' run.pk %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secondary">⎘ Copy Run</button>
+    </form>
   </div>
 </div>
 

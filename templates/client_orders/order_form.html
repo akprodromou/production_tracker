@@ -82,9 +82,12 @@ document.querySelectorAll('.delete-line').forEach(function(btn) {
       checkbox.checked = true;
       var row = this.closest('.line-row');
       if (row) {
+        // Fade visually but do NOT set pointer-events:none
+        // — that would prevent the hidden checkbox from submitting
         row.style.opacity = '0.4';
-        row.style.pointerEvents = 'none';
+        row.style.textDecoration = 'line-through';
         this.textContent = 'Removing…';
+        this.disabled = true;
       }
     }
   });
@@ -302,9 +305,12 @@ document.querySelectorAll('.delete-line').forEach(function(btn) {
       checkbox.checked = true;
       var row = this.closest('.line-row');
       if (row) {
+        // Fade visually but do NOT set pointer-events:none
+        // — that would prevent the hidden checkbox from submitting
         row.style.opacity = '0.4';
-        row.style.pointerEvents = 'none';
+        row.style.textDecoration = 'line-through';
         this.textContent = 'Removing…';
+        this.disabled = true;
       }
     }
   });
