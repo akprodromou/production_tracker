@@ -4300,7 +4300,7 @@
     "name": "Εξωτερικό κουτί -US Συσκευασία δώρου christmas edition ( 6x50ml )",
     "sku": "07-0000349",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -5800,7 +5800,7 @@
     "name": "Εξωτερικό κουτί - Συσκευασία δώρου christmas edition ( 6x50ml )",
     "sku": "07-0000307",
     "unit": 2,
-    "category": "RAW"
+    "category": "FIN"
   }
 },
 {
@@ -7460,7 +7460,7 @@
     "name": "Εξωτερικό κουτί - Συσκευασία δώρου Duo holiday (santa, snowman)",
     "sku": "07-0000371",
     "unit": 2,
-    "category": "PKG"
+    "category": "FIN"
   }
 },
 {
@@ -7470,7 +7470,7 @@
     "name": "UK Lbl back Yiayia Duo set (santa, snowman)",
     "sku": "07-0000372",
     "unit": 2,
-    "category": "FIN"
+    "category": "PKG"
   }
 },
 {
@@ -7480,7 +7480,7 @@
     "name": "US Lbl back Yiayia Duo set (santa, snowman)",
     "sku": "07-0000373",
     "unit": 2,
-    "category": "FIN"
+    "category": "PKG"
   }
 },
 {
@@ -7490,17 +7490,7 @@
     "name": "AUS Lbl back Yiayia Duo set (santa, snowman)",
     "sku": "07-0000374",
     "unit": 2,
-    "category": "FIN"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 757,
-  "fields": {
-    "name": "Duo holiday packaging Taiwan",
-    "sku": "999974",
-    "unit": 2,
-    "category": "FIN"
+    "category": "PKG"
   }
 },
 {
@@ -7509,36 +7499,6 @@
   "fields": {
     "name": "Εξωτερικό κουτί - Συσκευασία δώρου Keepsake Feast (evoo, chili, vinegar, salt, rusks, orzo, tea)",
     "sku": "07-0000375",
-    "unit": 2,
-    "category": "FIN"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 759,
-  "fields": {
-    "name": "AUS Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
-    "sku": "999960",
-    "unit": 2,
-    "category": "FIN"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 760,
-  "fields": {
-    "name": "TAIWAN Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
-    "sku": "999961",
-    "unit": 2,
-    "category": "FIN"
-  }
-},
-{
-  "model": "inventory.material",
-  "pk": 761,
-  "fields": {
-    "name": "KR Συσκευασία δώρου evoo, evoo chilli, evoo basil, evoo garlic, evoo lemon, evoo truffle ( 6x50ml )",
-    "sku": "999962",
     "unit": 2,
     "category": "FIN"
   }
@@ -7909,6 +7869,26 @@
   "fields": {
     "name": "US Sticker olive oil green 50ml round",
     "sku": "07-0000398",
+    "unit": 2,
+    "category": "PKG"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 814,
+  "fields": {
+    "name": "US yiayia can garlic 100ml (76x56x80)",
+    "sku": "999001",
+    "unit": 2,
+    "category": "PKG"
+  }
+},
+{
+  "model": "inventory.material",
+  "pk": 815,
+  "fields": {
+    "name": "US yiayia can chili 100ml (76x56x80)",
+    "sku": "999002",
     "unit": 2,
     "category": "PKG"
   }
@@ -10497,8 +10477,8 @@
     "order": 6,
     "material": 274,
     "quantity_ordered": "330.000",
-    "quantity_fulfilled": "0.000",
-    "status": "PENDING",
+    "quantity_fulfilled": "330.000",
+    "status": "FULFILLED",
     "notes": ""
   }
 },
@@ -10699,68 +10679,8 @@
   "pk": 48,
   "fields": {
     "order": 6,
-    "material": 310,
-    "quantity_ordered": "750.000",
-    "quantity_fulfilled": "0.000",
-    "status": "PENDING",
-    "notes": ""
-  }
-},
-{
-  "model": "inventory.clientorderline",
-  "pk": 49,
-  "fields": {
-    "order": 6,
-    "material": 396,
-    "quantity_ordered": "300.000",
-    "quantity_fulfilled": "0.000",
-    "status": "PENDING",
-    "notes": ""
-  }
-},
-{
-  "model": "inventory.clientorderline",
-  "pk": 50,
-  "fields": {
-    "order": 6,
-    "material": 722,
-    "quantity_ordered": "750.000",
-    "quantity_fulfilled": "0.000",
-    "status": "PENDING",
-    "notes": ""
-  }
-},
-{
-  "model": "inventory.clientorderline",
-  "pk": 51,
-  "fields": {
-    "order": 6,
-    "material": 759,
-    "quantity_ordered": "250.000",
-    "quantity_fulfilled": "0.000",
-    "status": "PENDING",
-    "notes": ""
-  }
-},
-{
-  "model": "inventory.clientorderline",
-  "pk": 52,
-  "fields": {
-    "order": 6,
-    "material": 760,
-    "quantity_ordered": "250.000",
-    "quantity_fulfilled": "0.000",
-    "status": "PENDING",
-    "notes": ""
-  }
-},
-{
-  "model": "inventory.clientorderline",
-  "pk": 53,
-  "fields": {
-    "order": 6,
-    "material": 761,
-    "quantity_ordered": "2000.000",
+    "material": 601,
+    "quantity_ordered": "3905.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -10772,7 +10692,7 @@
   "fields": {
     "order": 6,
     "material": 476,
-    "quantity_ordered": "5490.000",
+    "quantity_ordered": "6039.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -10784,7 +10704,7 @@
   "fields": {
     "order": 6,
     "material": 762,
-    "quantity_ordered": "5490.000",
+    "quantity_ordered": "6039.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -10796,7 +10716,7 @@
   "fields": {
     "order": 6,
     "material": 763,
-    "quantity_ordered": "5490.000",
+    "quantity_ordered": "6039.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -10808,7 +10728,7 @@
   "fields": {
     "order": 6,
     "material": 764,
-    "quantity_ordered": "2490.000",
+    "quantity_ordered": "2739.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -10820,7 +10740,43 @@
   "fields": {
     "order": 6,
     "material": 765,
-    "quantity_ordered": "3006.000",
+    "quantity_ordered": "3307.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 59,
+  "fields": {
+    "order": 6,
+    "material": 753,
+    "quantity_ordered": "4015.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 60,
+  "fields": {
+    "order": 6,
+    "material": 430,
+    "quantity_ordered": "825.000",
+    "quantity_fulfilled": "0.000",
+    "status": "PENDING",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.clientorderline",
+  "pk": 61,
+  "fields": {
+    "order": 6,
+    "material": 758,
+    "quantity_ordered": "330.000",
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
@@ -11094,30 +11050,11 @@
 },
 {
   "model": "inventory.productionrun",
-  "pk": 31,
-  "fields": {
-    "reference": "PR-DUO-HOLIDAY-PACKAGING-AUS",
-    "material": 756,
-    "planned_quantity": "150.000",
-    "actual_quantity": null,
-    "status": "PLANNED",
-    "planned_start": "2026-05-19",
-    "planned_end": "2026-08-27",
-    "actual_start": null,
-    "actual_end": null,
-    "location": 7,
-    "notes": "",
-    "created_at": "2026-05-19T09:32:31.966Z",
-    "product_batch": null
-  }
-},
-{
-  "model": "inventory.productionrun",
   "pk": 32,
   "fields": {
     "reference": "PR-DUO-HOLIDAY-PACKAGING-EU",
     "material": 753,
-    "planned_quantity": "1500.000",
+    "planned_quantity": "4015.000",
     "actual_quantity": null,
     "status": "PLANNED",
     "planned_start": "2026-05-19",
@@ -11125,46 +11062,8 @@
     "actual_start": null,
     "actual_end": null,
     "location": 7,
-    "notes": "",
+    "notes": "Includes the stickers for the UK, US and AUS markets.",
     "created_at": "2026-05-19T09:33:13.866Z",
-    "product_batch": null
-  }
-},
-{
-  "model": "inventory.productionrun",
-  "pk": 33,
-  "fields": {
-    "reference": "PR-DUO-HOLIDAY-PACKAGING-UK",
-    "material": 754,
-    "planned_quantity": "500.000",
-    "actual_quantity": null,
-    "status": "PLANNED",
-    "planned_start": "2026-05-19",
-    "planned_end": "2026-08-27",
-    "actual_start": null,
-    "actual_end": null,
-    "location": 7,
-    "notes": "",
-    "created_at": "2026-05-19T09:37:08.333Z",
-    "product_batch": null
-  }
-},
-{
-  "model": "inventory.productionrun",
-  "pk": 34,
-  "fields": {
-    "reference": "PR-DUO-HOLIDAY-PACKAGING-US",
-    "material": 755,
-    "planned_quantity": "1500.000",
-    "actual_quantity": null,
-    "status": "PLANNED",
-    "planned_start": "2026-05-19",
-    "planned_end": "2026-08-27",
-    "actual_start": null,
-    "actual_end": null,
-    "location": 7,
-    "notes": "",
-    "created_at": "2026-05-19T09:37:48.838Z",
     "product_batch": null
   }
 },
@@ -11174,7 +11073,7 @@
   "fields": {
     "reference": "PR-FEAST-BOX-PACKAGING-EU",
     "material": 758,
-    "planned_quantity": "300.000",
+    "planned_quantity": "330.000",
     "actual_quantity": null,
     "status": "PLANNED",
     "planned_start": "2026-05-19",
@@ -11355,6 +11254,215 @@
     "location": 7,
     "notes": "",
     "created_at": "2026-05-22T13:51:46.083Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 45,
+  "fields": {
+    "reference": "PR-TREE-50ML-EU-2026-01",
+    "material": 596,
+    "planned_quantity": "3905.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": null,
+    "planned_end": "2026-12-07",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T08:15:33.762Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 46,
+  "fields": {
+    "reference": "PR-TREE-50ML-US-2026-01",
+    "material": 596,
+    "planned_quantity": "4132.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": null,
+    "planned_end": null,
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T08:19:28.344Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 47,
+  "fields": {
+    "reference": "PR-STAR-50ML-US-2026-01",
+    "material": 597,
+    "planned_quantity": "4132.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": null,
+    "planned_end": "2026-07-15",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T08:30:35.091Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 48,
+  "fields": {
+    "reference": "PR-STAR-50ML-EU-2026-01",
+    "material": 597,
+    "planned_quantity": "3905.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": null,
+    "planned_end": "2026-07-15",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T08:32:02.376Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 49,
+  "fields": {
+    "reference": "PR-EVOO-6X50ML-CHRISTMAS-EU-2026-01",
+    "material": 601,
+    "planned_quantity": "4100.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": "2026-05-23",
+    "planned_end": "2026-08-27",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T08:43:10.773Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 50,
+  "fields": {
+    "reference": "PR-EVOO-6X50ML-CHRISTMAS-US-2026-01",
+    "material": 430,
+    "planned_quantity": "867.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": null,
+    "planned_end": "2026-08-27",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T08:43:12.638Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 52,
+  "fields": {
+    "reference": "PR-EVOO-ORIGINAL-100ML-US-2026-01",
+    "material": 476,
+    "planned_quantity": "6039.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": "2026-05-23",
+    "planned_end": "2026-07-15",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T08:58:17.293Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 53,
+  "fields": {
+    "reference": "PR-EVOO-GARLIC-100ML-US-2026-01",
+    "material": 762,
+    "planned_quantity": "6039.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": null,
+    "planned_end": "2026-07-15",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T08:58:19.220Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 54,
+  "fields": {
+    "reference": "PR-EVOO-CHILI-100ML-US-2026-01",
+    "material": 763,
+    "planned_quantity": "6039.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": null,
+    "planned_end": "2026-07-15",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T09:10:46.081Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 55,
+  "fields": {
+    "reference": "PR-RUSKS-TINS-PACKAGING-US",
+    "material": 764,
+    "planned_quantity": "2876.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": "2026-05-23",
+    "planned_end": null,
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T10:44:36.146Z",
+    "product_batch": null
+  }
+},
+{
+  "model": "inventory.productionrun",
+  "pk": 56,
+  "fields": {
+    "reference": "PR-4X50ML-EVOO-WORLD-PACKAGING-US",
+    "material": 765,
+    "planned_quantity": "3307.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": "2026-05-23",
+    "planned_end": "2026-07-15",
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-05-23T10:46:16.806Z",
     "product_batch": null
   }
 },
@@ -11608,6 +11716,149 @@
     "order_line": 42,
     "quantity_allocated": "4132.000",
     "created_at": "2026-05-22T13:53:18.060Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 44,
+  "fields": {
+    "production_run": 45,
+    "order_line": 44,
+    "quantity_allocated": "3905.000",
+    "created_at": "2026-05-23T08:19:22.349Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 45,
+  "fields": {
+    "production_run": 46,
+    "order_line": 44,
+    "quantity_allocated": "4132.000",
+    "created_at": "2026-05-23T08:21:06.641Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 46,
+  "fields": {
+    "production_run": 53,
+    "order_line": 55,
+    "quantity_allocated": "6039.000",
+    "created_at": "2026-05-23T09:05:48.821Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 47,
+  "fields": {
+    "production_run": 52,
+    "order_line": 54,
+    "quantity_allocated": "6039.000",
+    "created_at": "2026-05-23T09:06:07.522Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 48,
+  "fields": {
+    "production_run": 54,
+    "order_line": 56,
+    "quantity_allocated": "6039.000",
+    "created_at": "2026-05-23T09:11:35.655Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 49,
+  "fields": {
+    "production_run": 47,
+    "order_line": 46,
+    "quantity_allocated": "4132.000",
+    "created_at": "2026-05-23T09:21:52.450Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 50,
+  "fields": {
+    "production_run": 48,
+    "order_line": 46,
+    "quantity_allocated": "3905.000",
+    "created_at": "2026-05-23T09:22:01.729Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 51,
+  "fields": {
+    "production_run": 50,
+    "order_line": 60,
+    "quantity_allocated": "825.000",
+    "created_at": "2026-05-23T09:25:32.787Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 52,
+  "fields": {
+    "production_run": 49,
+    "order_line": 48,
+    "quantity_allocated": "3905.000",
+    "created_at": "2026-05-23T09:26:37.322Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 53,
+  "fields": {
+    "production_run": 32,
+    "order_line": 59,
+    "quantity_allocated": "4015.000",
+    "created_at": "2026-05-23T10:40:00.246Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 54,
+  "fields": {
+    "production_run": 35,
+    "order_line": 61,
+    "quantity_allocated": "330.000",
+    "created_at": "2026-05-23T10:42:28.235Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 55,
+  "fields": {
+    "production_run": 55,
+    "order_line": 57,
+    "quantity_allocated": "2739.000",
+    "created_at": "2026-05-23T10:44:44.029Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunallocation",
+  "pk": 56,
+  "fields": {
+    "production_run": 56,
+    "order_line": 58,
+    "quantity_allocated": "3307.000",
+    "created_at": "2026-05-23T10:46:22.600Z",
     "notes": ""
   }
 },
@@ -12289,14 +12540,14 @@
   "fields": {
     "production_run": 36,
     "material": 232,
-    "quantity_required": "3473.000",
+    "quantity_required": "148.000",
     "quantity_available": "0.000",
     "status": "PENDING",
     "raw_material_batch": null,
     "expected_date": null,
     "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-19T11:38:18.212Z"
+    "updated_at": "2026-05-23T08:23:05.088Z"
   }
 },
 {
@@ -12417,14 +12668,14 @@
   "fields": {
     "production_run": 37,
     "material": 232,
-    "quantity_required": "4100.000",
+    "quantity_required": "171.000",
     "quantity_available": "0.000",
     "status": "PENDING",
     "raw_material_batch": null,
     "expected_date": null,
     "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-19T13:56:12.020Z"
+    "updated_at": "2026-05-23T08:29:01.492Z"
   }
 },
 {
@@ -12929,14 +13180,14 @@
   "fields": {
     "production_run": 38,
     "material": 232,
-    "quantity_required": "866.000",
+    "quantity_required": "37.000",
     "quantity_available": "0.000",
     "status": "PENDING",
     "raw_material_batch": null,
     "expected_date": null,
     "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-20T09:07:32.591Z"
+    "updated_at": "2026-05-23T08:28:29.135Z"
   }
 },
 {
@@ -13441,14 +13692,14 @@
   "fields": {
     "production_run": 43,
     "material": 232,
-    "quantity_required": "4100.000",
+    "quantity_required": "171.000",
     "quantity_available": "0.000",
     "status": "PENDING",
     "raw_material_batch": null,
     "expected_date": null,
     "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-22T13:43:32.078Z"
+    "updated_at": "2026-05-23T08:26:12.106Z"
   }
 },
 {
@@ -13537,14 +13788,14 @@
   "fields": {
     "production_run": 44,
     "material": 232,
-    "quantity_required": "4339.000",
+    "quantity_required": "181.000",
     "quantity_available": "0.000",
     "status": "PENDING",
     "raw_material_batch": null,
     "expected_date": null,
     "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-22T13:53:09.068Z"
+    "updated_at": "2026-05-23T08:24:16.882Z"
   }
 },
 {
@@ -13577,6 +13828,593 @@
     "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:53:09.094Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 156,
+  "fields": {
+    "production_run": 45,
+    "material": 444,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:19:08.852Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 157,
+  "fields": {
+    "production_run": 45,
+    "material": 374,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:15:33.770Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 158,
+  "fields": {
+    "production_run": 45,
+    "material": 217,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:15:33.772Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 159,
+  "fields": {
+    "production_run": 45,
+    "material": 232,
+    "quantity_required": "171.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:26:26.841Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 160,
+  "fields": {
+    "production_run": 45,
+    "material": 563,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:19:08.855Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 161,
+  "fields": {
+    "production_run": 45,
+    "material": 452,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:15:33.778Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 162,
+  "fields": {
+    "production_run": 46,
+    "material": 813,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:20:52.137Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 163,
+  "fields": {
+    "production_run": 46,
+    "material": 374,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:20:52.139Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 164,
+  "fields": {
+    "production_run": 46,
+    "material": 217,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:20:52.141Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 165,
+  "fields": {
+    "production_run": 46,
+    "material": 232,
+    "quantity_required": "181.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:23:50.832Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 166,
+  "fields": {
+    "production_run": 46,
+    "material": 563,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:20:52.144Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 167,
+  "fields": {
+    "production_run": 46,
+    "material": 452,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:20:52.146Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 168,
+  "fields": {
+    "production_run": 47,
+    "material": 374,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:30:35.096Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 169,
+  "fields": {
+    "production_run": 47,
+    "material": 217,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:30:35.098Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 170,
+  "fields": {
+    "production_run": 47,
+    "material": 812,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:31:58.616Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 171,
+  "fields": {
+    "production_run": 47,
+    "material": 232,
+    "quantity_required": "181.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:30:35.103Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 172,
+  "fields": {
+    "production_run": 47,
+    "material": 565,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:31:58.618Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 173,
+  "fields": {
+    "production_run": 47,
+    "material": 452,
+    "quantity_required": "4339.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:30:35.108Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 174,
+  "fields": {
+    "production_run": 48,
+    "material": 374,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:33:22.222Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 175,
+  "fields": {
+    "production_run": 48,
+    "material": 217,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:33:22.225Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 176,
+  "fields": {
+    "production_run": 48,
+    "material": 442,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:33:22.226Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 177,
+  "fields": {
+    "production_run": 48,
+    "material": 232,
+    "quantity_required": "171.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:33:22.228Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 178,
+  "fields": {
+    "production_run": 48,
+    "material": 565,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:33:22.229Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 179,
+  "fields": {
+    "production_run": 48,
+    "material": 452,
+    "quantity_required": "4100.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T08:33:22.231Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 180,
+  "fields": {
+    "production_run": 52,
+    "material": 165,
+    "quantity_required": "6341.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:00:47.356Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 181,
+  "fields": {
+    "production_run": 52,
+    "material": 331,
+    "quantity_required": "6341.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:00:47.359Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 182,
+  "fields": {
+    "production_run": 52,
+    "material": 703,
+    "quantity_required": "397.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:00:47.360Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 183,
+  "fields": {
+    "production_run": 53,
+    "material": 331,
+    "quantity_required": "6341.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:02:44.823Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 184,
+  "fields": {
+    "production_run": 53,
+    "material": 703,
+    "quantity_required": "397.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:02:44.825Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 185,
+  "fields": {
+    "production_run": 53,
+    "material": 814,
+    "quantity_required": "6341.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:04:21.580Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 186,
+  "fields": {
+    "production_run": 54,
+    "material": 331,
+    "quantity_required": "6341.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:10:46.087Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 187,
+  "fields": {
+    "production_run": 54,
+    "material": 815,
+    "quantity_required": "6341.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:11:28.105Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 188,
+  "fields": {
+    "production_run": 54,
+    "material": 703,
+    "quantity_required": "397.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:10:46.092Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 189,
+  "fields": {
+    "production_run": 32,
+    "material": 756,
+    "quantity_required": "158.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:21:25.354Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 190,
+  "fields": {
+    "production_run": 32,
+    "material": 754,
+    "quantity_required": "525.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:21:25.356Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 191,
+  "fields": {
+    "production_run": 32,
+    "material": 755,
+    "quantity_required": "1575.000",
+    "quantity_available": "0.000",
+    "status": "PENDING",
+    "raw_material_batch": null,
+    "expected_date": null,
+    "actual_date": null,
+    "notes": "",
+    "updated_at": "2026-05-23T09:21:25.358Z"
+  }
+},
+{
+  "model": "inventory.productbatchreservation",
+  "pk": 1,
+  "fields": {
+    "product_batch": 16,
+    "order_line": 16,
+    "quantity_reserved": "330.000",
+    "notes": "",
+    "created_at": "2026-05-23T09:32:06.184Z"
   }
 },
 {
