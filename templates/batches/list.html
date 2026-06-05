@@ -7,6 +7,13 @@
 <style>
   th.sortable { cursor:pointer; user-select:none; white-space:nowrap; }
   th.sortable:hover { color:var(--accent); }
+  th.sort-asc::after  { content:' ↑'; color:var(--accent); }
+  th.sort-desc::after { content:' ↓'; color:var(--accent); }
+  th.sortable:not(.sort-asc):not(.sort-desc)::after { content:' ⇅'; font-size:10px; color:var(--muted); }
+</style>
+<style>
+  th.sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+  th.sortable:hover { color:var(--accent); }
   th.sortable::after { content:' \21C5'; font-size:10px; color:var(--muted); }
   th.sortable.asc::after  { content:' \2191'; color:var(--accent); }
   th.sortable.desc::after { content:' \2193'; color:var(--accent); }
@@ -58,13 +65,12 @@
     <table id="batchTable">
       <thead>
         <tr>
-          <th>Lot Number</th>
-          <th>Material</th>
-          <th>SKU</th>
-          <th>Location</th>
-          <th>Total</th>
-          <th>Available</th>
-          <th>Reserved</th>
+          {% for col_key, col_label in cols %}
+          <th class="sortable {% if current_sort == col_key %}sort-{{ current_dir }}{% endif %}">
+            <a href="?sort={{ col_key }}&dir={% if current_sort == col_key %}{% if current_dir == 'asc' %}desc{% else %}asc{% endif %}{% else %}asc{% endif %}{% if request.GET.material_id %}&material_id={{ request.GET.material_id }}{% endif %}{% if request.GET.location_id %}&location_id={{ request.GET.location_id }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+               style="color:inherit;text-decoration:none">{{ col_label }}</a>
+          </th>
+          {% endfor %}
           <th style="text-align:right">Actions</th>
         </tr>
       </thead>
@@ -85,7 +91,7 @@
               <span class="badge badge-red">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span>
             {% endif %}
           </td>
-          <td><span class="badge badge-orange">{{ b.reserved_quantity|smart_qty:b.material.unit.name }}</span></td>
+          <td><span class="badge badge-orange">{{ b.total_allocated|smart_qty:b.material.unit.name }}</span></td>
           <td>
             <div class="td-actions" style="justify-content:flex-end">
               <a href="{% url 'batch-detail' b.pk %}" class="btn btn-ghost btn-sm">View</a>

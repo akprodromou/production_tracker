@@ -40,9 +40,17 @@ class Material(models.Model):
 
 
 class RawMaterialBatch(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING',          'Pending — not yet ordered'),
+        ('ORDERED',          'Ordered from supplier'),
+        ('IN_WAREHOUSE_RAW', 'In Warehouse as Raw Material'),
+    ]
     material = models.ForeignKey('Material', on_delete=models.PROTECT)
     lot_number = models.CharField(max_length=100)
     total_quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='PENDING'
+    )
     created_at = models.DateTimeField(default=timezone.now)
     location = models.ForeignKey('Location', on_delete=models.PROTECT)
 
@@ -91,6 +99,35 @@ class RawMaterialBatch(models.Model):
             - self.reserved_quantity
             + self.released_quantity
         )
+
+
+
+class RawBatchAllocation(models.Model):
+    """
+    Links a RawMaterialBatch to a ProductionRun with a specific quantity.
+    Replaces the old Reserve/Consume MaterialTransaction workflow.
+    One batch can be split across multiple runs.
+    """
+    raw_batch      = models.ForeignKey(
+        'RawMaterialBatch', on_delete=models.CASCADE,
+        related_name='allocations'
+    )
+    production_run = models.ForeignKey(
+        'ProductionRun', on_delete=models.CASCADE,
+        related_name='raw_allocations'
+    )
+    quantity       = models.DecimalField(max_digits=15, decimal_places=3)
+    created_at     = models.DateTimeField(default=timezone.now)
+    notes          = models.TextField(blank=True)
+
+    def __str__(self):
+        return (
+            f"{self.raw_batch.lot_number} → "
+            f"{self.production_run.reference} × {self.quantity}"
+        )
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class ProductBatch(models.Model):
@@ -179,16 +216,16 @@ class Client(models.Model):
 
 class ClientOrder(models.Model):
     STATUS_CHOICES = [
-        ('DRAFT',                'Draft'),
+        ('PURCHASE_ORDER',       'Purchase Order'),
         ('CONFIRMED',            'Confirmed'),
-        ('IN_PRODUCTION',        'In Production'),
         ('PARTIALLY_FULFILLED',  'Partially Fulfilled'),
         ('FULFILLED',            'Fulfilled'),
+        ('SHIPPED',              'Shipped'),
         ('CANCELLED',            'Cancelled'),
     ]
     reference = models.CharField(max_length=100, unique=True)
     client = models.ForeignKey(Client, on_delete=models.PROTECT, related_name='orders')
-    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='DRAFT')
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='PURCHASE_ORDER')
     order_date = models.DateField(default=timezone.now)
     required_by = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
@@ -294,17 +331,22 @@ class ProductionRun(models.Model):
     def board_status(self):
         """
         Derives the Kanban stage from the least-advanced component.
-        Status priority (lowest = most blocking):
-          PENDING → ORDERED → IN_WAREHOUSE_RAW → IN_PROCESS → FINAL_PRODUCT
+        Status is derived from raw batch allocations.
         """
-        priority = [
-            'PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT'
-        ]
-        components = list(self.components.values_list('status', flat=True))
+        priority = ['PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW']
+        components = list(self.components.all())
         if not components:
             return 'PENDING'
-        # Return the status with the lowest priority index (the bottleneck)
-        return min(components, key=lambda s: priority.index(s) if s in priority else 0)
+        statuses = [c.status for c in components]
+        return min(statuses, key=lambda s: priority.index(s) if s in priority else 0)
+
+    @property
+    def all_components_in_warehouse(self):
+        """True when every component has status IN_WAREHOUSE_RAW."""
+        components = list(self.components.all())
+        if not components:
+            return False
+        return all(c.status == 'IN_WAREHOUSE_RAW' for c in components)
 
     class Meta:
         ordering = ['-created_at']
@@ -343,9 +385,7 @@ class ProductionComponent(models.Model):
     STATUS_CHOICES = [
         ('PENDING',          'Pending — not yet ordered'),
         ('ORDERED',          'Ordered from supplier'),
-        ('IN_WAREHOUSE_RAW', 'In Warehouse as raw material'),
-        ('IN_PROCESS',       'Processed for production'),
-        ('FINAL_PRODUCT',    'Stored as Final Product'),
+        ('IN_WAREHOUSE_RAW', 'In Warehouse as Raw Material'),
     ]
     production_run = models.ForeignKey(
         ProductionRun, on_delete=models.CASCADE, related_name='components'
@@ -358,30 +398,50 @@ class ProductionComponent(models.Model):
     quantity_available = models.DecimalField(
         max_digits=15, decimal_places=3, default=Decimal('0')
     )
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default='PENDING'
-    )
-    raw_material_batch = models.ForeignKey(
-        RawMaterialBatch, on_delete=models.SET_NULL,
-        null=True, blank=True,
-        help_text="Specific batch assigned to this component"
-    )
     expected_date = models.DateField(null=True, blank=True)
-    actual_date = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def status(self):
+        """
+        Derived from the raw batch allocations linked to this component's
+        production run for this material. Returns worst-case (lowest) status.
+        """
+        priority = ['PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW']
+        allocations = RawBatchAllocation.objects.filter(
+            production_run=self.production_run,
+            raw_batch__material=self.material
+        ).select_related('raw_batch')
+        if not allocations.exists():
+            return 'PENDING'
+        statuses = [a.raw_batch.status for a in allocations]
+        return min(statuses, key=lambda s: priority.index(s) if s in priority else 0)
+
+    @property
+    def allocated_quantity(self):
+        from django.db.models import Sum
+        from django.db.models.functions import Coalesce
+        from django.db.models import DecimalField as DField
+        return RawBatchAllocation.objects.filter(
+            production_run=self.production_run,
+            raw_batch__material=self.material
+        ).aggregate(
+            total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DField())
+        )['total']
+
+    @property
+    def quantity_shortfall(self):
+        shortfall = self.quantity_required - self.allocated_quantity
+        return shortfall if shortfall > 0 else Decimal('0')
+
+    @property
+    def is_ready(self):
+        return self.status == 'IN_WAREHOUSE_RAW'
 
     def __str__(self):
         return f"{self.production_run.reference} | {self.material.name} | {self.status}"
 
-    @property
-    def is_ready(self):
-        return self.status in ('IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT')
-
-    @property
-    def quantity_shortfall(self):
-        shortfall = self.quantity_required - self.quantity_available
-        return shortfall if shortfall > 0 else Decimal('0')
 
     class Meta:
         unique_together = [['production_run', 'material']]

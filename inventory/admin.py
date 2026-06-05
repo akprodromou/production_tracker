@@ -138,7 +138,7 @@ class ClientOrderLineAdmin(admin.ModelAdmin):
 class ProductionComponentInline(admin.TabularInline):
     model  = ProductionComponent
     extra  = 1
-    fields = ['material', 'quantity_required', 'quantity_available', 'status', 'raw_material_batch', 'expected_date', 'actual_date']
+    fields = ['material', 'quantity_required', 'expected_date', 'notes']
 
 
 class ProductionRunAllocationInline(admin.TabularInline):
@@ -174,8 +174,8 @@ class ProductionRunAdmin(admin.ModelAdmin):
 
 @admin.register(ProductionComponent)
 class ProductionComponentAdmin(admin.ModelAdmin):
-    list_display  = ['id', 'production_run', 'material', 'status', 'quantity_required', 'quantity_available', 'expected_date']
-    list_filter   = ['status', 'material']
+    list_display  = ['id', 'production_run', 'material', 'quantity_required', 'expected_date']
+    list_filter   = ['material']
     search_fields = ['production_run__reference', 'material__name']
 
 

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load inventory_extras %}
-{% block title %}{{ batch.lot_number }} — Batch Detail{% endblock %}
+{% block title %}{{ batch.lot_number }} — Raw Batch{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
   <a href="{% url 'batch-list' %}">Raw Batches</a><span>/</span>
@@ -11,180 +11,192 @@
 <div class="page-header">
   <div>
     <h1>{{ batch.lot_number }}</h1>
-    <p>{{ batch.material.name }} · <span class="text-mono">{{ batch.material.sku }}</span> · {{ batch.location.name }}</p>
+    <p>{{ batch.material.name }} · <a href="{% url 'material-detail' batch.material.pk %}" class="text-mono" style="color:var(--accent);text-decoration:none">{{ batch.material.sku }}</a></p>
   </div>
   <div class="page-actions">
     <a href="{% url 'batch-edit' batch.pk %}" class="btn btn-secondary">Edit</a>
-    <button class="btn btn-success"   onclick="document.getElementById('reserveModal').classList.add('open')">Reserve</button>
-    <button class="btn btn-warn"      onclick="document.getElementById('consumeModal').classList.add('open')">Consume</button>
-    <button class="btn btn-secondary" onclick="document.getElementById('releaseModal').classList.add('open')">Release</button>
     <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
   </div>
 </div>
 
+{# ── STOCK SUMMARY ── #}
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px" class="mb-3">
-  <div class="stat-card"><div class="stat-label">Material</div><div style="font-size:15px;font-weight:600">{{ batch.material.name }}</div></div>
-  <div class="stat-card"><div class="stat-label">SKU</div><div class="text-mono" style="font-size:15px">{{ batch.material.sku }}</div></div>
-  <div class="stat-card"><div class="stat-label">Location</div><div>{{ batch.location.name }}</div></div>
-  <div class="stat-card"><div class="stat-label">Created</div><div class="text-mono" style="font-size:13px">{{ batch.created_at|date:"Y-m-d H:i" }}</div></div>
-</div>
-
-<div class="card mb-3">
-  <div class="card-header"><span class="card-title">Stock Summary</span></div>
-  <div class="card-body">
-    {% include "partials/_batch_stock_card.html" with batch=batch %}
-    <div style="margin-top:12px;font-size:12px;color:var(--muted)">
-      Total declared: <span class="text-mono">{{ batch.total_quantity|smart_qty:batch.material.unit.name }} {{ batch.material.unit.name }}</span>
+  <div class="stat-card">
+    <div class="stat-label">Material</div>
+    <div style="font-size:14px;font-weight:500">{{ batch.material.name }}</div>
+    <div class="text-mono text-muted" style="font-size:11px">{{ batch.material.sku }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Quantity</div>
+    <div class="stat-value">{{ batch.total_quantity|smart_qty:batch.material.unit.name }}</div>
+    <div class="stat-sub">{{ batch.material.unit.name }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Allocated to Runs</div>
+    <div class="stat-value" style="color:var(--warn)">{{ total_allocated|smart_qty:batch.material.unit.name }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Available</div>
+    <div class="stat-value" style="{% if available > 0 %}color:var(--accent2){% else %}color:var(--danger){% endif %}">
+      {{ available|smart_qty:batch.material.unit.name }}
     </div>
   </div>
 </div>
 
-<div class="card">
-  <div class="card-header">
-    <span class="card-title">Transaction Ledger</span>
-    <a href="{% url 'transaction-list' %}?batch_id={{ batch.pk }}" class="btn btn-ghost btn-sm">Full view →</a>
+{# ── STATUS ── #}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Batch Status</span></div>
+  <div class="card-body">
+    <form method="post" style="display:flex;align-items:center;gap:12px">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_status">
+      <select name="status" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px;outline:none;">
+        {% for val, label in batch.STATUS_CHOICES %}
+        <option value="{{ val }}" {% if batch.status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-primary">Update Status</button>
+      <span class="text-muted" style="font-size:12px">
+        Current:
+        {% if batch.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+        {% elif batch.status == 'ORDERED' %}<span class="badge badge-blue">Ordered</span>
+        {% else %}<span class="badge badge-green">In Warehouse</span>
+        {% endif %}
+      </span>
+    </form>
   </div>
+</div>
+
+{# ── PRODUCTION RUN ALLOCATIONS ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Production Run Allocations</span>
+    <span class="text-muted" style="font-size:11px">Link this batch to runs that require {{ batch.material.name }}</span>
+  </div>
+  <div class="card-body">
+
+    {% if allocations %}
+    <div class="table-wrap mb-3">
+      <table>
+        <thead>
+          <tr><th>Production Run</th><th>Product</th><th>Qty Allocated</th><th>Date</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for alloc in allocations %}
+          <tr id="alloc-row-{{ alloc.pk }}">
+            <td class="td-mono">
+              <a href="{% url 'production-run-detail' alloc.production_run.pk %}" style="color:var(--accent);text-decoration:none">
+                {{ alloc.production_run.reference }}
+              </a>
+            </td>
+            <td>{{ alloc.production_run.material.name }}</td>
+            <td class="td-mono" id="alloc-qty-{{ alloc.pk }}">
+              {{ alloc.quantity|smart_qty:batch.material.unit.name }}
+            </td>
+            <td class="text-muted" style="font-size:12px">{{ alloc.created_at|date:"Y-m-d" }}</td>
+            <td>
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                <button type="button" class="btn btn-secondary btn-sm"
+                  onclick="toggleEdit({{ alloc.pk }}, {{ alloc.quantity }})">Edit</button>
+                <form method="post" style="display:inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="remove_allocation">
+                  <input type="hidden" name="allocation_id" value="{{ alloc.pk }}">
+                  <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                </form>
+                <form method="post" id="edit-form-{{ alloc.pk }}" style="display:none">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="edit_allocation">
+                  <input type="hidden" name="allocation_id" value="{{ alloc.pk }}">
+                  <input type="number" name="quantity" id="edit-qty-{{ alloc.pk }}"
+                    step="1" min="1"
+                    style="width:80px;background:var(--surface2);border:1px solid var(--accent);border-radius:var(--radius);color:var(--text);font-size:13px;padding:5px 8px;outline:none;">
+                  <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                  <button type="button" class="btn btn-ghost btn-sm"
+                    onclick="document.getElementById('edit-form-{{ alloc.pk }}').style.display='none'">Cancel</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if available > 0 and eligible_runs %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="allocate">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end">
+        <div class="form-group">
+          <label>Production Run</label>
+          <select name="production_run_id" required>
+            <option value="">Select run…</option>
+            {% for run in eligible_runs %}
+            <option value="{{ run.pk }}">{{ run.reference }} — {{ run.material.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantity (max {{ available|smart_qty:batch.material.unit.name }})</label>
+          <input type="number" name="quantity" step="1" min="1" max="{{ available }}" required>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input type="text" name="notes" placeholder="Optional…">
+        </div>
+        <div style="padding-bottom:1px">
+          <button type="submit" class="btn btn-primary">Allocate</button>
+        </div>
+      </div>
+    </form>
+    {% elif not eligible_runs %}
+    <p class="text-muted" style="font-size:13px">
+      No active production runs found that contain <strong>{{ batch.material.name }}</strong> as a component.
+    </p>
+    {% elif available <= 0 %}
+    <p class="text-muted" style="font-size:13px">All stock has been allocated.</p>
+    {% endif %}
+
+  </div>
+</div>
+
+{# ── TRANSACTIONS ── #}
+{% if transactions %}
+<div class="card">
+  <div class="card-header"><span class="card-title">Transaction History</span></div>
   <div class="table-wrap">
-    {% if transactions %}
     <table>
       <thead>
-        <tr><th>Type</th><th>Qty</th><th>Product Batch</th><th>Reference</th><th>When</th></tr>
+        <tr><th>Type</th><th>Linked Batch</th><th>Qty</th><th>Reference</th><th>When</th></tr>
       </thead>
       <tbody>
         {% for tx in transactions %}
         <tr>
-          <td>
-            {% if tx.transaction_type == 'PRODUCED' %}<span class="badge badge-blue">PRODUCED</span>
-            {% elif tx.transaction_type == 'RESERVED' %}<span class="badge badge-orange">RESERVED</span>
-            {% elif tx.transaction_type == 'CONSUMED' %}<span class="badge badge-red">CONSUMED</span>
-            {% else %}<span class="badge badge-grey">RELEASED</span>
-            {% endif %}
-          </td>
-          <td class="td-mono">{{ tx.quantity|smart_qty:batch.material.unit.name }}</td>
-          <td class="td-mono text-muted">
+          <td><span class="badge badge-grey">{{ tx.transaction_type }}</span></td>
+          <td class="td-mono">
             {% if tx.product_batch %}
-              <a href="{% url 'product-batch-detail' tx.product_batch.pk %}" style="color:var(--accent);text-decoration:none">{{ tx.product_batch.batch_number }}</a>
+              <a href="{% url 'product-batch-detail' tx.product_batch.pk %}" style="color:var(--accent);text-decoration:none">
+                {{ tx.product_batch.batch_number }}
+              </a>
             {% else %}—{% endif %}
           </td>
+          <td class="td-mono">{{ tx.quantity|smart_qty:batch.material.unit.name }}</td>
           <td class="text-muted" style="font-size:12px">{{ tx.reference|default:"—" }}</td>
           <td class="text-muted" style="font-size:12px">{{ tx.created_at|date:"Y-m-d H:i" }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    {% else %}
-    <div class="empty"><div class="empty-icon">📋</div><h3>No transactions yet</h3></div>
-    {% endif %}
   </div>
 </div>
+{% endif %}
 
-{# ── RESERVE MODAL ── #}
-<div class="modal-backdrop" id="reserveModal">
-  <div class="modal">
-    <h3>Reserve Stock</h3>
-    <p style="margin-bottom:12px;font-size:13px;color:var(--muted)">
-      Link this reservation to a product batch. Optionally reference the production run for full traceability.
-    </p>
-    <form method="post" action="{% url 'reserve-material' %}">
-      {% csrf_token %}
-      <input type="hidden" name="batch_id" value="{{ batch.pk }}">
-      <div class="form-grid" style="margin-bottom:16px">
-        <div class="form-group">
-          <label>Product Batch</label>
-          <select name="product_batch_id" required>
-            <option value="">Select product batch…</option>
-            {% for pb in product_batches %}
-            <option value="{{ pb.pk }}">{{ pb.batch_number }} — {{ pb.material.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Production Run <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-          <select name="production_run_id">
-            <option value="">None</option>
-            {% for run in production_runs %}
-            <option value="{{ run.pk }}">{{ run.reference }} — {{ run.material.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Quantity (available: {{ batch.available_quantity|smart_qty:batch.material.unit.name }})</label>
-          <input type="number" name="quantity" step="0.001" min="0.001" max="{{ batch.available_quantity|smart_qty:batch.material.unit.name }}" required>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('reserveModal').classList.remove('open')">Cancel</button>
-        <button type="submit" class="btn btn-success">Reserve</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-{# ── CONSUME MODAL ── #}
-<div class="modal-backdrop" id="consumeModal">
-  <div class="modal">
-    <h3>Consume Reserved Stock</h3>
-    <form method="post" action="{% url 'consume-material' %}">
-      {% csrf_token %}
-      <input type="hidden" name="batch_id" value="{{ batch.pk }}">
-      <div class="form-grid" style="margin-bottom:16px">
-        <div class="form-group">
-          <label>Product Batch</label>
-          <select name="product_batch_id" required>
-            <option value="">Select product batch…</option>
-            {% for pb in product_batches %}
-            <option value="{{ pb.pk }}">{{ pb.batch_number }} — {{ pb.material.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Quantity</label>
-          <input type="number" name="quantity" step="0.001" min="0.001" required>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('consumeModal').classList.remove('open')">Cancel</button>
-        <button type="submit" class="btn btn-warn">Consume</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-{# ── RELEASE MODAL ── #}
-<div class="modal-backdrop" id="releaseModal">
-  <div class="modal">
-    <h3>Release Reservation</h3>
-    <form method="post" action="{% url 'release-material' %}">
-      {% csrf_token %}
-      <input type="hidden" name="batch_id" value="{{ batch.pk }}">
-      <div class="form-grid" style="margin-bottom:16px">
-        <div class="form-group">
-          <label>Product Batch</label>
-          <select name="product_batch_id" required>
-            <option value="">Select product batch…</option>
-            {% for pb in product_batches %}
-            <option value="{{ pb.pk }}">{{ pb.batch_number }} — {{ pb.material.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Quantity to Release</label>
-          <input type="number" name="quantity" step="0.001" min="0.001" required>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('releaseModal').classList.remove('open')">Cancel</button>
-        <button type="submit" class="btn btn-secondary">Release</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-{# ── DELETE MODAL ── #}
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal">
     <h3>⚠ Confirm Delete</h3>
-    <p>Delete batch <strong style="color:var(--text)">{{ batch.lot_number }}</strong> and all its transactions? This cannot be undone.</p>
+    <p>Delete batch <strong style="color:var(--text)">{{ batch.lot_number }}</strong>? All allocations will be removed.</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
       <form method="post" action="{% url 'batch-delete' batch.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
@@ -192,11 +204,22 @@
   </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script>
-document.querySelectorAll('.modal-backdrop').forEach(function(m) {
-  m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
 });
+
+function toggleEdit(allocPk, currentQty) {
+  var form = document.getElementById('edit-form-' + allocPk);
+  var qtyInput = document.getElementById('edit-qty-' + allocPk);
+  if (form.style.display === 'none' || form.style.display === '') {
+    form.style.display = 'block';
+    qtyInput.value = Math.round(currentQty);
+    qtyInput.focus();
+  } else {
+    form.style.display = 'none';
+  }
+}
 </script>
 {% endblock %}

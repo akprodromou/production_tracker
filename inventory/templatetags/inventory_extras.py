@@ -35,9 +35,10 @@ def smart_qty(value, unit=None):
         return str(int(d))
     else:
         # Round to 1 decimal place, strip trailing zero
-        formatted = '{:.1f}'.format(d)
+        rounded = d.quantize(Decimal('0.1'))
+        formatted = '{:.1f}'.format(rounded)
         if formatted.endswith('.0'):
-            formatted = formatted[:-2]  # show as integer if .0
+            return formatted[:-2]  # show as integer if .0
         return formatted
 
 

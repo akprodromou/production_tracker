@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}Dashboard — InventoryOS{% endblock %}
 
 {% block breadcrumb %}Dashboard{% endblock %}
@@ -35,7 +36,7 @@
   {# ── LOW STOCK BATCHES ── #}
   <div class="card">
     <div class="card-header">
-      <span class="card-title">⚠ Low Available Stock</span>
+      <span class="card-title">⚠ Low Raw Material Stock</span>
       <a href="{% url 'batch-list' %}" class="btn btn-ghost btn-sm">View all →</a>
     </div>
     <div class="table-wrap">
@@ -55,7 +56,7 @@
               <a href="{% url 'batch-detail' b.pk %}" style="color:var(--accent);text-decoration:none">{{ b.lot_number }}</a>
             </td>
             <td>{{ b.material.name }}</td>
-            <td><span class="badge badge-red">{{ b.available_quantity }}</span></td>
+            <td><span class="badge badge-red">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -72,36 +73,32 @@
   {# ── RECENT TRANSACTIONS ── #}
   <div class="card">
     <div class="card-header">
-      <span class="card-title">Recent Transactions</span>
-      <a href="{% url 'transaction-list' %}" class="btn btn-ghost btn-sm">View all →</a>
+      <span class="card-title">Low Product Stock</span>
+      <a href="{% url 'product-batch-list' %}" class="btn btn-ghost btn-sm">View all →</a>
     </div>
     <div class="table-wrap">
-      {% if recent_transactions %}
+      {% if low_product_batches %}
       <table>
         <thead>
-          <tr><th>Type</th><th>Qty</th><th>Lot</th><th>When</th></tr>
+          <tr><th>Batch</th><th>Product</th><th>Qty</th><th>Location</th></tr>
         </thead>
         <tbody>
-          {% for tx in recent_transactions %}
+          {% for pb in low_product_batches %}
           <tr>
-            <td>
-              {% if tx.transaction_type == 'PRODUCED' %}<span class="badge badge-blue">{{ tx.transaction_type }}</span>
-              {% elif tx.transaction_type == 'RESERVED' %}<span class="badge badge-orange">{{ tx.transaction_type }}</span>
-              {% elif tx.transaction_type == 'CONSUMED' %}<span class="badge badge-red">{{ tx.transaction_type }}</span>
-              {% else %}<span class="badge badge-grey">{{ tx.transaction_type }}</span>
-              {% endif %}
+            <td class="td-mono">
+              <a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a>
             </td>
-            <td class="td-mono">{{ tx.quantity }}</td>
-            <td class="td-mono text-muted">{{ tx.raw_material_batch.lot_number }}</td>
-            <td class="text-muted" style="font-size:11px">{{ tx.created_at|timesince }} ago</td>
+            <td>{{ pb.material.name }}</td>
+            <td class="td-mono" style="color:var(--warn)">{{ pb.quantity_produced|smart_qty:pb.material.unit.name }}</td>
+            <td class="text-muted" style="font-size:12px">{{ pb.location.name }}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
       {% else %}
-      <div class="empty">
-        <div class="empty-icon">📋</div>
-        <h3>No transactions yet</h3>
+      <div class="empty" style="padding:20px">
+        <div class="empty-icon">🏭</div>
+        <h3>No low stock product batches</h3>
       </div>
       {% endif %}
     </div>

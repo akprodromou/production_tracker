@@ -16,7 +16,7 @@ from .models import (
     Client, ClientOrder, ClientOrderLine,
     ProductionRun, ProductionRunAllocation,
     ProductionComponent, ProductionRunShipment,
-    ProductBatchReservation
+    ProductBatchReservation, RawBatchAllocation
 )
 from .forms import (
     UnitForm, LocationForm, MaterialForm, RawMaterialBatchForm,
@@ -62,7 +62,7 @@ class DashboardView(View):
         all_batches = list(RawMaterialBatch.objects.select_related('material', 'location'))
         low_stock = sorted(
             [b for b in all_batches
-             if b.available_quantity <= (b.total_quantity * Decimal('0.2'))],
+             if b.available_quantity < Decimal('1000')],
             key=lambda b: b.available_quantity
         )[:8]
 
@@ -87,6 +87,11 @@ class DashboardView(View):
             'recent_product_batches': ProductBatch.objects.select_related(
                                           'material', 'location'
                                       ).order_by('-created_at')[:6],
+            'low_product_batches':    ProductBatch.objects.select_related(
+                                          'material__unit', 'location'
+                                      ).filter(
+                                          quantity_produced__lt=1000
+                                      ).order_by('quantity_produced')[:8],
         })
 
 
@@ -351,11 +356,42 @@ class RawMaterialBatchListView(View):
                     Q(material__sku__icontains=term) |
                     Q(material__name__icontains=term)
                 )
-        paginator = Paginator(qs.order_by('-created_at'), 25)
+        qs = qs.annotate(
+            total_allocated=Coalesce(
+                Sum('allocations__quantity'), Decimal('0'), output_field=DecimalField()
+            )
+        )
+        sort      = request.GET.get('sort', 'date')
+        direction = request.GET.get('dir', 'desc')
+        sort_map  = {
+            'lot_number': 'lot_number',
+            'material':   'material__name',
+            'sku':        'material__sku',
+            'location':   'location__name',
+            'status':     'status',
+            'total':      'total_quantity',
+            'allocated':  'total_allocated',
+            'available':  'total_quantity',
+            'date':       'created_at',
+        }
+        sort_field = sort_map.get(sort, 'created_at')
+        order      = sort_field if direction == 'asc' else f'-{sort_field}'
+        paginator  = Paginator(qs.order_by(order), 25)
         return render(request, 'batches/list.html', {
             'batches':       paginator.get_page(request.GET.get('page')),
             'all_materials': Material.objects.filter(category__in=['RAW', 'PKG']).order_by('name'),
             'all_locations': Location.objects.order_by('name'),
+            'current_sort':  sort,
+            'current_dir':   direction,
+            'cols': [
+                ('lot_number', 'Lot Number'),
+                ('material',   'Material'),
+                ('sku',        'SKU'),
+                ('location',   'Location'),
+                ('total',      'Total'),
+                ('available',  'Available'),
+                ('allocated',  'Allocated to Runs'),
+            ],
         })
 
 
@@ -364,22 +400,115 @@ class RawMaterialBatchDetailView(View):
         batch = get_object_or_404(
             RawMaterialBatch.objects.select_related('material', 'location'), pk=pk
         )
+        # Production runs that contain this material as a component
+        eligible_runs = ProductionRun.objects.filter(
+            components__material=batch.material,
+            status__in=['PLANNED', 'ACTIVE']
+        ).select_related('material').distinct().order_by('-created_at')
+
+        # Existing allocations for this batch
+        allocations = RawBatchAllocation.objects.filter(
+            raw_batch=batch
+        ).select_related('production_run__material')
+
+        total_allocated = sum(a.quantity for a in allocations)
+        available       = batch.total_quantity - total_allocated
+
         return render(request, 'batches/detail.html', {
-            'batch':           batch,
-            'transactions':    MaterialTransaction.objects.filter(
-                                   raw_material_batch=batch
-                               ).select_related('product_batch').order_by('-created_at'),
-            'product_batches': ProductBatch.objects.filter(
-                               # Only show batches whose production run uses this raw material
-                               production_run__components__material=batch.material
-                           ).select_related('material').distinct().order_by('-created_at'),
-            'production_runs': ProductionRun.objects.filter(
-                                   status__in=['PLANNED', 'ACTIVE']
-                               ).select_related('material').order_by('-created_at'),
-            'open_orders':     ClientOrder.objects.exclude(
-                                   status__in=['FULFILLED', 'CANCELLED']
-                               ).select_related('client').order_by('-order_date'),
+            'batch':          batch,
+            'transactions':   MaterialTransaction.objects.filter(
+                                  raw_material_batch=batch
+                              ).select_related('product_batch').order_by('-created_at'),
+            'eligible_runs':  eligible_runs,
+            'allocations':    allocations,
+            'total_allocated': total_allocated,
+            'available':      available,
         })
+
+    def post(self, request, pk):
+        batch  = get_object_or_404(RawMaterialBatch, pk=pk)
+        action = request.POST.get('action')
+
+        if action == 'update_status':
+            new_status = request.POST.get('status')
+            if new_status in dict(RawMaterialBatch.STATUS_CHOICES):
+                batch.status = new_status
+                batch.save()
+                messages.success(request, f'Status updated to {batch.get_status_display()}.')
+
+        elif action == 'allocate':
+            run_id  = request.POST.get('production_run_id')
+            qty_str = request.POST.get('quantity', '').strip()
+            try:
+                run = ProductionRun.objects.get(pk=int(run_id))
+                qty = Decimal(qty_str)
+                if qty <= 0:
+                    raise ValueError
+
+                # Check available quantity
+                total_allocated = RawBatchAllocation.objects.filter(
+                    raw_batch=batch
+                ).aggregate(
+                    total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                )['total']
+                available = batch.total_quantity - total_allocated
+
+                if qty > available:
+                    messages.error(request, f'Only {available} units available.')
+                elif not run.components.filter(material=batch.material).exists():
+                    messages.error(
+                        request,
+                        f'{run.reference} does not contain {batch.material.name} as a component.'
+                    )
+                else:
+                    RawBatchAllocation.objects.create(
+                        raw_batch=batch,
+                        production_run=run,
+                        quantity=qty,
+                        notes=request.POST.get('notes', ''),
+                    )
+                    messages.success(
+                        request,
+                        f'Allocated {qty} units to {run.reference}.'
+                    )
+            except (ProductionRun.DoesNotExist, ValueError, InvalidOperation):
+                messages.error(request, 'Invalid run or quantity.')
+
+        elif action == 'edit_allocation':
+            alloc_id = request.POST.get('allocation_id')
+            qty_str  = request.POST.get('quantity', '').strip()
+            try:
+                alloc = RawBatchAllocation.objects.get(pk=alloc_id, raw_batch=batch)
+                qty   = Decimal(qty_str)
+                if qty <= 0:
+                    raise ValueError
+                # Check available (excluding this allocation's current quantity)
+                total_allocated = RawBatchAllocation.objects.filter(
+                    raw_batch=batch
+                ).exclude(pk=alloc.pk).aggregate(
+                    total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                )['total']
+                available = batch.total_quantity - total_allocated
+                if qty > available:
+                    messages.error(request, f'Only {available} units available.')
+                else:
+                    alloc.quantity = qty
+                    alloc.save()
+                    messages.success(request, f'Allocation updated to {qty}.')
+            except (RawBatchAllocation.DoesNotExist, ValueError, InvalidOperation):
+                messages.error(request, 'Invalid allocation or quantity.')
+
+        elif action == 'remove_allocation':
+            alloc_id = request.POST.get('allocation_id')
+            try:
+                alloc = RawBatchAllocation.objects.get(pk=alloc_id, raw_batch=batch)
+                run_ref = alloc.production_run.reference
+                alloc.delete()
+                messages.success(request, f'Allocation to {run_ref} removed.')
+            except RawBatchAllocation.DoesNotExist:
+                messages.error(request, 'Allocation not found.')
+
+        return redirect('batch-detail', pk=pk)
 
 
 class RawMaterialBatchCreateView(View):
@@ -486,11 +615,33 @@ class ProductBatchListView(View):
                     Q(material__sku__icontains=term) |
                     Q(material__name__icontains=term)
                 )
-        paginator = Paginator(qs.order_by('-created_at'), 25)
+        sort      = request.GET.get('sort', 'date')
+        direction = request.GET.get('dir', 'desc')
+        sort_map  = {
+            'batch_number': 'batch_number',
+            'material':     'material__name',
+            'sku':          'material__sku',
+            'location':     'location__name',
+            'quantity':     'quantity_produced',
+            'date':         'created_at',
+        }
+        sort_field = sort_map.get(sort, 'created_at')
+        order      = sort_field if direction == 'asc' else f'-{sort_field}'
+        paginator  = Paginator(qs.order_by(order), 25)
         return render(request, 'product_batches/list.html', {
             'batches':       paginator.get_page(request.GET.get('page')),
             'all_materials': Material.objects.filter(category='FIN').order_by('name'),
             'all_locations': Location.objects.order_by('name'),
+            'current_sort':  sort,
+            'current_dir':   direction,
+            'cols': [
+                ('batch_number', 'Batch Number'),
+                ('material',     'Product'),
+                ('sku',          'SKU'),
+                ('location',     'Location'),
+                ('quantity',     'Qty Produced'),
+                ('date',         'Date'),
+            ],
         })
 
 
@@ -955,12 +1106,22 @@ class ClientOrderDetailView(View):
         })
 
     def post(self, request, pk):
-        order = get_object_or_404(ClientOrder, pk=pk)
-        new_status = request.POST.get('status')
-        if new_status in dict(ClientOrder.STATUS_CHOICES):
-            order.status = new_status
+        order  = get_object_or_404(ClientOrder, pk=pk)
+        action = request.POST.get('action', 'status')
+
+        if action == 'ship':
+            # Mark order as shipped
+            order.status = 'SHIPPED'
             order.save()
-            messages.success(request, f'Order status updated to {order.get_status_display()}.')
+            messages.success(request, f'Order {order.reference} marked as Shipped.')
+
+        elif action == 'status':
+            new_status = request.POST.get('status')
+            if new_status in dict(ClientOrder.STATUS_CHOICES):
+                order.status = new_status
+                order.save()
+                messages.success(request, f'Order status updated to {order.get_status_display()}.')
+
         return redirect('order-detail', pk=pk)
 
 
@@ -1103,7 +1264,7 @@ class ProductionRunDetailView(View):
                 'material', 'location', 'product_batch'
             ).prefetch_related(
                 Prefetch('components', queryset=ProductionComponent.objects.select_related(
-                    'material__unit', 'raw_material_batch'
+                    'material__unit'
                 ).order_by('material__name')),
                 Prefetch('allocations', queryset=ProductionRunAllocation.objects.select_related(
                     'order_line__order__client', 'order_line__material'
@@ -1129,12 +1290,39 @@ class ProductionRunDetailView(View):
 
         if action == 'update_status':
             new_status = request.POST.get('status')
-            if new_status in dict(ProductionRun.STATUS_CHOICES):
+            if new_status == 'COMPLETED':
+                # Only allow completing if all components are IN_WAREHOUSE_RAW
+                if not run.all_components_in_warehouse:
+                    messages.error(
+                        request,
+                        'Cannot complete run — not all components are In Warehouse as Raw Material.'
+                    )
+                else:
+                    run.status = 'COMPLETED'
+                    run.actual_end = timezone.now().date()
+                    run.save()
+                    # Auto-create a ProductBatch for this run
+                    from .models import ProductBatch as PB
+                    batch_num = f"BATCH-{run.reference}"
+                    if not PB.objects.filter(batch_number=batch_num).exists():
+                        pb = PB.objects.create(
+                            material         = run.material,
+                            batch_number     = batch_num,
+                            quantity_produced= run.actual_quantity or run.planned_quantity,
+                            location         = run.location,
+                        )
+                        run.product_batch = pb
+                        run.save()
+                        messages.success(
+                            request,
+                            f'Run completed. Product batch {pb.batch_number} created.'
+                        )
+                    else:
+                        messages.success(request, f'Run marked as completed.')
+            elif new_status in dict(ProductionRun.STATUS_CHOICES):
+                run.status = new_status
                 if new_status == 'ACTIVE' and not run.actual_start:
                     run.actual_start = timezone.now().date()
-                if new_status == 'COMPLETED' and not run.actual_end:
-                    run.actual_end = timezone.now().date()
-                run.status = new_status
                 run.save()
                 messages.success(request, f'Run status updated to {run.get_status_display()}.')
 

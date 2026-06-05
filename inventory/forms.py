@@ -151,7 +151,7 @@ class ProductBatchForm(forms.ModelForm):
 class MaterialTransactionForm(forms.ModelForm):
     class Meta:
         model = MaterialTransaction
-        fields = ['raw_material_batch', 'product_batch', 'transaction_type', 'quantity', 'reference']
+        fields = ['product_batch', 'transaction_type', 'quantity', 'reference']
 
     def clean_quantity(self):
         qty = self.cleaned_data['quantity']
@@ -317,7 +317,7 @@ class ClientForm(forms.ModelForm):
 class ClientOrderForm(forms.ModelForm):
     class Meta:
         model = ClientOrder
-        fields = ['reference', 'client', 'status', 'order_date', 'required_by', 'notes']
+        fields = ['reference', 'client', 'order_date', 'required_by', 'notes']
         widgets = {
             'order_date':  forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'required_by': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
@@ -369,7 +369,7 @@ class ProductionRunForm(forms.ModelForm):
         model = ProductionRun
         fields = [
             'reference', 'material', 'planned_quantity',
-            'status', 'planned_start', 'planned_end',
+            'planned_start', 'planned_end',
             'actual_start', 'actual_end', 'actual_quantity',
             'location', 'notes'
         ]
@@ -437,19 +437,16 @@ class ProductionComponentForm(forms.ModelForm):
         model = ProductionComponent
         fields = [
             'material', 'quantity_required',
-            'status', 'raw_material_batch', 'expected_date', 'actual_date', 'notes'
+            'expected_date', 'notes'
         ]
         widgets = {
             'expected_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
-            'actual_date':   forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['material'].queryset = Material.objects.filter(category__in=['RAW', 'PKG'])
-        self.fields['raw_material_batch'].required = False
         self.fields['expected_date'].required = False
-        self.fields['actual_date'].required = False
 
     def clean_quantity_required(self):
         qty = self.cleaned_data['quantity_required']

@@ -57,11 +57,7 @@
     <p>{{ run.material.name }} · <span class="text-mono text-muted">{{ run.material.sku }}</span> · {{ run.location.name }}</p>
   </div>
   <div class="page-actions">
-    {% if run.status == 'PLANNED' %}
-    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_status"><input type="hidden" name="status" value="ACTIVE">
-      <button type="submit" class="btn btn-primary">▶ Start Run</button>
-    </form>
-    {% elif run.status == 'ACTIVE' %}
+    {% if run.status == 'ACTIVE' %}
     <form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_status"><input type="hidden" name="status" value="COMPLETED">
       <button type="submit" class="btn btn-success">✓ Complete Run</button>
     </form>
@@ -148,22 +144,19 @@
       <div class="comp-cell td-mono">{{ comp.quantity_required|smart_qty:comp.material.unit.name }} {{ comp.material.unit.name }}</div>
       <div class="comp-cell td-mono">
         {% if comp.quantity_shortfall > 0 %}
-          <span style="color:var(--danger)">{{ comp.quantity_available|smart_qty:comp.material.unit.name }}</span>
+          <span style="color:var(--danger)">{{ comp.allocated_quantity|smart_qty:comp.material.unit.name }}</span>
           <span class="text-muted" style="font-size:11px;margin-left:4px">(short {{ comp.quantity_shortfall|smart_qty:comp.material.unit.name }})</span>
         {% else %}
-          <span style="color:var(--accent2)">{{ comp.quantity_available|smart_qty:comp.material.unit.name }}</span>
+          <span style="color:var(--accent2)">{{ comp.allocated_quantity|smart_qty:comp.material.unit.name }}</span>
         {% endif %}
       </div>
       <div class="comp-cell text-muted" style="font-size:12px">{{ comp.expected_date|date:"Y-m-d"|default:"—" }}</div>
       <div class="comp-cell">
-        <form method="post" action="{% url 'component-status' comp.pk %}" style="width:100%">
-          {% csrf_token %}
-          <select name="status" class="status-select" onchange="this.form.submit()">
-            {% for val, label in component_status_choices %}
-            <option value="{{ val }}" {% if comp.status == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </form>
+        {% if comp.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+        {% elif comp.status == 'ORDERED' %}<span class="badge badge-blue">Ordered</span>
+        {% elif comp.status == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-green">In Warehouse</span>
+        {% endif %}
+        <span class="text-muted" style="font-size:11px;margin-left:6px">(from batches)</span>
       </div>
     </div>
     {% endfor %}

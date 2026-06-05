@@ -28,10 +28,5 @@
       {{ run.planned_quantity|smart_qty:run.material.unit.name }} units
       {% if run.planned_end %} · {{ run.planned_end|date:"M d" }}{% endif %}
     </span>
-    <button
-      class="btn btn-success btn-sm"
-      onclick="event.stopPropagation(); openShipModal({{ run.pk }}, '{{ run.reference|escapejs }}', {{ run.planned_quantity|smart_qty:run.material.unit.name }})">
-      Ship →
-    </button>
   </div>
 </div>

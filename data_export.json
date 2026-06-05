@@ -8042,6 +8042,7 @@
     "material": 492,
     "lot_number": "5062WH1V005",
     "total_quantity": "41940.000",
+    "status": "PENDING",
     "created_at": "2026-05-18T07:08:33.377Z",
     "location": 1
   }
@@ -8053,6 +8054,7 @@
     "material": 584,
     "lot_number": "2036WH1V005",
     "total_quantity": "29680.000",
+    "status": "PENDING",
     "created_at": "2026-05-18T07:10:20.178Z",
     "location": 1
   }
@@ -8064,6 +8066,7 @@
     "material": 170,
     "lot_number": "OPENING-07-0000018-7",
     "total_quantity": "6174.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.109Z",
     "location": 7
   }
@@ -8075,6 +8078,7 @@
     "material": 171,
     "lot_number": "OPENING-07-0000019-7",
     "total_quantity": "1322.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.123Z",
     "location": 7
   }
@@ -8086,6 +8090,7 @@
     "material": 172,
     "lot_number": "OPENING-07-0000020-7",
     "total_quantity": "8254.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.136Z",
     "location": 7
   }
@@ -8097,6 +8102,7 @@
     "material": 173,
     "lot_number": "OPENING-07-0000021-7",
     "total_quantity": "4068.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.149Z",
     "location": 7
   }
@@ -8108,6 +8114,7 @@
     "material": 174,
     "lot_number": "OPENING-07-0000022-7",
     "total_quantity": "5500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.160Z",
     "location": 7
   }
@@ -8119,6 +8126,7 @@
     "material": 175,
     "lot_number": "OPENING-07-0000023-7",
     "total_quantity": "5250.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.172Z",
     "location": 7
   }
@@ -8130,6 +8138,7 @@
     "material": 176,
     "lot_number": "OPENING-07-0000024-7",
     "total_quantity": "14880.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.185Z",
     "location": 7
   }
@@ -8141,6 +8150,7 @@
     "material": 177,
     "lot_number": "OPENING-07-0000025-7",
     "total_quantity": "1500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.197Z",
     "location": 7
   }
@@ -8152,6 +8162,7 @@
     "material": 178,
     "lot_number": "OPENING-07-0000026-7",
     "total_quantity": "2000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.208Z",
     "location": 7
   }
@@ -8163,6 +8174,7 @@
     "material": 179,
     "lot_number": "OPENING-07-0000027-7",
     "total_quantity": "3000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.220Z",
     "location": 7
   }
@@ -8174,6 +8186,7 @@
     "material": 180,
     "lot_number": "OPENING-07-0000028-7",
     "total_quantity": "1000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.231Z",
     "location": 7
   }
@@ -8185,6 +8198,7 @@
     "material": 183,
     "lot_number": "OPENING-07-0000031-7",
     "total_quantity": "10599.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.241Z",
     "location": 7
   }
@@ -8196,6 +8210,7 @@
     "material": 184,
     "lot_number": "OPENING-07-0000032-7",
     "total_quantity": "9867.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.253Z",
     "location": 7
   }
@@ -8207,6 +8222,7 @@
     "material": 185,
     "lot_number": "OPENING-07-0000033-7",
     "total_quantity": "8650.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.266Z",
     "location": 7
   }
@@ -8218,6 +8234,7 @@
     "material": 186,
     "lot_number": "OPENING-07-0000034-7",
     "total_quantity": "14500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.276Z",
     "location": 7
   }
@@ -8229,6 +8246,7 @@
     "material": 187,
     "lot_number": "OPENING-07-0000035-7",
     "total_quantity": "1400.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.288Z",
     "location": 7
   }
@@ -8240,6 +8258,7 @@
     "material": 188,
     "lot_number": "OPENING-07-0000036-7",
     "total_quantity": "4250.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.301Z",
     "location": 7
   }
@@ -8251,6 +8270,7 @@
     "material": 194,
     "lot_number": "OPENING-07-0000042-7",
     "total_quantity": "13203.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.314Z",
     "location": 7
   }
@@ -8262,6 +8282,7 @@
     "material": 195,
     "lot_number": "OPENING-07-0000043-7",
     "total_quantity": "6300.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.324Z",
     "location": 7
   }
@@ -8273,6 +8294,7 @@
     "material": 199,
     "lot_number": "OPENING-07-0000052-7",
     "total_quantity": "1650.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.336Z",
     "location": 7
   }
@@ -8284,6 +8306,7 @@
     "material": 201,
     "lot_number": "OPENING-07-0000054-7",
     "total_quantity": "3000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.347Z",
     "location": 7
   }
@@ -8295,6 +8318,7 @@
     "material": 202,
     "lot_number": "OPENING-07-0000055-7",
     "total_quantity": "3000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.356Z",
     "location": 7
   }
@@ -8306,6 +8330,7 @@
     "material": 203,
     "lot_number": "OPENING-07-0000056-7",
     "total_quantity": "4500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.369Z",
     "location": 7
   }
@@ -8317,6 +8342,7 @@
     "material": 217,
     "lot_number": "OPENING-07-0000070-7",
     "total_quantity": "25400.000",
+    "status": "IN_WAREHOUSE_RAW",
     "created_at": "2026-05-25T14:24:32.384Z",
     "location": 7
   }
@@ -8328,6 +8354,7 @@
     "material": 218,
     "lot_number": "OPENING-07-0000071-7",
     "total_quantity": "60000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.401Z",
     "location": 7
   }
@@ -8339,6 +8366,7 @@
     "material": 222,
     "lot_number": "OPENING-07-0000075-7",
     "total_quantity": "4.540",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.422Z",
     "location": 7
   }
@@ -8350,6 +8378,7 @@
     "material": 228,
     "lot_number": "OPENING-07-0000091-7",
     "total_quantity": "40687.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.446Z",
     "location": 7
   }
@@ -8361,6 +8390,7 @@
     "material": 229,
     "lot_number": "OPENING-07-0000092-7",
     "total_quantity": "94.800",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.473Z",
     "location": 7
   }
@@ -8372,6 +8402,7 @@
     "material": 230,
     "lot_number": "OPENING-07-0000093-7",
     "total_quantity": "275.170",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.489Z",
     "location": 7
   }
@@ -8383,6 +8414,7 @@
     "material": 231,
     "lot_number": "OPENING-07-0000094-7",
     "total_quantity": "1300.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.501Z",
     "location": 7
   }
@@ -8394,6 +8426,7 @@
     "material": 232,
     "lot_number": "OPENING-07-0000095-7",
     "total_quantity": "417.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.519Z",
     "location": 7
   }
@@ -8405,6 +8438,7 @@
     "material": 306,
     "lot_number": "OPENING-07-0000001-7",
     "total_quantity": "1583.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.703Z",
     "location": 7
   }
@@ -8416,6 +8450,7 @@
     "material": 313,
     "lot_number": "OPENING-07-0000124-7",
     "total_quantity": "37940.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.718Z",
     "location": 7
   }
@@ -8427,6 +8462,7 @@
     "material": 319,
     "lot_number": "OPENING-07-0000130-7",
     "total_quantity": "74.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.729Z",
     "location": 7
   }
@@ -8438,6 +8474,7 @@
     "material": 320,
     "lot_number": "OPENING-07-0000131-7",
     "total_quantity": "1.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.738Z",
     "location": 7
   }
@@ -8449,6 +8486,7 @@
     "material": 321,
     "lot_number": "OPENING-07-0000132-7",
     "total_quantity": "80.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.749Z",
     "location": 7
   }
@@ -8460,6 +8498,7 @@
     "material": 322,
     "lot_number": "OPENING-07-0000133-7",
     "total_quantity": "100.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.761Z",
     "location": 7
   }
@@ -8471,6 +8510,7 @@
     "material": 323,
     "lot_number": "OPENING-07-0000134-7",
     "total_quantity": "129.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.772Z",
     "location": 7
   }
@@ -8482,6 +8522,7 @@
     "material": 325,
     "lot_number": "OPENING-07-0000136-7",
     "total_quantity": "4.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.783Z",
     "location": 7
   }
@@ -8493,6 +8534,7 @@
     "material": 326,
     "lot_number": "OPENING-07-0000137-7",
     "total_quantity": "2.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.795Z",
     "location": 7
   }
@@ -8504,6 +8546,7 @@
     "material": 339,
     "lot_number": "OPENING-07-0000150-7",
     "total_quantity": "3500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.805Z",
     "location": 7
   }
@@ -8515,6 +8558,7 @@
     "material": 341,
     "lot_number": "OPENING-07-0000152-7",
     "total_quantity": "3000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.817Z",
     "location": 7
   }
@@ -8526,6 +8570,7 @@
     "material": 342,
     "lot_number": "OPENING-07-0000153-7",
     "total_quantity": "4000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.828Z",
     "location": 7
   }
@@ -8537,6 +8582,7 @@
     "material": 357,
     "lot_number": "OPENING-07-0000165-7",
     "total_quantity": "570.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.866Z",
     "location": 7
   }
@@ -8548,6 +8594,7 @@
     "material": 362,
     "lot_number": "OPENING-07-0000169-7",
     "total_quantity": "414.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.882Z",
     "location": 7
   }
@@ -8559,6 +8606,7 @@
     "material": 371,
     "lot_number": "OPENING-07-0000177-7",
     "total_quantity": "176.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.893Z",
     "location": 7
   }
@@ -8570,6 +8618,7 @@
     "material": 392,
     "lot_number": "OPENING-07-0000196-7",
     "total_quantity": "78.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.905Z",
     "location": 7
   }
@@ -8581,6 +8630,7 @@
     "material": 394,
     "lot_number": "OPENING-07-0000198-7",
     "total_quantity": "24.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.916Z",
     "location": 7
   }
@@ -8592,6 +8642,7 @@
     "material": 403,
     "lot_number": "OPENING-07-0000295-7",
     "total_quantity": "529.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.931Z",
     "location": 7
   }
@@ -8603,6 +8654,7 @@
     "material": 417,
     "lot_number": "OPENING-07-0000336-7",
     "total_quantity": "15000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.973Z",
     "location": 7
   }
@@ -8614,6 +8666,7 @@
     "material": 418,
     "lot_number": "OPENING-07-0000337-7",
     "total_quantity": "15000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.985Z",
     "location": 7
   }
@@ -8625,6 +8678,7 @@
     "material": 419,
     "lot_number": "OPENING-07-0000338-7",
     "total_quantity": "15000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:32.996Z",
     "location": 7
   }
@@ -8636,6 +8690,7 @@
     "material": 420,
     "lot_number": "OPENING-07-0000339-7",
     "total_quantity": "15000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.005Z",
     "location": 7
   }
@@ -8647,6 +8702,7 @@
     "material": 421,
     "lot_number": "OPENING-07-0000340-7",
     "total_quantity": "15000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.016Z",
     "location": 7
   }
@@ -8658,6 +8714,7 @@
     "material": 422,
     "lot_number": "OPENING-07-0000341-7",
     "total_quantity": "15000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.028Z",
     "location": 7
   }
@@ -8669,6 +8726,7 @@
     "material": 423,
     "lot_number": "OPENING-07-0000342-7",
     "total_quantity": "15000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.038Z",
     "location": 7
   }
@@ -8680,6 +8738,7 @@
     "material": 424,
     "lot_number": "OPENING-07-0000343-7",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.049Z",
     "location": 7
   }
@@ -8691,6 +8750,7 @@
     "material": 425,
     "lot_number": "OPENING-07-0000344-7",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.059Z",
     "location": 7
   }
@@ -8702,6 +8762,7 @@
     "material": 426,
     "lot_number": "OPENING-07-0000345-7",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.070Z",
     "location": 7
   }
@@ -8713,6 +8774,7 @@
     "material": 427,
     "lot_number": "OPENING-07-0000346-7",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.084Z",
     "location": 7
   }
@@ -8724,6 +8786,7 @@
     "material": 428,
     "lot_number": "OPENING-07-0000347-7",
     "total_quantity": "2550.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.093Z",
     "location": 7
   }
@@ -8735,6 +8798,7 @@
     "material": 429,
     "lot_number": "OPENING-07-0000348-7",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.102Z",
     "location": 7
   }
@@ -8746,6 +8810,7 @@
     "material": 435,
     "lot_number": "OPENING-07-0000204-7",
     "total_quantity": "5.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.113Z",
     "location": 7
   }
@@ -8757,6 +8822,7 @@
     "material": 459,
     "lot_number": "OPENING-07-0000259-7",
     "total_quantity": "63.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.134Z",
     "location": 7
   }
@@ -8768,6 +8834,7 @@
     "material": 493,
     "lot_number": "OPENING-07-0000121-7",
     "total_quantity": "388.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.150Z",
     "location": 7
   }
@@ -8779,6 +8846,7 @@
     "material": 507,
     "lot_number": "OPENING-07-0000100-7",
     "total_quantity": "3110.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.161Z",
     "location": 7
   }
@@ -8790,6 +8858,7 @@
     "material": 508,
     "lot_number": "OPENING-07-0000103-7",
     "total_quantity": "2470.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.173Z",
     "location": 7
   }
@@ -8801,6 +8870,7 @@
     "material": 509,
     "lot_number": "OPENING-07-0000104-7",
     "total_quantity": "4423.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.185Z",
     "location": 7
   }
@@ -8812,6 +8882,7 @@
     "material": 510,
     "lot_number": "OPENING-07-0000105-7",
     "total_quantity": "2373.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.196Z",
     "location": 7
   }
@@ -8823,6 +8894,7 @@
     "material": 511,
     "lot_number": "OPENING-07-0000106-7",
     "total_quantity": "2716.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.207Z",
     "location": 7
   }
@@ -8834,6 +8906,7 @@
     "material": 512,
     "lot_number": "OPENING-07-0000107-7",
     "total_quantity": "2247.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.217Z",
     "location": 7
   }
@@ -8845,6 +8918,7 @@
     "material": 513,
     "lot_number": "OPENING-07-0000108-7",
     "total_quantity": "3291.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.228Z",
     "location": 7
   }
@@ -8856,6 +8930,7 @@
     "material": 514,
     "lot_number": "OPENING-07-0000109-7",
     "total_quantity": "3291.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.237Z",
     "location": 7
   }
@@ -8867,6 +8942,7 @@
     "material": 515,
     "lot_number": "OPENING-07-0000110-7",
     "total_quantity": "6497.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.249Z",
     "location": 7
   }
@@ -8878,6 +8954,7 @@
     "material": 516,
     "lot_number": "OPENING-07-0000111-7",
     "total_quantity": "3666.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.260Z",
     "location": 7
   }
@@ -8889,6 +8966,7 @@
     "material": 517,
     "lot_number": "OPENING-07-0000112-7",
     "total_quantity": "3609.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.270Z",
     "location": 7
   }
@@ -8900,6 +8978,7 @@
     "material": 524,
     "lot_number": "OPENING-07-0000119-7",
     "total_quantity": "3074.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.284Z",
     "location": 7
   }
@@ -8911,6 +8990,7 @@
     "material": 533,
     "lot_number": "OPENING-07-0000219-7",
     "total_quantity": "4000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.295Z",
     "location": 7
   }
@@ -8922,6 +9002,7 @@
     "material": 534,
     "lot_number": "OPENING-07-0000220-7",
     "total_quantity": "4000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.304Z",
     "location": 7
   }
@@ -8933,6 +9014,7 @@
     "material": 536,
     "lot_number": "OPENING-07-0000222-7",
     "total_quantity": "2000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.316Z",
     "location": 7
   }
@@ -8944,6 +9026,7 @@
     "material": 550,
     "lot_number": "OPENING-07-0000334-7",
     "total_quantity": "3000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.332Z",
     "location": 7
   }
@@ -8955,6 +9038,7 @@
     "material": 569,
     "lot_number": "OPENING-07-0000296-7",
     "total_quantity": "450.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.352Z",
     "location": 7
   }
@@ -8966,6 +9050,7 @@
     "material": 570,
     "lot_number": "OPENING-07-0000297-7",
     "total_quantity": "509.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.363Z",
     "location": 7
   }
@@ -8977,6 +9062,7 @@
     "material": 571,
     "lot_number": "OPENING-07-0000298-7",
     "total_quantity": "540.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.373Z",
     "location": 7
   }
@@ -8988,6 +9074,7 @@
     "material": 572,
     "lot_number": "OPENING-07-0000299-7",
     "total_quantity": "501.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.384Z",
     "location": 7
   }
@@ -8999,6 +9086,7 @@
     "material": 573,
     "lot_number": "OPENING-07-0000300-7",
     "total_quantity": "532.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.394Z",
     "location": 7
   }
@@ -9010,6 +9098,7 @@
     "material": 574,
     "lot_number": "OPENING-07-0000301-7",
     "total_quantity": "735.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.404Z",
     "location": 7
   }
@@ -9021,6 +9110,7 @@
     "material": 575,
     "lot_number": "OPENING-07-0000302-7",
     "total_quantity": "560.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.415Z",
     "location": 7
   }
@@ -9032,6 +9122,7 @@
     "material": 576,
     "lot_number": "OPENING-07-0000303-7",
     "total_quantity": "496.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.428Z",
     "location": 7
   }
@@ -9043,6 +9134,7 @@
     "material": 577,
     "lot_number": "OPENING-07-0000304-7",
     "total_quantity": "596.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.438Z",
     "location": 7
   }
@@ -9054,6 +9146,7 @@
     "material": 578,
     "lot_number": "OPENING-07-0000305-7",
     "total_quantity": "502.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.452Z",
     "location": 7
   }
@@ -9065,6 +9158,7 @@
     "material": 579,
     "lot_number": "OPENING-07-0000306-7",
     "total_quantity": "500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.464Z",
     "location": 7
   }
@@ -9076,6 +9170,7 @@
     "material": 580,
     "lot_number": "OPENING-07-0000307-7",
     "total_quantity": "112.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.474Z",
     "location": 7
   }
@@ -9087,6 +9182,7 @@
     "material": 652,
     "lot_number": "OPENING-07-0000212-7",
     "total_quantity": "48.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.519Z",
     "location": 7
   }
@@ -9098,6 +9194,7 @@
     "material": 653,
     "lot_number": "OPENING-07-0000213-7",
     "total_quantity": "45.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.531Z",
     "location": 7
   }
@@ -9109,6 +9206,7 @@
     "material": 654,
     "lot_number": "OPENING-07-0000214-7",
     "total_quantity": "83.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.541Z",
     "location": 7
   }
@@ -9120,6 +9218,7 @@
     "material": 665,
     "lot_number": "OPENING-07-0000232-7",
     "total_quantity": "55.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.556Z",
     "location": 7
   }
@@ -9131,6 +9230,7 @@
     "material": 666,
     "lot_number": "OPENING-07-0000233-7",
     "total_quantity": "13.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.569Z",
     "location": 7
   }
@@ -9142,6 +9242,7 @@
     "material": 667,
     "lot_number": "OPENING-07-0000234-7",
     "total_quantity": "88.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.580Z",
     "location": 7
   }
@@ -9153,6 +9254,7 @@
     "material": 669,
     "lot_number": "OPENING-07-0000236-7",
     "total_quantity": "46.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.589Z",
     "location": 7
   }
@@ -9164,6 +9266,7 @@
     "material": 670,
     "lot_number": "OPENING-07-0000237-7",
     "total_quantity": "4.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.600Z",
     "location": 7
   }
@@ -9175,6 +9278,7 @@
     "material": 672,
     "lot_number": "OPENING-07-0000239-7",
     "total_quantity": "116.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.612Z",
     "location": 7
   }
@@ -9186,6 +9290,7 @@
     "material": 673,
     "lot_number": "OPENING-07-0000240-7",
     "total_quantity": "19.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.622Z",
     "location": 7
   }
@@ -9197,6 +9302,7 @@
     "material": 701,
     "lot_number": "OPENING-07-0000324-7",
     "total_quantity": "65.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.695Z",
     "location": 7
   }
@@ -9208,6 +9314,7 @@
     "material": 706,
     "lot_number": "OPENING-07-0000260-7",
     "total_quantity": "24164.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.705Z",
     "location": 7
   }
@@ -9219,6 +9326,7 @@
     "material": 721,
     "lot_number": "OPENING-07-0000247-7",
     "total_quantity": "1189.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.716Z",
     "location": 7
   }
@@ -9230,6 +9338,7 @@
     "material": 732,
     "lot_number": "OPENING-07-0000224-7",
     "total_quantity": "500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.732Z",
     "location": 7
   }
@@ -9241,6 +9350,7 @@
     "material": 740,
     "lot_number": "OPENING-07-0000226-7",
     "total_quantity": "5616.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.741Z",
     "location": 7
   }
@@ -9252,6 +9362,7 @@
     "material": 106,
     "lot_number": "OPENING-07-0000122-6",
     "total_quantity": "2124.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.801Z",
     "location": 6
   }
@@ -9263,6 +9374,7 @@
     "material": 163,
     "lot_number": "OPENING-07-0000011-6",
     "total_quantity": "1.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.855Z",
     "location": 6
   }
@@ -9274,6 +9386,7 @@
     "material": 230,
     "lot_number": "OPENING-07-0000093-6",
     "total_quantity": "243.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.866Z",
     "location": 6
   }
@@ -9285,6 +9398,7 @@
     "material": 231,
     "lot_number": "OPENING-07-0000094-6",
     "total_quantity": "319.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.880Z",
     "location": 6
   }
@@ -9296,6 +9410,7 @@
     "material": 232,
     "lot_number": "OPENING-07-0000095-6",
     "total_quantity": "251.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:33.890Z",
     "location": 6
   }
@@ -9307,6 +9422,7 @@
     "material": 362,
     "lot_number": "OPENING-07-0000169-6",
     "total_quantity": "10.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.039Z",
     "location": 6
   }
@@ -9318,6 +9434,7 @@
     "material": 363,
     "lot_number": "OPENING-07-0000170-6",
     "total_quantity": "786.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.052Z",
     "location": 6
   }
@@ -9329,6 +9446,7 @@
     "material": 371,
     "lot_number": "OPENING-07-0000177-6",
     "total_quantity": "20.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.071Z",
     "location": 6
   }
@@ -9340,6 +9458,7 @@
     "material": 378,
     "lot_number": "OPENING-07-0000184-6",
     "total_quantity": "13.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.084Z",
     "location": 6
   }
@@ -9351,6 +9470,7 @@
     "material": 403,
     "lot_number": "OPENING-07-0000295-6",
     "total_quantity": "33.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.098Z",
     "location": 6
   }
@@ -9362,6 +9482,7 @@
     "material": 459,
     "lot_number": "OPENING-07-0000259-6",
     "total_quantity": "107.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.153Z",
     "location": 6
   }
@@ -9373,6 +9494,7 @@
     "material": 493,
     "lot_number": "OPENING-07-0000121-6",
     "total_quantity": "3382.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.197Z",
     "location": 6
   }
@@ -9384,6 +9506,7 @@
     "material": 540,
     "lot_number": "OPENING-07-0000273-6",
     "total_quantity": "246.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.206Z",
     "location": 6
   }
@@ -9395,6 +9518,7 @@
     "material": 541,
     "lot_number": "OPENING-07-0000274-6",
     "total_quantity": "226.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.218Z",
     "location": 6
   }
@@ -9406,6 +9530,7 @@
     "material": 542,
     "lot_number": "OPENING-07-0000275-6",
     "total_quantity": "243.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.229Z",
     "location": 6
   }
@@ -9417,6 +9542,7 @@
     "material": 543,
     "lot_number": "OPENING-07-0000276-6",
     "total_quantity": "241.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.239Z",
     "location": 6
   }
@@ -9428,6 +9554,7 @@
     "material": 544,
     "lot_number": "OPENING-07-0000277-6",
     "total_quantity": "233.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.251Z",
     "location": 6
   }
@@ -9439,6 +9566,7 @@
     "material": 545,
     "lot_number": "OPENING-07-0000278-6",
     "total_quantity": "233.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.263Z",
     "location": 6
   }
@@ -9450,6 +9578,7 @@
     "material": 569,
     "lot_number": "OPENING-07-0000296-6",
     "total_quantity": "29.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.284Z",
     "location": 6
   }
@@ -9461,6 +9590,7 @@
     "material": 570,
     "lot_number": "OPENING-07-0000297-6",
     "total_quantity": "33.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.295Z",
     "location": 6
   }
@@ -9472,6 +9602,7 @@
     "material": 571,
     "lot_number": "OPENING-07-0000298-6",
     "total_quantity": "33.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.304Z",
     "location": 6
   }
@@ -9483,6 +9614,7 @@
     "material": 572,
     "lot_number": "OPENING-07-0000299-6",
     "total_quantity": "33.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.316Z",
     "location": 6
   }
@@ -9494,6 +9626,7 @@
     "material": 573,
     "lot_number": "OPENING-07-0000300-6",
     "total_quantity": "33.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.327Z",
     "location": 6
   }
@@ -9505,6 +9638,7 @@
     "material": 574,
     "lot_number": "OPENING-07-0000301-6",
     "total_quantity": "8.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.337Z",
     "location": 6
   }
@@ -9516,6 +9650,7 @@
     "material": 575,
     "lot_number": "OPENING-07-0000302-6",
     "total_quantity": "9.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.348Z",
     "location": 6
   }
@@ -9527,6 +9662,7 @@
     "material": 576,
     "lot_number": "OPENING-07-0000303-6",
     "total_quantity": "10.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.357Z",
     "location": 6
   }
@@ -9538,6 +9674,7 @@
     "material": 577,
     "lot_number": "OPENING-07-0000304-6",
     "total_quantity": "8.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.368Z",
     "location": 6
   }
@@ -9549,6 +9686,7 @@
     "material": 578,
     "lot_number": "OPENING-07-0000305-6",
     "total_quantity": "8.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.379Z",
     "location": 6
   }
@@ -9560,6 +9698,7 @@
     "material": 579,
     "lot_number": "OPENING-07-0000306-6",
     "total_quantity": "8.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.388Z",
     "location": 6
   }
@@ -9571,6 +9710,7 @@
     "material": 163,
     "lot_number": "OPENING-07-0000011-3",
     "total_quantity": "15227.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.465Z",
     "location": 3
   }
@@ -9582,6 +9722,7 @@
     "material": 164,
     "lot_number": "OPENING-07-0000012-3",
     "total_quantity": "2250.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.474Z",
     "location": 3
   }
@@ -9593,6 +9734,7 @@
     "material": 165,
     "lot_number": "OPENING-07-0000013-3",
     "total_quantity": "5064.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.485Z",
     "location": 3
   }
@@ -9604,6 +9746,7 @@
     "material": 166,
     "lot_number": "OPENING-07-0000014-3",
     "total_quantity": "5040.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.497Z",
     "location": 3
   }
@@ -9615,6 +9758,7 @@
     "material": 168,
     "lot_number": "OPENING-07-0000016-3",
     "total_quantity": "1120.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.507Z",
     "location": 3
   }
@@ -9626,6 +9770,7 @@
     "material": 171,
     "lot_number": "OPENING-07-0000019-3",
     "total_quantity": "8217.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.517Z",
     "location": 3
   }
@@ -9637,6 +9782,7 @@
     "material": 173,
     "lot_number": "OPENING-07-0000021-3",
     "total_quantity": "7472.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.528Z",
     "location": 3
   }
@@ -9648,6 +9794,7 @@
     "material": 174,
     "lot_number": "OPENING-07-0000022-3",
     "total_quantity": "1300.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.537Z",
     "location": 3
   }
@@ -9659,6 +9806,7 @@
     "material": 175,
     "lot_number": "OPENING-07-0000023-3",
     "total_quantity": "5200.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.548Z",
     "location": 3
   }
@@ -9670,6 +9818,7 @@
     "material": 176,
     "lot_number": "OPENING-07-0000024-3",
     "total_quantity": "6660.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.558Z",
     "location": 3
   }
@@ -9681,6 +9830,7 @@
     "material": 177,
     "lot_number": "OPENING-07-0000025-3",
     "total_quantity": "3100.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.570Z",
     "location": 3
   }
@@ -9692,6 +9842,7 @@
     "material": 178,
     "lot_number": "OPENING-07-0000026-3",
     "total_quantity": "2168.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.582Z",
     "location": 3
   }
@@ -9703,6 +9854,7 @@
     "material": 179,
     "lot_number": "OPENING-07-0000027-3",
     "total_quantity": "3704.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.591Z",
     "location": 3
   }
@@ -9714,6 +9866,7 @@
     "material": 180,
     "lot_number": "OPENING-07-0000028-3",
     "total_quantity": "823.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.612Z",
     "location": 3
   }
@@ -9725,6 +9878,7 @@
     "material": 181,
     "lot_number": "OPENING-07-0000029-3",
     "total_quantity": "1568.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.629Z",
     "location": 3
   }
@@ -9736,6 +9890,7 @@
     "material": 182,
     "lot_number": "OPENING-07-0000030-3",
     "total_quantity": "2380.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.639Z",
     "location": 3
   }
@@ -9747,6 +9902,7 @@
     "material": 183,
     "lot_number": "OPENING-07-0000031-3",
     "total_quantity": "3440.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.650Z",
     "location": 3
   }
@@ -9758,6 +9914,7 @@
     "material": 184,
     "lot_number": "OPENING-07-0000032-3",
     "total_quantity": "4172.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.661Z",
     "location": 3
   }
@@ -9769,6 +9926,7 @@
     "material": 187,
     "lot_number": "OPENING-07-0000035-3",
     "total_quantity": "6400.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.671Z",
     "location": 3
   }
@@ -9780,6 +9938,7 @@
     "material": 188,
     "lot_number": "OPENING-07-0000036-3",
     "total_quantity": "4500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.682Z",
     "location": 3
   }
@@ -9791,6 +9950,7 @@
     "material": 190,
     "lot_number": "OPENING-07-0000038-3",
     "total_quantity": "3000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.691Z",
     "location": 3
   }
@@ -9802,6 +9962,7 @@
     "material": 191,
     "lot_number": "OPENING-07-0000039-3",
     "total_quantity": "3000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.702Z",
     "location": 3
   }
@@ -9813,6 +9974,7 @@
     "material": 194,
     "lot_number": "OPENING-07-0000042-3",
     "total_quantity": "1836.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.712Z",
     "location": 3
   }
@@ -9824,6 +9986,7 @@
     "material": 196,
     "lot_number": "OPENING-07-0000044-3",
     "total_quantity": "6500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.722Z",
     "location": 3
   }
@@ -9835,6 +9998,7 @@
     "material": 198,
     "lot_number": "OPENING-07-0000051-3",
     "total_quantity": "2700.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.734Z",
     "location": 3
   }
@@ -9846,6 +10010,7 @@
     "material": 199,
     "lot_number": "OPENING-07-0000052-3",
     "total_quantity": "2400.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.744Z",
     "location": 3
   }
@@ -9857,6 +10022,7 @@
     "material": 200,
     "lot_number": "OPENING-07-0000053-3",
     "total_quantity": "2700.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.754Z",
     "location": 3
   }
@@ -9868,6 +10034,7 @@
     "material": 201,
     "lot_number": "OPENING-07-0000054-3",
     "total_quantity": "7000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.765Z",
     "location": 3
   }
@@ -9879,6 +10046,7 @@
     "material": 202,
     "lot_number": "OPENING-07-0000055-3",
     "total_quantity": "8004.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.774Z",
     "location": 3
   }
@@ -9890,6 +10058,7 @@
     "material": 203,
     "lot_number": "OPENING-07-0000056-3",
     "total_quantity": "7384.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.785Z",
     "location": 3
   }
@@ -9901,6 +10070,7 @@
     "material": 204,
     "lot_number": "OPENING-07-0000057-3",
     "total_quantity": "2700.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.795Z",
     "location": 3
   }
@@ -9912,6 +10082,7 @@
     "material": 205,
     "lot_number": "OPENING-07-0000058-3",
     "total_quantity": "2800.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.805Z",
     "location": 3
   }
@@ -9923,6 +10094,7 @@
     "material": 207,
     "lot_number": "OPENING-07-0000060-3",
     "total_quantity": "1400.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.815Z",
     "location": 3
   }
@@ -9934,6 +10106,7 @@
     "material": 208,
     "lot_number": "OPENING-07-0000061-3",
     "total_quantity": "1400.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.825Z",
     "location": 3
   }
@@ -9945,6 +10118,7 @@
     "material": 209,
     "lot_number": "OPENING-07-0000062-3",
     "total_quantity": "1500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.835Z",
     "location": 3
   }
@@ -9956,6 +10130,7 @@
     "material": 210,
     "lot_number": "OPENING-07-0000063-3",
     "total_quantity": "1400.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.846Z",
     "location": 3
   }
@@ -9967,6 +10142,7 @@
     "material": 211,
     "lot_number": "OPENING-07-0000064-3",
     "total_quantity": "1400.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.855Z",
     "location": 3
   }
@@ -9978,6 +10154,7 @@
     "material": 217,
     "lot_number": "OPENING-07-0000070-3",
     "total_quantity": "22447.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.865Z",
     "location": 3
   }
@@ -9989,6 +10166,7 @@
     "material": 218,
     "lot_number": "OPENING-07-0000071-3",
     "total_quantity": "100000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.874Z",
     "location": 3
   }
@@ -10000,6 +10178,7 @@
     "material": 219,
     "lot_number": "OPENING-07-0000072-3",
     "total_quantity": "49500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.885Z",
     "location": 3
   }
@@ -10011,6 +10190,7 @@
     "material": 230,
     "lot_number": "OPENING-07-0000093-3",
     "total_quantity": "2970.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.895Z",
     "location": 3
   }
@@ -10022,6 +10202,7 @@
     "material": 231,
     "lot_number": "OPENING-07-0000094-3",
     "total_quantity": "9450.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.904Z",
     "location": 3
   }
@@ -10033,6 +10214,7 @@
     "material": 232,
     "lot_number": "OPENING-07-0000095-3",
     "total_quantity": "3134.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.915Z",
     "location": 3
   }
@@ -10044,6 +10226,7 @@
     "material": 234,
     "lot_number": "OPENING-07-0000097-3",
     "total_quantity": "9.420",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.924Z",
     "location": 3
   }
@@ -10055,6 +10238,7 @@
     "material": 235,
     "lot_number": "OPENING-07-0000098-3",
     "total_quantity": "10.630",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.934Z",
     "location": 3
   }
@@ -10066,6 +10250,7 @@
     "material": 236,
     "lot_number": "OPENING-07-0000099-3",
     "total_quantity": "4.600",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.944Z",
     "location": 3
   }
@@ -10077,6 +10262,7 @@
     "material": 306,
     "lot_number": "OPENING-07-0000001-3",
     "total_quantity": "14930.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.954Z",
     "location": 3
   }
@@ -10088,6 +10274,7 @@
     "material": 313,
     "lot_number": "OPENING-07-0000124-3",
     "total_quantity": "34500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.964Z",
     "location": 3
   }
@@ -10099,6 +10286,7 @@
     "material": 314,
     "lot_number": "OPENING-07-0000125-3",
     "total_quantity": "12650.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.974Z",
     "location": 3
   }
@@ -10110,6 +10298,7 @@
     "material": 315,
     "lot_number": "OPENING-07-0000126-3",
     "total_quantity": "9671.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.985Z",
     "location": 3
   }
@@ -10121,6 +10310,7 @@
     "material": 316,
     "lot_number": "OPENING-07-0000127-3",
     "total_quantity": "12763.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:34.998Z",
     "location": 3
   }
@@ -10132,6 +10322,7 @@
     "material": 317,
     "lot_number": "OPENING-07-0000128-3",
     "total_quantity": "12884.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.012Z",
     "location": 3
   }
@@ -10143,6 +10334,7 @@
     "material": 318,
     "lot_number": "OPENING-07-0000129-3",
     "total_quantity": "12870.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.023Z",
     "location": 3
   }
@@ -10154,6 +10346,7 @@
     "material": 319,
     "lot_number": "OPENING-07-0000130-3",
     "total_quantity": "6444.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.034Z",
     "location": 3
   }
@@ -10165,6 +10358,7 @@
     "material": 320,
     "lot_number": "OPENING-07-0000131-3",
     "total_quantity": "6112.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.045Z",
     "location": 3
   }
@@ -10176,6 +10370,7 @@
     "material": 321,
     "lot_number": "OPENING-07-0000132-3",
     "total_quantity": "7359.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.055Z",
     "location": 3
   }
@@ -10187,6 +10382,7 @@
     "material": 322,
     "lot_number": "OPENING-07-0000133-3",
     "total_quantity": "7044.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.067Z",
     "location": 3
   }
@@ -10198,6 +10394,7 @@
     "material": 323,
     "lot_number": "OPENING-07-0000134-3",
     "total_quantity": "7993.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.078Z",
     "location": 3
   }
@@ -10209,6 +10406,7 @@
     "material": 324,
     "lot_number": "OPENING-07-0000135-3",
     "total_quantity": "5975.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.088Z",
     "location": 3
   }
@@ -10220,6 +10418,7 @@
     "material": 325,
     "lot_number": "OPENING-07-0000136-3",
     "total_quantity": "16913.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.101Z",
     "location": 3
   }
@@ -10231,6 +10430,7 @@
     "material": 326,
     "lot_number": "OPENING-07-0000137-3",
     "total_quantity": "7809.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.112Z",
     "location": 3
   }
@@ -10242,6 +10442,7 @@
     "material": 327,
     "lot_number": "OPENING-07-0000138-3",
     "total_quantity": "2196.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.122Z",
     "location": 3
   }
@@ -10253,6 +10454,7 @@
     "material": 329,
     "lot_number": "OPENING-07-0000140-3",
     "total_quantity": "8590.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.133Z",
     "location": 3
   }
@@ -10264,6 +10466,7 @@
     "material": 339,
     "lot_number": "OPENING-07-0000150-3",
     "total_quantity": "19300.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.145Z",
     "location": 3
   }
@@ -10275,6 +10478,7 @@
     "material": 340,
     "lot_number": "OPENING-07-0000151-3",
     "total_quantity": "3100.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.155Z",
     "location": 3
   }
@@ -10286,6 +10490,7 @@
     "material": 341,
     "lot_number": "OPENING-07-0000152-3",
     "total_quantity": "7300.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.166Z",
     "location": 3
   }
@@ -10297,6 +10502,7 @@
     "material": 342,
     "lot_number": "OPENING-07-0000153-3",
     "total_quantity": "7700.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.175Z",
     "location": 3
   }
@@ -10308,6 +10514,7 @@
     "material": 343,
     "lot_number": "OPENING-07-0000154-3",
     "total_quantity": "4032.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.185Z",
     "location": 3
   }
@@ -10319,6 +10526,7 @@
     "material": 361,
     "lot_number": "OPENING-07-0000168-3",
     "total_quantity": "225.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.195Z",
     "location": 3
   }
@@ -10330,6 +10538,7 @@
     "material": 376,
     "lot_number": "OPENING-07-0000182-3",
     "total_quantity": "13825.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.204Z",
     "location": 3
   }
@@ -10341,6 +10550,7 @@
     "material": 377,
     "lot_number": "OPENING-07-0000183-3",
     "total_quantity": "4988.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.216Z",
     "location": 3
   }
@@ -10352,6 +10562,7 @@
     "material": 398,
     "lot_number": "OPENING-07-0000199-3",
     "total_quantity": "20.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.224Z",
     "location": 3
   }
@@ -10363,6 +10574,7 @@
     "material": 405,
     "lot_number": "OPENING-07-0000309-3",
     "total_quantity": "9985.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.236Z",
     "location": 3
   }
@@ -10374,6 +10586,7 @@
     "material": 417,
     "lot_number": "OPENING-07-0000336-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.246Z",
     "location": 3
   }
@@ -10385,6 +10598,7 @@
     "material": 418,
     "lot_number": "OPENING-07-0000337-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.255Z",
     "location": 3
   }
@@ -10396,6 +10610,7 @@
     "material": 419,
     "lot_number": "OPENING-07-0000338-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.267Z",
     "location": 3
   }
@@ -10407,6 +10622,7 @@
     "material": 420,
     "lot_number": "OPENING-07-0000339-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.277Z",
     "location": 3
   }
@@ -10418,6 +10634,7 @@
     "material": 421,
     "lot_number": "OPENING-07-0000340-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.287Z",
     "location": 3
   }
@@ -10429,6 +10646,7 @@
     "material": 422,
     "lot_number": "OPENING-07-0000341-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.299Z",
     "location": 3
   }
@@ -10440,6 +10658,7 @@
     "material": 423,
     "lot_number": "OPENING-07-0000342-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.311Z",
     "location": 3
   }
@@ -10451,6 +10670,7 @@
     "material": 424,
     "lot_number": "OPENING-07-0000343-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.321Z",
     "location": 3
   }
@@ -10462,6 +10682,7 @@
     "material": 425,
     "lot_number": "OPENING-07-0000344-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.332Z",
     "location": 3
   }
@@ -10473,6 +10694,7 @@
     "material": 426,
     "lot_number": "OPENING-07-0000345-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.342Z",
     "location": 3
   }
@@ -10484,6 +10706,7 @@
     "material": 427,
     "lot_number": "OPENING-07-0000346-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.353Z",
     "location": 3
   }
@@ -10495,6 +10718,7 @@
     "material": 428,
     "lot_number": "OPENING-07-0000347-3",
     "total_quantity": "4850.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.364Z",
     "location": 3
   }
@@ -10506,6 +10730,7 @@
     "material": 429,
     "lot_number": "OPENING-07-0000348-3",
     "total_quantity": "5000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.374Z",
     "location": 3
   }
@@ -10517,6 +10742,7 @@
     "material": 435,
     "lot_number": "OPENING-07-0000204-3",
     "total_quantity": "8.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.384Z",
     "location": 3
   }
@@ -10528,6 +10754,7 @@
     "material": 436,
     "lot_number": "OPENING-07-0000329-3",
     "total_quantity": "10000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.395Z",
     "location": 3
   }
@@ -10539,6 +10766,7 @@
     "material": 441,
     "lot_number": "OPENING-07-0000272-3",
     "total_quantity": "10500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.404Z",
     "location": 3
   }
@@ -10550,6 +10778,7 @@
     "material": 442,
     "lot_number": "OPENING-07-0000279-3",
     "total_quantity": "216.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.415Z",
     "location": 3
   }
@@ -10561,6 +10790,7 @@
     "material": 443,
     "lot_number": "OPENING-07-0000280-3",
     "total_quantity": "216.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.424Z",
     "location": 3
   }
@@ -10572,6 +10802,7 @@
     "material": 444,
     "lot_number": "OPENING-07-0000281-3",
     "total_quantity": "216.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.434Z",
     "location": 3
   }
@@ -10583,6 +10814,7 @@
     "material": 445,
     "lot_number": "OPENING-07-0000282-3",
     "total_quantity": "196.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.444Z",
     "location": 3
   }
@@ -10594,6 +10826,7 @@
     "material": 446,
     "lot_number": "OPENING-07-0000283-3",
     "total_quantity": "216.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.454Z",
     "location": 3
   }
@@ -10605,6 +10838,7 @@
     "material": 447,
     "lot_number": "OPENING-07-0000284-3",
     "total_quantity": "216.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.465Z",
     "location": 3
   }
@@ -10616,6 +10850,7 @@
     "material": 452,
     "lot_number": "OPENING-07-0000287-3",
     "total_quantity": "104967.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.474Z",
     "location": 3
   }
@@ -10627,6 +10862,7 @@
     "material": 532,
     "lot_number": "OPENING-07-0000218-3",
     "total_quantity": "2520.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.487Z",
     "location": 3
   }
@@ -10638,6 +10874,7 @@
     "material": 533,
     "lot_number": "OPENING-07-0000219-3",
     "total_quantity": "1218.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.498Z",
     "location": 3
   }
@@ -10649,6 +10886,7 @@
     "material": 534,
     "lot_number": "OPENING-07-0000220-3",
     "total_quantity": "1800.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.507Z",
     "location": 3
   }
@@ -10660,6 +10898,7 @@
     "material": 535,
     "lot_number": "OPENING-07-0000221-3",
     "total_quantity": "6600.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.518Z",
     "location": 3
   }
@@ -10671,6 +10910,7 @@
     "material": 536,
     "lot_number": "OPENING-07-0000222-3",
     "total_quantity": "9000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.528Z",
     "location": 3
   }
@@ -10682,6 +10922,7 @@
     "material": 537,
     "lot_number": "OPENING-07-0000223-3",
     "total_quantity": "1700.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.538Z",
     "location": 3
   }
@@ -10693,6 +10934,7 @@
     "material": 550,
     "lot_number": "OPENING-07-0000334-3",
     "total_quantity": "7000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.548Z",
     "location": 3
   }
@@ -10704,6 +10946,7 @@
     "material": 563,
     "lot_number": "OPENING-07-0000289-3",
     "total_quantity": "14.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.559Z",
     "location": 3
   }
@@ -10715,6 +10958,7 @@
     "material": 564,
     "lot_number": "OPENING-07-0000290-3",
     "total_quantity": "10.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.570Z",
     "location": 3
   }
@@ -10726,6 +10970,7 @@
     "material": 565,
     "lot_number": "OPENING-07-0000291-3",
     "total_quantity": "78.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.581Z",
     "location": 3
   }
@@ -10737,6 +10982,7 @@
     "material": 567,
     "lot_number": "OPENING-07-0000293-3",
     "total_quantity": "34.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.591Z",
     "location": 3
   }
@@ -10748,6 +10994,7 @@
     "material": 581,
     "lot_number": "OPENING-07-0000308-3",
     "total_quantity": "1000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.602Z",
     "location": 3
   }
@@ -10759,6 +11006,7 @@
     "material": 591,
     "lot_number": "OPENING-07-0000269-3",
     "total_quantity": "4500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.613Z",
     "location": 3
   }
@@ -10770,6 +11018,7 @@
     "material": 624,
     "lot_number": "OPENING-07-0000314-3",
     "total_quantity": "29352.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.622Z",
     "location": 3
   }
@@ -10781,6 +11030,7 @@
     "material": 625,
     "lot_number": "OPENING-07-0000315-3",
     "total_quantity": "30973.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.633Z",
     "location": 3
   }
@@ -10792,6 +11042,7 @@
     "material": 626,
     "lot_number": "OPENING-07-0000316-3",
     "total_quantity": "10982.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.646Z",
     "location": 3
   }
@@ -10803,6 +11054,7 @@
     "material": 627,
     "lot_number": "OPENING-07-0000317-3",
     "total_quantity": "2800.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.656Z",
     "location": 3
   }
@@ -10814,6 +11066,7 @@
     "material": 628,
     "lot_number": "OPENING-07-0000318-3",
     "total_quantity": "2000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.666Z",
     "location": 3
   }
@@ -10825,6 +11078,7 @@
     "material": 629,
     "lot_number": "OPENING-07-0000319-3",
     "total_quantity": "2500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.676Z",
     "location": 3
   }
@@ -10836,6 +11090,7 @@
     "material": 630,
     "lot_number": "OPENING-07-0000320-3",
     "total_quantity": "2500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.687Z",
     "location": 3
   }
@@ -10847,6 +11102,7 @@
     "material": 631,
     "lot_number": "OPENING-07-0000321-3",
     "total_quantity": "2500.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.697Z",
     "location": 3
   }
@@ -10858,6 +11114,7 @@
     "material": 694,
     "lot_number": "OPENING-07-0000253-3",
     "total_quantity": "21602.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.705Z",
     "location": 3
   }
@@ -10869,6 +11126,7 @@
     "material": 695,
     "lot_number": "OPENING-07-0000254-3",
     "total_quantity": "129896.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.717Z",
     "location": 3
   }
@@ -10880,6 +11138,7 @@
     "material": 696,
     "lot_number": "OPENING-07-0000255-3",
     "total_quantity": "2616.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.729Z",
     "location": 3
   }
@@ -10891,6 +11150,7 @@
     "material": 700,
     "lot_number": "OPENING-07-0000323-3",
     "total_quantity": "6372.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.738Z",
     "location": 3
   }
@@ -10902,6 +11162,7 @@
     "material": 701,
     "lot_number": "OPENING-07-0000324-3",
     "total_quantity": "8085.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.750Z",
     "location": 3
   }
@@ -10913,6 +11174,7 @@
     "material": 702,
     "lot_number": "OPENING-07-0000325-3",
     "total_quantity": "6439.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.760Z",
     "location": 3
   }
@@ -10924,6 +11186,7 @@
     "material": 703,
     "lot_number": "OPENING-07-0000326-3",
     "total_quantity": "5937.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.770Z",
     "location": 3
   }
@@ -10935,6 +11198,7 @@
     "material": 708,
     "lot_number": "OPENING-07-0000261-3",
     "total_quantity": "20077.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.781Z",
     "location": 3
   }
@@ -10946,6 +11210,7 @@
     "material": 709,
     "lot_number": "OPENING-07-0000262-3",
     "total_quantity": "6896.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.791Z",
     "location": 3
   }
@@ -10957,6 +11222,7 @@
     "material": 710,
     "lot_number": "OPENING-07-0000263-3",
     "total_quantity": "12311.000",
+    "status": "IN_WAREHOUSE_RAW",
     "created_at": "2026-05-25T14:24:35.801Z",
     "location": 3
   }
@@ -10968,6 +11234,7 @@
     "material": 711,
     "lot_number": "OPENING-07-0000264-3",
     "total_quantity": "4766.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.813Z",
     "location": 3
   }
@@ -10979,6 +11246,7 @@
     "material": 712,
     "lot_number": "OPENING-07-0000265-3",
     "total_quantity": "4846.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.823Z",
     "location": 3
   }
@@ -10990,6 +11258,7 @@
     "material": 713,
     "lot_number": "OPENING-07-0000267-3",
     "total_quantity": "4858.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.833Z",
     "location": 3
   }
@@ -11001,6 +11270,7 @@
     "material": 740,
     "lot_number": "OPENING-07-0000226-3",
     "total_quantity": "63776.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.845Z",
     "location": 3
   }
@@ -11012,6 +11282,7 @@
     "material": 741,
     "lot_number": "OPENING-07-0000227-3",
     "total_quantity": "1000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.854Z",
     "location": 3
   }
@@ -11023,6 +11294,7 @@
     "material": 212,
     "lot_number": "OPENING-07-0000065-12",
     "total_quantity": "1043.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.865Z",
     "location": 12
   }
@@ -11034,6 +11306,7 @@
     "material": 213,
     "lot_number": "OPENING-07-0000066-12",
     "total_quantity": "1029.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.874Z",
     "location": 12
   }
@@ -11045,6 +11318,7 @@
     "material": 381,
     "lot_number": "OPENING-07-0000186-12",
     "total_quantity": "543.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.886Z",
     "location": 12
   }
@@ -11056,6 +11330,7 @@
     "material": 382,
     "lot_number": "OPENING-07-0000188-2",
     "total_quantity": "18.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.896Z",
     "location": 2
   }
@@ -11067,6 +11342,7 @@
     "material": 492,
     "lot_number": "OPENING-07-0000010-2",
     "total_quantity": "109466.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.905Z",
     "location": 2
   }
@@ -11078,6 +11354,7 @@
     "material": 584,
     "lot_number": "OPENING-07-0000101-2",
     "total_quantity": "53068.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.917Z",
     "location": 2
   }
@@ -11089,6 +11366,7 @@
     "material": 585,
     "lot_number": "OPENING-07-0000102-2",
     "total_quantity": "53420.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.926Z",
     "location": 2
   }
@@ -11100,6 +11378,7 @@
     "material": 588,
     "lot_number": "OPENING-07-0000322-2",
     "total_quantity": "17408.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.936Z",
     "location": 2
   }
@@ -11111,6 +11390,7 @@
     "material": 189,
     "lot_number": "OPENING-07-0000037-10",
     "total_quantity": "13984.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.947Z",
     "location": 10
   }
@@ -11122,6 +11402,7 @@
     "material": 197,
     "lot_number": "OPENING-07-0000045-10",
     "total_quantity": "2000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.956Z",
     "location": 10
   }
@@ -11133,6 +11414,7 @@
     "material": 218,
     "lot_number": "OPENING-07-0000071-10",
     "total_quantity": "100.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.966Z",
     "location": 10
   }
@@ -11144,6 +11426,7 @@
     "material": 231,
     "lot_number": "OPENING-07-0000094-10",
     "total_quantity": "2824.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.976Z",
     "location": 10
   }
@@ -11155,6 +11438,7 @@
     "material": 306,
     "lot_number": "OPENING-07-0000001-10",
     "total_quantity": "3124.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.986Z",
     "location": 10
   }
@@ -11166,6 +11450,7 @@
     "material": 339,
     "lot_number": "OPENING-07-0000150-10",
     "total_quantity": "12452.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:35.998Z",
     "location": 10
   }
@@ -11177,6 +11462,7 @@
     "material": 345,
     "lot_number": "OPENING-07-0000156-10",
     "total_quantity": "5550.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.007Z",
     "location": 10
   }
@@ -11188,6 +11474,7 @@
     "material": 450,
     "lot_number": "OPENING-07-0000285-10",
     "total_quantity": "5524.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.017Z",
     "location": 10
   }
@@ -11199,6 +11486,7 @@
     "material": 468,
     "lot_number": "OPENING-07-0000312-10",
     "total_quantity": "492.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.028Z",
     "location": 10
   }
@@ -11210,6 +11498,7 @@
     "material": 469,
     "lot_number": "OPENING-07-0000313-10",
     "total_quantity": "492.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.037Z",
     "location": 10
   }
@@ -11221,6 +11510,7 @@
     "material": 471,
     "lot_number": "OPENING-07-0000330-10",
     "total_quantity": "5015.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.047Z",
     "location": 10
   }
@@ -11232,6 +11522,7 @@
     "material": 472,
     "lot_number": "OPENING-07-0000331-10",
     "total_quantity": "4993.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.057Z",
     "location": 10
   }
@@ -11243,6 +11534,7 @@
     "material": 592,
     "lot_number": "OPENING-07-0000270-10",
     "total_quantity": "13984.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.070Z",
     "location": 10
   }
@@ -11254,6 +11546,7 @@
     "material": 741,
     "lot_number": "OPENING-07-0000227-10",
     "total_quantity": "11840.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.083Z",
     "location": 10
   }
@@ -11265,6 +11558,7 @@
     "material": 700,
     "lot_number": "OPENING-07-0000323-11",
     "total_quantity": "525.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.096Z",
     "location": 11
   }
@@ -11276,6 +11570,7 @@
     "material": 702,
     "lot_number": "OPENING-07-0000325-11",
     "total_quantity": "525.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.107Z",
     "location": 11
   }
@@ -11287,6 +11582,7 @@
     "material": 703,
     "lot_number": "OPENING-07-0000326-11",
     "total_quantity": "525.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.119Z",
     "location": 11
   }
@@ -11298,6 +11594,7 @@
     "material": 553,
     "lot_number": "OPENING-07-0000352-1",
     "total_quantity": "247000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.132Z",
     "location": 1
   }
@@ -11309,6 +11606,7 @@
     "material": 339,
     "lot_number": "OPENING-07-0000150-1",
     "total_quantity": "190000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.148Z",
     "location": 1
   }
@@ -11320,6 +11618,7 @@
     "material": 313,
     "lot_number": "OPENING-07-0000124-1",
     "total_quantity": "300000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.157Z",
     "location": 1
   }
@@ -11331,6 +11630,7 @@
     "material": 441,
     "lot_number": "OPENING-07-0000272-1",
     "total_quantity": "21000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.168Z",
     "location": 1
   }
@@ -11342,6 +11642,7 @@
     "material": 740,
     "lot_number": "OPENING-07-0000226-1",
     "total_quantity": "100000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.179Z",
     "location": 1
   }
@@ -11353,6 +11654,7 @@
     "material": 741,
     "lot_number": "OPENING-07-0000227-1",
     "total_quantity": "100000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.189Z",
     "location": 1
   }
@@ -11364,6 +11666,7 @@
     "material": 798,
     "lot_number": "OPENING-07-0000384-9",
     "total_quantity": "8662.000",
+    "status": "ORDERED",
     "created_at": "2026-05-25T14:24:36.201Z",
     "location": 9
   }
@@ -11375,6 +11678,7 @@
     "material": 800,
     "lot_number": "OPENING-07-0000386-9",
     "total_quantity": "13846.000",
+    "status": "IN_WAREHOUSE_RAW",
     "created_at": "2026-05-25T14:24:36.211Z",
     "location": 9
   }
@@ -11386,6 +11690,7 @@
     "material": 802,
     "lot_number": "OPENING-07-0000380-9",
     "total_quantity": "10000.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.221Z",
     "location": 9
   }
@@ -11397,6 +11702,7 @@
     "material": 803,
     "lot_number": "OPENING-07-0000392-9",
     "total_quantity": "5870.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.232Z",
     "location": 9
   }
@@ -11408,6 +11714,7 @@
     "material": 804,
     "lot_number": "OPENING-07-0000388-9",
     "total_quantity": "9100.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.241Z",
     "location": 9
   }
@@ -11419,6 +11726,7 @@
     "material": 807,
     "lot_number": "OPENING-07-0000391-9",
     "total_quantity": "5870.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.252Z",
     "location": 9
   }
@@ -11430,6 +11738,7 @@
     "material": 805,
     "lot_number": "OPENING-07-0000389-9",
     "total_quantity": "5870.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.263Z",
     "location": 9
   }
@@ -11441,6 +11750,7 @@
     "material": 808,
     "lot_number": "OPENING-07-0000393-9",
     "total_quantity": "5870.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.272Z",
     "location": 9
   }
@@ -11452,6 +11762,7 @@
     "material": 806,
     "lot_number": "OPENING-07-0000390-9",
     "total_quantity": "5870.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.285Z",
     "location": 9
   }
@@ -11463,6 +11774,7 @@
     "material": 799,
     "lot_number": "OPENING-07-0000385-9",
     "total_quantity": "3738.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.296Z",
     "location": 9
   }
@@ -11474,6 +11786,7 @@
     "material": 801,
     "lot_number": "OPENING-07-0000387-9",
     "total_quantity": "6594.000",
+    "status": "PENDING",
     "created_at": "2026-05-25T14:24:36.306Z",
     "location": 9
   }
@@ -11485,6 +11798,7 @@
     "material": 816,
     "lot_number": "OPENING-07-0000357-1",
     "total_quantity": "200.000",
+    "status": "PENDING",
     "created_at": "2026-05-26T08:43:04.026Z",
     "location": 7
   }
@@ -11496,6 +11810,7 @@
     "material": 817,
     "lot_number": "OPENING-07-0000370-1",
     "total_quantity": "4000.000",
+    "status": "PENDING",
     "created_at": "2026-05-26T08:44:10.627Z",
     "location": 3
   }
@@ -11507,6 +11822,7 @@
     "material": 818,
     "lot_number": "OPENING-07-0000400-1",
     "total_quantity": "5.000",
+    "status": "PENDING",
     "created_at": "2026-05-26T08:44:47.064Z",
     "location": 3
   }
@@ -11518,6 +11834,7 @@
     "material": 819,
     "lot_number": "OPENING-07-0000354-1",
     "total_quantity": "2200.000",
+    "status": "PENDING",
     "created_at": "2026-05-26T08:45:20.507Z",
     "location": 3
   }
@@ -11529,6 +11846,7 @@
     "material": 820,
     "lot_number": "OPENING-07-0000361-1",
     "total_quantity": "2000.000",
+    "status": "PENDING",
     "created_at": "2026-05-26T08:45:54.402Z",
     "location": 10
   }
@@ -11540,6 +11858,7 @@
     "material": 823,
     "lot_number": "OPENING-07-0000401-1",
     "total_quantity": "2000.000",
+    "status": "PENDING",
     "created_at": "2026-05-27T08:18:03.254Z",
     "location": 11
   }
@@ -11551,6 +11870,7 @@
     "material": 824,
     "lot_number": "OPENING-07-0000402-1",
     "total_quantity": "2000.000",
+    "status": "PENDING",
     "created_at": "2026-05-27T08:19:46.949Z",
     "location": 11
   }
@@ -11562,8 +11882,64 @@
     "material": 584,
     "lot_number": "OPENING-07-0000101-VETROELITE-2026",
     "total_quantity": "247000.000",
+    "status": "PENDING",
     "created_at": "2026-06-04T08:00:04.545Z",
     "location": 1
+  }
+},
+{
+  "model": "inventory.rawbatchallocation",
+  "pk": 1,
+  "fields": {
+    "raw_batch": 318,
+    "production_run": 13,
+    "quantity": "12000.000",
+    "created_at": "2026-06-05T18:59:11.904Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.rawbatchallocation",
+  "pk": 2,
+  "fields": {
+    "raw_batch": 313,
+    "production_run": 16,
+    "quantity": "30.000",
+    "created_at": "2026-06-05T19:00:11.483Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.rawbatchallocation",
+  "pk": 5,
+  "fields": {
+    "raw_batch": 317,
+    "production_run": 11,
+    "quantity": "2000.000",
+    "created_at": "2026-06-05T19:14:08.888Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.rawbatchallocation",
+  "pk": 6,
+  "fields": {
+    "raw_batch": 317,
+    "production_run": 11,
+    "quantity": "5162.000",
+    "created_at": "2026-06-05T19:14:28.142Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.rawbatchallocation",
+  "pk": 7,
+  "fields": {
+    "raw_batch": 317,
+    "production_run": 11,
+    "quantity": "70.000",
+    "created_at": "2026-06-05T19:16:52.227Z",
+    "notes": ""
   }
 },
 {
@@ -19560,8 +19936,8 @@
     "order": 6,
     "material": 449,
     "quantity_ordered": "1980.000",
-    "quantity_fulfilled": "0.000",
-    "status": "PENDING",
+    "quantity_fulfilled": "55.000",
+    "status": "PARTIAL",
     "notes": ""
   }
 },
@@ -20616,11 +20992,11 @@
     "material": 598,
     "planned_quantity": "3905.000",
     "actual_quantity": null,
-    "status": "PLANNED",
+    "status": "COMPLETED",
     "planned_start": null,
     "planned_end": null,
-    "actual_start": null,
-    "actual_end": null,
+    "actual_start": "2026-06-05",
+    "actual_end": "2026-06-05",
     "location": 7,
     "notes": "",
     "created_at": "2026-05-19T12:05:41.961Z",
@@ -20643,7 +21019,7 @@
     "location": 7,
     "notes": "Ίδιο με το PR-SNOWMAN-50ML-EU-2026-01 αλλά αλλάζει η ετικέτα, που είναι US.",
     "created_at": "2026-05-20T09:03:09.066Z",
-    "product_batch": null
+    "product_batch": 71
   }
 },
 {
@@ -20882,10 +21258,10 @@
     "material": 476,
     "planned_quantity": "6039.000",
     "actual_quantity": null,
-    "status": "PLANNED",
+    "status": "ACTIVE",
     "planned_start": "2026-05-23",
     "planned_end": "2026-07-15",
-    "actual_start": null,
+    "actual_start": "2026-06-05",
     "actual_end": null,
     "location": 7,
     "notes": "",
@@ -21392,10 +21768,7 @@
     "material": 798,
     "quantity_required": "8662.000",
     "quantity_available": "0.000",
-    "status": "IN_WAREHOUSE_RAW",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T08:43:49.771Z"
   }
@@ -21408,10 +21781,7 @@
     "material": 441,
     "quantity_required": "8662.000",
     "quantity_available": "0.000",
-    "status": "ORDERED",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T11:27:05.302Z"
   }
@@ -21424,10 +21794,7 @@
     "material": 740,
     "quantity_required": "8662.000",
     "quantity_available": "0.000",
-    "status": "ORDERED",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T11:27:05.314Z"
   }
@@ -21440,10 +21807,7 @@
     "material": 773,
     "quantity_required": "5830.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:34:45.989Z"
   }
@@ -21456,10 +21820,7 @@
     "material": 330,
     "quantity_required": "8662.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:34:46.008Z"
   }
@@ -21472,10 +21833,7 @@
     "material": 799,
     "quantity_required": "3650.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T09:07:56.386Z"
   }
@@ -21488,10 +21846,7 @@
     "material": 740,
     "quantity_required": "3650.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T09:07:56.365Z"
   }
@@ -21504,10 +21859,7 @@
     "material": 441,
     "quantity_required": "3650.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T09:07:56.341Z"
   }
@@ -21520,10 +21872,7 @@
     "material": 330,
     "quantity_required": "3650.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T09:07:56.354Z"
   }
@@ -21536,10 +21885,7 @@
     "material": 800,
     "quantity_required": "13846.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T07:41:49.817Z"
   }
@@ -21552,10 +21898,7 @@
     "material": 459,
     "quantity_required": "8580.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:21:50.731Z"
   }
@@ -21568,10 +21911,7 @@
     "material": 441,
     "quantity_required": "13846.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T11:47:51.928Z"
   }
@@ -21584,10 +21924,7 @@
     "material": 740,
     "quantity_required": "13846.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T11:47:51.940Z"
   }
@@ -21600,10 +21937,7 @@
     "material": 330,
     "quantity_required": "13846.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:30:56.670Z"
   }
@@ -21616,10 +21950,7 @@
     "material": 801,
     "quantity_required": "6594.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T07:42:06.843Z"
   }
@@ -21632,10 +21963,7 @@
     "material": 441,
     "quantity_required": "6594.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T11:53:14.772Z"
   }
@@ -21648,10 +21976,7 @@
     "material": 740,
     "quantity_required": "6594.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T11:53:14.786Z"
   }
@@ -21664,10 +21989,7 @@
     "material": 330,
     "quantity_required": "6594.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:27:34.273Z"
   }
@@ -21680,10 +22002,7 @@
     "material": 706,
     "quantity_required": "2200.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:27:34.285Z"
   }
@@ -21696,10 +22015,7 @@
     "material": 313,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T13:24:08.277Z"
   }
@@ -21712,10 +22028,7 @@
     "material": 740,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T13:24:08.290Z"
   }
@@ -21728,10 +22041,7 @@
     "material": 324,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T13:24:08.299Z"
   }
@@ -21744,10 +22054,7 @@
     "material": 330,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:11:40.593Z"
   }
@@ -21760,10 +22067,7 @@
     "material": 450,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T14:07:01.869Z"
   }
@@ -21776,10 +22080,7 @@
     "material": 339,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T13:50:49.929Z"
   }
@@ -21792,10 +22093,7 @@
     "material": 741,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T13:50:49.943Z"
   }
@@ -21808,10 +22106,7 @@
     "material": 339,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T14:03:21.481Z"
   }
@@ -21824,10 +22119,7 @@
     "material": 741,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T14:03:21.495Z"
   }
@@ -21840,10 +22132,7 @@
     "material": 472,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-18T14:03:21.507Z"
   }
@@ -21856,10 +22145,7 @@
     "material": 784,
     "quantity_required": "5592.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": "2026-06-19",
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T06:41:00.594Z"
   }
@@ -21872,10 +22158,7 @@
     "material": 785,
     "quantity_required": "5592.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": "2026-06-19",
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T06:41:00.579Z"
   }
@@ -21888,10 +22171,7 @@
     "material": 224,
     "quantity_required": "315.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:34:36.946Z"
   }
@@ -21904,10 +22184,7 @@
     "material": 511,
     "quantity_required": "5250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T07:00:58.859Z"
   }
@@ -21920,10 +22197,7 @@
     "material": 516,
     "quantity_required": "5250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T07:04:40.679Z"
   }
@@ -21936,10 +22210,7 @@
     "material": 224,
     "quantity_required": "315.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:39:29.721Z"
   }
@@ -21952,10 +22223,7 @@
     "material": 223,
     "quantity_required": "315.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:43:59.207Z"
   }
@@ -21968,10 +22236,7 @@
     "material": 516,
     "quantity_required": "5250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:43:59.188Z"
   }
@@ -21984,10 +22249,7 @@
     "material": 786,
     "quantity_required": "5250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T07:45:10.418Z"
   }
@@ -22000,10 +22262,7 @@
     "material": 788,
     "quantity_required": "11.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T07:45:10.437Z"
   }
@@ -22016,10 +22275,7 @@
     "material": 652,
     "quantity_required": "5250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T08:22:16.285Z"
   }
@@ -22032,10 +22288,7 @@
     "material": 176,
     "quantity_required": "3473.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T11:38:18.195Z"
   }
@@ -22048,10 +22301,7 @@
     "material": 217,
     "quantity_required": "3473.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T11:38:18.205Z"
   }
@@ -22064,10 +22314,7 @@
     "material": 232,
     "quantity_required": "148.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:23:05.088Z"
   }
@@ -22080,10 +22327,7 @@
     "material": 374,
     "quantity_required": "3473.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T11:38:18.220Z"
   }
@@ -22096,10 +22340,7 @@
     "material": 376,
     "quantity_required": "3473.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T11:38:18.227Z"
   }
@@ -22112,10 +22353,7 @@
     "material": 452,
     "quantity_required": "3473.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T11:38:18.233Z"
   }
@@ -22128,10 +22366,7 @@
     "material": 452,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T13:56:12.050Z"
   }
@@ -22144,10 +22379,7 @@
     "material": 217,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T13:56:12.005Z"
   }
@@ -22160,10 +22392,7 @@
     "material": 567,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T14:00:29.818Z"
   }
@@ -22176,10 +22405,7 @@
     "material": 443,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T13:26:58.302Z"
   }
@@ -22192,10 +22418,7 @@
     "material": 232,
     "quantity_required": "171.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:29:01.492Z"
   }
@@ -22208,10 +22431,7 @@
     "material": 374,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-19T13:56:11.987Z"
   }
@@ -22224,10 +22444,7 @@
     "material": 221,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:11:40.606Z"
   }
@@ -22240,10 +22457,7 @@
     "material": 230,
     "quantity_required": "875.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:11:40.620Z"
   }
@@ -22256,10 +22470,7 @@
     "material": 230,
     "quantity_required": "550.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:27:34.295Z"
   }
@@ -22272,10 +22483,7 @@
     "material": 221,
     "quantity_required": "6594.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:27:34.308Z"
   }
@@ -22288,10 +22496,7 @@
     "material": 230,
     "quantity_required": "1154.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:30:56.686Z"
   }
@@ -22304,10 +22509,7 @@
     "material": 221,
     "quantity_required": "13846.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:30:56.702Z"
   }
@@ -22320,10 +22522,7 @@
     "material": 230,
     "quantity_required": "721.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:34:46.026Z"
   }
@@ -22336,10 +22535,7 @@
     "material": 221,
     "quantity_required": "8662.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T06:34:46.045Z"
   }
@@ -22352,10 +22548,7 @@
     "material": 230,
     "quantity_required": "290.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T09:07:56.326Z"
   }
@@ -22368,10 +22561,7 @@
     "material": 221,
     "quantity_required": "3650.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T09:07:56.396Z"
   }
@@ -22384,10 +22574,7 @@
     "material": 231,
     "quantity_required": "1750.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T07:56:59.365Z"
   }
@@ -22400,10 +22587,7 @@
     "material": 306,
     "quantity_required": "1750.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:01:42.278Z"
   }
@@ -22416,10 +22600,7 @@
     "material": 451,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:01:42.295Z"
   }
@@ -22432,10 +22613,7 @@
     "material": 231,
     "quantity_required": "1750.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:08:54.244Z"
   }
@@ -22448,10 +22626,7 @@
     "material": 306,
     "quantity_required": "1750.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:08:54.254Z"
   }
@@ -22464,10 +22639,7 @@
     "material": 559,
     "quantity_required": "10500.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:08:54.265Z"
   }
@@ -22480,10 +22652,7 @@
     "material": 228,
     "quantity_required": "5250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:34:36.958Z"
   }
@@ -22496,10 +22665,7 @@
     "material": 229,
     "quantity_required": "21.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:34:36.983Z"
   }
@@ -22512,10 +22678,7 @@
     "material": 230,
     "quantity_required": "438.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:34:36.995Z"
   }
@@ -22528,10 +22691,7 @@
     "material": 230,
     "quantity_required": "438.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:39:29.733Z"
   }
@@ -22544,10 +22704,7 @@
     "material": 228,
     "quantity_required": "5250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:39:29.748Z"
   }
@@ -22560,10 +22717,7 @@
     "material": 229,
     "quantity_required": "21.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:39:29.760Z"
   }
@@ -22576,10 +22730,7 @@
     "material": 228,
     "quantity_required": "5250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:43:59.223Z"
   }
@@ -22592,10 +22743,7 @@
     "material": 229,
     "quantity_required": "21.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:43:59.241Z"
   }
@@ -22608,10 +22756,7 @@
     "material": 230,
     "quantity_required": "438.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:43:59.257Z"
   }
@@ -22624,10 +22769,7 @@
     "material": 674,
     "quantity_required": "81.900",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:54:32.733Z"
   }
@@ -22640,10 +22782,7 @@
     "material": 229,
     "quantity_required": "250.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T08:54:32.747Z"
   }
@@ -22656,10 +22795,7 @@
     "material": 793,
     "quantity_required": "866.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:07:32.564Z"
   }
@@ -22672,10 +22808,7 @@
     "material": 374,
     "quantity_required": "866.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:07:32.574Z"
   }
@@ -22688,10 +22821,7 @@
     "material": 217,
     "quantity_required": "866.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:07:32.580Z"
   }
@@ -22704,10 +22834,7 @@
     "material": 232,
     "quantity_required": "37.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:28:29.135Z"
   }
@@ -22720,10 +22847,7 @@
     "material": 452,
     "quantity_required": "866.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:07:32.598Z"
   }
@@ -22736,10 +22860,7 @@
     "material": 567,
     "quantity_required": "866.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:07:32.606Z"
   }
@@ -22752,10 +22873,7 @@
     "material": 216,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:29:57.507Z"
   }
@@ -22768,10 +22886,7 @@
     "material": 217,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:29:57.517Z"
   }
@@ -22784,10 +22899,7 @@
     "material": 232,
     "quantity_required": "37.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:29:57.528Z"
   }
@@ -22800,10 +22912,7 @@
     "material": 374,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:29:57.537Z"
   }
@@ -22816,10 +22925,7 @@
     "material": 568,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:29:57.549Z"
   }
@@ -22832,10 +22938,7 @@
     "material": 794,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:30:16.953Z"
   }
@@ -22848,10 +22951,7 @@
     "material": 374,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:33:19.211Z"
   }
@@ -22864,10 +22964,7 @@
     "material": 217,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:33:19.222Z"
   }
@@ -22880,10 +22977,7 @@
     "material": 446,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:33:19.234Z"
   }
@@ -22896,10 +22990,7 @@
     "material": 232,
     "quantity_required": "171.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:33:19.244Z"
   }
@@ -22912,10 +23003,7 @@
     "material": 216,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:33:19.252Z"
   }
@@ -22928,10 +23016,7 @@
     "material": 568,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-20T09:33:19.262Z"
   }
@@ -22944,10 +23029,7 @@
     "material": 809,
     "quantity_required": "3650.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T09:07:56.376Z"
   }
@@ -22960,10 +23042,7 @@
     "material": 773,
     "quantity_required": "3650.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T09:07:56.407Z"
   }
@@ -22976,10 +23055,7 @@
     "material": 447,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:25:22.556Z"
   }
@@ -22992,10 +23068,7 @@
     "material": 374,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:21:12.775Z"
   }
@@ -23008,10 +23081,7 @@
     "material": 217,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:21:12.791Z"
   }
@@ -23024,10 +23094,7 @@
     "material": 232,
     "quantity_required": "171.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:21:12.807Z"
   }
@@ -23040,10 +23107,7 @@
     "material": 566,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:26:01.736Z"
   }
@@ -23056,10 +23120,7 @@
     "material": 216,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:21:12.837Z"
   }
@@ -23072,10 +23133,7 @@
     "material": 810,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:37:49.513Z"
   }
@@ -23088,10 +23146,7 @@
     "material": 374,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:36:23.456Z"
   }
@@ -23104,10 +23159,7 @@
     "material": 217,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:36:23.464Z"
   }
@@ -23120,10 +23172,7 @@
     "material": 232,
     "quantity_required": "37.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:36:23.471Z"
   }
@@ -23136,10 +23185,7 @@
     "material": 566,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:36:23.479Z"
   }
@@ -23152,10 +23198,7 @@
     "material": 216,
     "quantity_required": "867.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:36:23.487Z"
   }
@@ -23168,10 +23211,7 @@
     "material": 445,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:48:31.606Z"
   }
@@ -23184,10 +23224,7 @@
     "material": 374,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:43:32.049Z"
   }
@@ -23200,10 +23237,7 @@
     "material": 217,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:43:32.064Z"
   }
@@ -23216,10 +23250,7 @@
     "material": 232,
     "quantity_required": "171.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:26:12.106Z"
   }
@@ -23232,10 +23263,7 @@
     "material": 564,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T07:53:46.836Z"
   }
@@ -23248,10 +23276,7 @@
     "material": 452,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:43:32.109Z"
   }
@@ -23264,10 +23289,7 @@
     "material": 811,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:53:09.026Z"
   }
@@ -23280,10 +23302,7 @@
     "material": 374,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:53:09.039Z"
   }
@@ -23296,10 +23315,7 @@
     "material": 217,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:53:09.052Z"
   }
@@ -23312,10 +23328,7 @@
     "material": 232,
     "quantity_required": "181.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:24:16.882Z"
   }
@@ -23328,10 +23341,7 @@
     "material": 564,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-25T07:53:56.259Z"
   }
@@ -23344,10 +23354,7 @@
     "material": 452,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-22T13:53:09.094Z"
   }
@@ -23360,10 +23367,7 @@
     "material": 444,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:19:08.852Z"
   }
@@ -23376,10 +23380,7 @@
     "material": 374,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:15:33.770Z"
   }
@@ -23392,10 +23393,7 @@
     "material": 217,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:15:33.772Z"
   }
@@ -23408,10 +23406,7 @@
     "material": 232,
     "quantity_required": "171.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:26:26.841Z"
   }
@@ -23424,10 +23419,7 @@
     "material": 563,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:19:08.855Z"
   }
@@ -23440,10 +23432,7 @@
     "material": 452,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:15:33.778Z"
   }
@@ -23456,10 +23445,7 @@
     "material": 813,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:20:52.137Z"
   }
@@ -23472,10 +23458,7 @@
     "material": 374,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:20:52.139Z"
   }
@@ -23488,10 +23471,7 @@
     "material": 217,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:20:52.141Z"
   }
@@ -23504,10 +23484,7 @@
     "material": 232,
     "quantity_required": "181.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:23:50.832Z"
   }
@@ -23520,10 +23497,7 @@
     "material": 563,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:20:52.144Z"
   }
@@ -23536,10 +23510,7 @@
     "material": 452,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:20:52.146Z"
   }
@@ -23552,12 +23523,9 @@
     "material": 374,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-23T08:30:35.096Z"
+    "updated_at": "2026-06-05T16:47:42.856Z"
   }
 },
 {
@@ -23568,12 +23536,9 @@
     "material": 217,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-23T08:30:35.098Z"
+    "updated_at": "2026-06-05T16:47:47.781Z"
   }
 },
 {
@@ -23584,12 +23549,9 @@
     "material": 812,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-23T08:31:58.616Z"
+    "updated_at": "2026-06-05T16:47:52.548Z"
   }
 },
 {
@@ -23600,12 +23562,9 @@
     "material": 232,
     "quantity_required": "181.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-23T08:30:35.103Z"
+    "updated_at": "2026-06-05T16:47:54.145Z"
   }
 },
 {
@@ -23616,12 +23575,9 @@
     "material": 565,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-23T08:31:58.618Z"
+    "updated_at": "2026-06-05T16:47:56.003Z"
   }
 },
 {
@@ -23632,12 +23588,9 @@
     "material": 452,
     "quantity_required": "4339.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
-    "updated_at": "2026-05-23T08:30:35.108Z"
+    "updated_at": "2026-06-05T16:47:57.622Z"
   }
 },
 {
@@ -23648,10 +23601,7 @@
     "material": 374,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:33:22.222Z"
   }
@@ -23664,10 +23614,7 @@
     "material": 217,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:33:22.225Z"
   }
@@ -23680,10 +23627,7 @@
     "material": 442,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:33:22.226Z"
   }
@@ -23696,10 +23640,7 @@
     "material": 232,
     "quantity_required": "171.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:33:22.228Z"
   }
@@ -23712,10 +23653,7 @@
     "material": 565,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:33:22.229Z"
   }
@@ -23728,10 +23666,7 @@
     "material": 452,
     "quantity_required": "4100.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T08:33:22.231Z"
   }
@@ -23744,10 +23679,7 @@
     "material": 165,
     "quantity_required": "6341.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:00:47.356Z"
   }
@@ -23760,10 +23692,7 @@
     "material": 331,
     "quantity_required": "6341.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:00:47.359Z"
   }
@@ -23776,10 +23705,7 @@
     "material": 703,
     "quantity_required": "397.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:00:47.360Z"
   }
@@ -23792,10 +23718,7 @@
     "material": 331,
     "quantity_required": "6341.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:02:44.823Z"
   }
@@ -23808,10 +23731,7 @@
     "material": 703,
     "quantity_required": "397.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:02:44.825Z"
   }
@@ -23824,10 +23744,7 @@
     "material": 814,
     "quantity_required": "6341.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:04:21.580Z"
   }
@@ -23840,10 +23757,7 @@
     "material": 331,
     "quantity_required": "6341.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": "2026-06-05",
     "notes": "",
     "updated_at": "2026-06-05T12:14:57.003Z"
   }
@@ -23856,10 +23770,7 @@
     "material": 815,
     "quantity_required": "6341.000",
     "quantity_available": "0.000",
-    "status": "ORDERED",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-06-05T12:14:13.789Z"
   }
@@ -23872,10 +23783,7 @@
     "material": 703,
     "quantity_required": "397.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:10:46.092Z"
   }
@@ -23888,10 +23796,7 @@
     "material": 756,
     "quantity_required": "158.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:21:25.354Z"
   }
@@ -23904,10 +23809,7 @@
     "material": 754,
     "quantity_required": "525.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:21:25.356Z"
   }
@@ -23920,10 +23822,7 @@
     "material": 755,
     "quantity_required": "1575.000",
     "quantity_available": "0.000",
-    "status": "PENDING",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-05-23T09:21:25.358Z"
   }
@@ -23936,10 +23835,7 @@
     "material": 232,
     "quantity_required": "70.000",
     "quantity_available": "0.000",
-    "status": "FINAL_PRODUCT",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-06-04T07:27:50.889Z"
   }
@@ -23952,10 +23848,7 @@
     "material": 452,
     "quantity_required": "1680.000",
     "quantity_available": "0.000",
-    "status": "FINAL_PRODUCT",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-06-04T07:27:50.904Z"
   }
@@ -23968,10 +23861,7 @@
     "material": 217,
     "quantity_required": "1680.000",
     "quantity_available": "0.000",
-    "status": "FINAL_PRODUCT",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-06-04T07:27:50.915Z"
   }
@@ -23984,10 +23874,7 @@
     "material": 176,
     "quantity_required": "1680.000",
     "quantity_available": "0.000",
-    "status": "FINAL_PRODUCT",
-    "raw_material_batch": null,
     "expected_date": null,
-    "actual_date": null,
     "notes": "",
     "updated_at": "2026-06-04T07:27:50.927Z"
   }
@@ -24001,6 +23888,17 @@
     "quantity_reserved": "330.000",
     "notes": "",
     "created_at": "2026-05-23T09:32:06.184Z"
+  }
+},
+{
+  "model": "inventory.productbatchreservation",
+  "pk": 2,
+  "fields": {
+    "product_batch": 134,
+    "order_line": 17,
+    "quantity_reserved": "55.000",
+    "notes": "",
+    "created_at": "2026-06-05T18:39:46.109Z"
   }
 },
 {

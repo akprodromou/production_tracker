@@ -7,9 +7,9 @@
 <style>
   th.sortable { cursor:pointer; user-select:none; white-space:nowrap; }
   th.sortable:hover { color:var(--accent); }
-  th.sortable::after { content:' \21C5'; font-size:10px; color:var(--muted); }
-  th.sortable.asc::after  { content:' \2191'; color:var(--accent); }
-  th.sortable.desc::after { content:' \2193'; color:var(--accent); }
+  th.sort-asc::after  { content:' ↑'; color:var(--accent); }
+  th.sort-desc::after { content:' ↓'; color:var(--accent); }
+  th.sortable:not(.sort-asc):not(.sort-desc)::after { content:' ⇅'; font-size:10px; color:var(--muted); }
 </style>
 {% endblock %}
 
@@ -23,6 +23,8 @@
 
 <div class="filter-bar">
   <form method="get" style="display:contents">
+    <input type="hidden" name="sort" value="{{ current_sort }}">
+    <input type="hidden" name="dir"  value="{{ current_dir }}">
     <div class="form-group">
       <label>Material</label>
       <select name="material_id" onchange="this.form.submit()">
@@ -52,18 +54,19 @@
   </form>
 </div>
 
+{% with base_url=request.get_full_path %}
 <div class="card">
   <div class="table-wrap">
     {% if batches %}
-    <table id="pbTable">
+    <table>
       <thead>
         <tr>
-          <th>Batch Number</th>
-          <th>Product</th>
-          <th>SKU</th>
-          <th>Location</th>
-          <th>Qty Produced</th>
-          <th>Date</th>
+          {% for col_key, col_label in cols %}
+          <th class="sortable {% if current_sort == col_key %}sort-{{ current_dir }}{% endif %}">
+            <a href="?sort={{ col_key }}&dir={% if current_sort == col_key %}{% if current_dir == 'asc' %}desc{% else %}asc{% endif %}{% else %}asc{% endif %}{% if request.GET.material_id %}&material_id={{ request.GET.material_id }}{% endif %}{% if request.GET.location_id %}&location_id={{ request.GET.location_id }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+               style="color:inherit;text-decoration:none">{{ col_label }}</a>
+          </th>
+          {% endfor %}
           <th style="text-align:right">Actions</th>
         </tr>
       </thead>
@@ -99,6 +102,7 @@
     {% endif %}
   </div>
 </div>
+{% endwith %}
 
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal">
@@ -122,30 +126,5 @@ function openDeleteModal(name, url) {
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
-(function() {
-  var table = document.getElementById('pbTable');
-  if (!table) return;
-  var headers = table.querySelectorAll('thead th');
-  headers.forEach(function(th, colIdx) {
-    if (th.style.textAlign === 'right' || th.textContent.trim() === 'Actions') return;
-    th.classList.add('sortable');
-    th.addEventListener('click', function() {
-      var asc = !this.classList.contains('asc');
-      headers.forEach(function(h) { h.classList.remove('asc','desc'); });
-      this.classList.add(asc ? 'asc' : 'desc');
-      var tbody = table.querySelector('tbody');
-      var rows  = Array.from(tbody.querySelectorAll('tr'));
-      rows.sort(function(a, b) {
-        var aVal = ((a.querySelectorAll('td')[colIdx] || {}).textContent || '').trim();
-        var bVal = ((b.querySelectorAll('td')[colIdx] || {}).textContent || '').trim();
-        var aNum = parseFloat(aVal.replace(/[^0-9.]/g, ''));
-        var bNum = parseFloat(bVal.replace(/[^0-9.]/g, ''));
-        if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
-        return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-      });
-      rows.forEach(function(r) { tbody.appendChild(r); });
-    });
-  });
-})();
 </script>
 {% endblock %}

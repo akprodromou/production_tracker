@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}{{ material.name }} — Materials{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
@@ -223,16 +224,20 @@
     {% if raw_batches %}
     <table>
       <thead>
-        <tr><th>Lot</th><th>Location</th><th>Available</th><th>Reserved</th><th>Total</th><th></th></tr>
+        <tr><th>Lot</th><th>Location</th><th>Status</th><th>Total</th><th></th></tr>
       </thead>
       <tbody>
         {% for b in raw_batches %}
         <tr>
           <td class="td-mono"><a href="{% url 'batch-detail' b.pk %}" style="color:var(--accent);text-decoration:none">{{ b.lot_number }}</a></td>
           <td>{{ b.location.name }}</td>
-          <td class="td-mono" style="color:var(--accent2)">{{ b.available_quantity }}</td>
-          <td class="td-mono" style="color:var(--warn)">{{ b.reserved_quantity }}</td>
-          <td class="td-mono">{{ b.total_quantity }}</td>
+          <td>
+            {% if b.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+            {% elif b.status == 'ORDERED' %}<span class="badge badge-blue">Ordered</span>
+            {% elif b.status == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-green">In Warehouse</span>
+            {% endif %}
+          </td>
+          <td class="td-mono">{{ b.total_quantity|smart_qty:b.material.unit.name }}</td>
           <td><a href="{% url 'batch-detail' b.pk %}" class="btn btn-ghost btn-sm">→</a></td>
         </tr>
         {% endfor %}
