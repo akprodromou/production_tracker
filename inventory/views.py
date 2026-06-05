@@ -344,7 +344,13 @@ class RawMaterialBatchListView(View):
             except (ValueError, TypeError):
                 pass
         if q:
-            qs = qs.filter(lot_number__icontains=q)
+            terms = q.split()
+            for term in terms:
+                qs = qs.filter(
+                    Q(lot_number__icontains=term) |
+                    Q(material__sku__icontains=term) |
+                    Q(material__name__icontains=term)
+                )
         paginator = Paginator(qs.order_by('-created_at'), 25)
         return render(request, 'batches/list.html', {
             'batches':       paginator.get_page(request.GET.get('page')),
@@ -363,7 +369,10 @@ class RawMaterialBatchDetailView(View):
             'transactions':    MaterialTransaction.objects.filter(
                                    raw_material_batch=batch
                                ).select_related('product_batch').order_by('-created_at'),
-            'product_batches': ProductBatch.objects.select_related('material').order_by('-created_at'),
+            'product_batches': ProductBatch.objects.filter(
+                               # Only show batches whose production run uses this raw material
+                               production_run__components__material=batch.material
+                           ).select_related('material').distinct().order_by('-created_at'),
             'production_runs': ProductionRun.objects.filter(
                                    status__in=['PLANNED', 'ACTIVE']
                                ).select_related('material').order_by('-created_at'),
@@ -470,7 +479,13 @@ class ProductBatchListView(View):
             except (ValueError, TypeError):
                 pass
         if q:
-            qs = qs.filter(batch_number__icontains=q)
+            terms = q.split()
+            for term in terms:
+                qs = qs.filter(
+                    Q(batch_number__icontains=term) |
+                    Q(material__sku__icontains=term) |
+                    Q(material__name__icontains=term)
+                )
         paginator = Paginator(qs.order_by('-created_at'), 25)
         return render(request, 'product_batches/list.html', {
             'batches':       paginator.get_page(request.GET.get('page')),
@@ -954,12 +969,14 @@ class ClientOrderCreateView(View):
         fin_materials = list(
             Material.objects.filter(category='FIN').order_by('name').values('id', 'name', 'sku')
         )
+        clients_list = list(Client.objects.order_by('name').values('id', 'name', 'code'))
         return render(request, 'client_orders/order_form.html', {
             'form':               ClientOrderForm(),
             'formset':            ClientOrderLineFormSet(),
             'form_title':         'New Client Order',
             'submit_label':       'Create Order',
             'fin_materials_json': json.dumps(fin_materials),
+            'clients_json':       json.dumps(clients_list),
         })
 
     def post(self, request):
@@ -974,12 +991,14 @@ class ClientOrderCreateView(View):
         fin_materials = list(
             Material.objects.filter(category='FIN').order_by('name').values('id', 'name', 'sku')
         )
+        clients_list = list(Client.objects.order_by('name').values('id', 'name', 'code'))
         return render(request, 'client_orders/order_form.html', {
             'form':               form,
             'formset':            formset,
             'form_title':         'New Client Order',
             'submit_label':       'Create Order',
             'fin_materials_json': json.dumps(fin_materials),
+            'clients_json':       json.dumps(clients_list),
         })
 
 
@@ -989,6 +1008,7 @@ class ClientOrderEditView(View):
         fin_materials = list(
             Material.objects.filter(category='FIN').order_by('name').values('id', 'name', 'sku')
         )
+        clients_list = list(Client.objects.order_by('name').values('id', 'name', 'code'))
         return render(request, 'client_orders/order_form.html', {
             'form':               ClientOrderForm(instance=order),
             'formset':            ClientOrderLineFormSet(instance=order),
@@ -996,6 +1016,7 @@ class ClientOrderEditView(View):
             'submit_label':       'Save Changes',
             'order':              order,
             'fin_materials_json': json.dumps(fin_materials),
+            'clients_json':       json.dumps(clients_list),
         })
 
     def post(self, request, pk):
@@ -1024,6 +1045,7 @@ class ClientOrderEditView(View):
         fin_materials = list(
             Material.objects.filter(category='FIN').order_by('name').values('id', 'name', 'sku')
         )
+        clients_list = list(Client.objects.order_by('name').values('id', 'name', 'code'))
         return render(request, 'client_orders/order_form.html', {
             'form':               form,
             'formset':            formset,
@@ -1031,6 +1053,7 @@ class ClientOrderEditView(View):
             'submit_label':       'Save Changes',
             'order':              order,
             'fin_materials_json': json.dumps(fin_materials),
+            'clients_json':       json.dumps(clients_list),
         })
 
 
@@ -1088,10 +1111,16 @@ class ProductionRunDetailView(View):
             ), pk=pk
         )
         allocation_form = ProductionRunAllocationForm(production_run=run)
+        # Product batches with matching material for linking
+        linkable_batches = ProductBatch.objects.filter(
+            material=run.material
+        ).select_related('material').order_by('-created_at')
+
         return render(request, 'production_runs/detail.html', {
-            'run':             run,
-            'allocation_form': allocation_form,
+            'run':               run,
+            'allocation_form':   allocation_form,
             'component_status_choices': ProductionComponent.STATUS_CHOICES,
+            'linkable_batches':  linkable_batches,
         })
 
     def post(self, request, pk):
@@ -1139,6 +1168,33 @@ class ProductionRunDetailView(View):
                 for errs in form.errors.values():
                     for e in errs:
                         messages.error(request, e)
+
+        elif action == 'link_batch':
+            batch_id = request.POST.get('product_batch_id')
+            if batch_id:
+                try:
+                    pb = ProductBatch.objects.get(pk=int(batch_id))
+                    # Check material matches
+                    if pb.material != run.material:
+                        messages.error(
+                            request,
+                            f'Batch material ({pb.material.name}) does not match '
+                            f'run material ({run.material.name}).'
+                        )
+                    else:
+                        run.product_batch = pb
+                        run.save()
+                        messages.success(
+                            request,
+                            f'Product batch {pb.batch_number} linked to this run.'
+                        )
+                except (ProductBatch.DoesNotExist, ValueError):
+                    messages.error(request, 'Product batch not found.')
+            else:
+                # Unlink
+                run.product_batch = None
+                run.save()
+                messages.success(request, 'Product batch unlinked.')
 
         elif action == 'ship':
             qty = request.POST.get('quantity_shipped', '').strip()

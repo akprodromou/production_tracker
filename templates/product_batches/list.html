@@ -1,13 +1,21 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}Product Batches — InventoryOS{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Product Batches{% endblock %}
 
+{% block extra_head %}
+<style>
+  th.sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+  th.sortable:hover { color:var(--accent); }
+  th.sortable::after { content:' \21C5'; font-size:10px; color:var(--muted); }
+  th.sortable.asc::after  { content:' \2191'; color:var(--accent); }
+  th.sortable.desc::after { content:' \2193'; color:var(--accent); }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
-  <div>
-    <h1>Product Batches</h1>
-    <p>Finished goods produced from raw material consumption</p>
-  </div>
+  <div><h1>Product Batches</h1><p>Finished goods inventory</p></div>
   <div class="page-actions">
     <a href="{% url 'product-batch-create' %}" class="btn btn-primary">+ New Batch</a>
   </div>
@@ -16,8 +24,8 @@
 <div class="filter-bar">
   <form method="get" style="display:contents">
     <div class="form-group">
-      <label>Product</label>
-      <select name="material_id">
+      <label>Material</label>
+      <select name="material_id" onchange="this.form.submit()">
         <option value="">All products</option>
         {% for m in all_materials %}
         <option value="{{ m.pk }}" {% if request.GET.material_id == m.pk|stringformat:'s' %}selected{% endif %}>{{ m.name }}</option>
@@ -26,7 +34,7 @@
     </div>
     <div class="form-group">
       <label>Location</label>
-      <select name="location_id">
+      <select name="location_id" onchange="this.form.submit()">
         <option value="">All locations</option>
         {% for loc in all_locations %}
         <option value="{{ loc.pk }}" {% if request.GET.location_id == loc.pk|stringformat:'s' %}selected{% endif %}>{{ loc.name }}</option>
@@ -35,7 +43,7 @@
     </div>
     <div class="form-group">
       <label>Search</label>
-      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Batch number…">
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search batch, SKU or name…">
     </div>
     <div style="padding-bottom:1px">
       <button type="submit" class="btn btn-secondary">Filter</button>
@@ -47,15 +55,15 @@
 <div class="card">
   <div class="table-wrap">
     {% if batches %}
-    <table>
+    <table id="pbTable">
       <thead>
         <tr>
-          <th>Batch #</th>
+          <th>Batch Number</th>
           <th>Product</th>
           <th>SKU</th>
-          <th>Qty Produced</th>
           <th>Location</th>
-          <th>Created</th>
+          <th>Qty Produced</th>
+          <th>Date</th>
           <th style="text-align:right">Actions</th>
         </tr>
       </thead>
@@ -67,13 +75,14 @@
           </td>
           <td>{{ pb.material.name }}</td>
           <td class="td-mono text-muted">{{ pb.material.sku }}</td>
-          <td class="td-mono">{{ pb.quantity_produced }} {{ pb.material.unit.name }}</td>
           <td>{{ pb.location.name }}</td>
+          <td class="td-mono">{{ pb.quantity_produced|smart_qty:pb.material.unit.name }}</td>
           <td class="text-muted" style="font-size:12px">{{ pb.created_at|date:"Y-m-d" }}</td>
           <td>
             <div class="td-actions" style="justify-content:flex-end">
               <a href="{% url 'product-batch-detail' pb.pk %}" class="btn btn-ghost btn-sm">View</a>
-              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ pb.batch_number }}','{% url 'product-batch-delete' pb.pk %}')">Delete</button>
+              <a href="{% url 'product-batch-edit' pb.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ pb.batch_number|escapejs }}','{% url 'product-batch-delete' pb.pk %}')">Delete</button>
             </div>
           </td>
         </tr>
@@ -85,7 +94,7 @@
     <div class="empty">
       <div class="empty-icon">🏭</div>
       <h3>No product batches found</h3>
-      <p>{% if request.GET %}Try adjusting your filters.{% else %}Create your first finished goods batch.{% endif %}</p>
+      <p>{% if request.GET %}Try adjusting your filters.{% else %}Create your first product batch.{% endif %}</p>
     </div>
     {% endif %}
   </div>
@@ -94,7 +103,7 @@
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal">
     <h3>⚠ Confirm Delete</h3>
-    <p>Delete batch <strong id="deleteTarget" style="color:var(--text)"></strong>? All linked transactions will also be removed.</p>
+    <p>Delete batch <strong id="deleteTarget" style="color:var(--text)"></strong>?</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
       <form method="post" id="deleteForm">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
@@ -113,5 +122,30 @@ function openDeleteModal(name, url) {
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
+(function() {
+  var table = document.getElementById('pbTable');
+  if (!table) return;
+  var headers = table.querySelectorAll('thead th');
+  headers.forEach(function(th, colIdx) {
+    if (th.style.textAlign === 'right' || th.textContent.trim() === 'Actions') return;
+    th.classList.add('sortable');
+    th.addEventListener('click', function() {
+      var asc = !this.classList.contains('asc');
+      headers.forEach(function(h) { h.classList.remove('asc','desc'); });
+      this.classList.add(asc ? 'asc' : 'desc');
+      var tbody = table.querySelector('tbody');
+      var rows  = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aVal = ((a.querySelectorAll('td')[colIdx] || {}).textContent || '').trim();
+        var bVal = ((b.querySelectorAll('td')[colIdx] || {}).textContent || '').trim();
+        var aNum = parseFloat(aVal.replace(/[^0-9.]/g, ''));
+        var bNum = parseFloat(bVal.replace(/[^0-9.]/g, ''));
+        if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
+        return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      });
+      rows.forEach(function(r) { tbody.appendChild(r); });
+    });
+  });
+})();
 </script>
 {% endblock %}

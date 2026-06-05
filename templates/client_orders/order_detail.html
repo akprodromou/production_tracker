@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}{{ order.reference }} — Order Detail{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
@@ -82,12 +83,12 @@
           <td><strong>{{ row.material.name }}</strong></td>
           <td class="td-mono text-muted">{{ row.material.sku }}</td>
           <td class="text-muted">{{ row.material.unit.name }}</td>
-          <td class="td-mono">{{ row.required }}</td>
-          <td class="td-mono">{{ row.available }}</td>
-          <td class="td-mono" style="color:var(--warn)">{{ row.reserved }}</td>
+          <td class="td-mono">{{ row.required|smart_qty:row.material.unit.name }}</td>
+          <td class="td-mono">{{ row.available|smart_qty:row.material.unit.name }}</td>
+          <td class="td-mono" style="color:var(--warn)">{{ row.reserved|smart_qty:row.material.unit.name }}</td>
           <td class="td-mono">
             {% if row.gap > 0 %}
-              <span style="color:var(--danger);font-weight:600">-{{ row.gap }}</span>
+              <span style="color:var(--danger);font-weight:600">-{{ row.gap|smart_qty:row.material.unit.name }}</span>
             {% elif row.gap < 0 %}
               <span style="color:var(--accent2)">+{{ row.gap|cut:"-" }}</span>
             {% else %}
@@ -128,10 +129,10 @@
             <strong>{{ line.material.name }}</strong><br>
             <span class="text-mono text-muted">{{ line.material.sku }}</span>
           </td>
-          <td class="td-mono">{{ line.quantity_ordered }}</td>
-          <td class="td-mono">{{ line.quantity_fulfilled }}</td>
+          <td class="td-mono">{{ line.quantity_ordered|smart_qty:line.material.unit.name }}</td>
+          <td class="td-mono">{{ line.quantity_fulfilled|smart_qty:line.material.unit.name }}</td>
           <td class="td-mono" style="{% if line.quantity_remaining > 0 %}color:var(--warn){% endif %}">
-            {{ line.quantity_remaining }}
+            {{ line.quantity_remaining|smart_qty:line.material.unit.name }}
           </td>
           <td>
             {% for alloc in line.allocations.all %}
@@ -139,7 +140,7 @@
               <a href="{% url 'production-run-detail' alloc.production_run.pk %}" style="color:var(--accent);text-decoration:none">
                 {{ alloc.production_run.reference }}
               </a>
-              <span class="text-muted">× {{ alloc.quantity_allocated }}</span>
+              <span class="text-muted">× {{ alloc.quantity_allocated|smart_qty:line.material.unit.name }}</span>
             </div>
             {% endfor %}
             {% for res in line.batch_reservations.all %}
@@ -147,7 +148,7 @@
               <a href="{% url 'product-batch-detail' res.product_batch.pk %}" style="color:var(--accent2);text-decoration:none">
                 {{ res.product_batch.batch_number }}
               </a>
-              <span class="text-muted">× {{ res.quantity_reserved }}</span>
+              <span class="text-muted">× {{ res.quantity_reserved|smart_qty:line.material.unit.name }}</span>
               <span class="badge badge-green" style="font-size:10px;padding:1px 5px">stock</span>
             </div>
             {% endfor %}
@@ -199,7 +200,7 @@
               {% endif %}
               {% endwith %}
             </td>
-            <td class="td-mono">{{ alloc.quantity_allocated }}</td>
+            <td class="td-mono">{{ alloc.quantity_allocated|smart_qty:line.material.unit.name }}</td>
             <td>
               {% with comps=alloc.production_run.components.all %}
               {% if comps %}

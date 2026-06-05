@@ -1,3 +1,4 @@
+{% load inventory_extras %}
 {# Expects `run` in context. Included by board.html for each column. #}
 <div class="run-card" onclick="window.location='{% url 'production-run-detail' run.pk %}'">
   <div class="run-card-ref">{{ run.reference }}</div>
@@ -24,12 +25,12 @@
 
   <div class="run-card-footer">
     <span style="font-size:11px;color:var(--muted)">
-      {{ run.planned_quantity }} units
+      {{ run.planned_quantity|smart_qty:run.material.unit.name }} units
       {% if run.planned_end %} · {{ run.planned_end|date:"M d" }}{% endif %}
     </span>
     <button
       class="btn btn-success btn-sm"
-      onclick="event.stopPropagation(); openShipModal({{ run.pk }}, '{{ run.reference|escapejs }}', {{ run.planned_quantity }})">
+      onclick="event.stopPropagation(); openShipModal({{ run.pk }}, '{{ run.reference|escapejs }}', {{ run.planned_quantity|smart_qty:run.material.unit.name }})">
       Ship →
     </button>
   </div>

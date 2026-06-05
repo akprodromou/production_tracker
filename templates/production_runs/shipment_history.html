@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}Shipment History — InventoryOS{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
@@ -41,7 +42,7 @@
             </a>
           </td>
           <td>{{ s.production_run.material.name }}</td>
-          <td class="td-mono" style="color:var(--accent2)">{{ s.quantity_shipped }}</td>
+          <td class="td-mono" style="color:var(--accent2)">{{ s.quantity_shipped|smart_qty:s.production_run.material.unit.name }}</td>
           <td class="td-mono">
             {% if s.order_line %}
               <a href="{% url 'order-detail' s.order_line.order.pk %}" style="color:var(--accent);text-decoration:none">

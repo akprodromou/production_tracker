@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}{{ run.reference }} — Production Run{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
@@ -53,7 +54,7 @@
 <div class="page-header">
   <div>
     <h1>{{ run.reference }}</h1>
-    <p>{{ run.material.name }} · {{ run.location.name }}</p>
+    <p>{{ run.material.name }} · <span class="text-mono text-muted">{{ run.material.sku }}</span> · {{ run.location.name }}</p>
   </div>
   <div class="page-actions">
     {% if run.status == 'PLANNED' %}
@@ -102,12 +103,12 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Planned Qty</div>
-    <div class="stat-value">{{ run.planned_quantity }}</div>
+    <div class="stat-value">{{ run.planned_quantity|smart_qty:run.material.unit.name }}</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Allocated</div>
-    <div class="stat-value" style="color:var(--accent2)">{{ run.allocated_quantity }}</div>
-    <div class="stat-sub">{{ run.unallocated_quantity }} unallocated</div>
+    <div class="stat-value" style="color:var(--accent2)">{{ run.allocated_quantity|smart_qty:run.material.unit.name }}</div>
+    <div class="stat-sub">{{ run.unallocated_quantity|smart_qty:run.material.unit.name }} unallocated</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Planned Window</div>
@@ -144,13 +145,13 @@
         </a>
         {% endif %}
       </div>
-      <div class="comp-cell td-mono">{{ comp.quantity_required }} {{ comp.material.unit.name }}</div>
+      <div class="comp-cell td-mono">{{ comp.quantity_required|smart_qty:comp.material.unit.name }} {{ comp.material.unit.name }}</div>
       <div class="comp-cell td-mono">
         {% if comp.quantity_shortfall > 0 %}
-          <span style="color:var(--danger)">{{ comp.quantity_available }}</span>
-          <span class="text-muted" style="font-size:11px;margin-left:4px">(short {{ comp.quantity_shortfall }})</span>
+          <span style="color:var(--danger)">{{ comp.quantity_available|smart_qty:comp.material.unit.name }}</span>
+          <span class="text-muted" style="font-size:11px;margin-left:4px">(short {{ comp.quantity_shortfall|smart_qty:comp.material.unit.name }})</span>
         {% else %}
-          <span style="color:var(--accent2)">{{ comp.quantity_available }}</span>
+          <span style="color:var(--accent2)">{{ comp.quantity_available|smart_qty:comp.material.unit.name }}</span>
         {% endif %}
       </div>
       <div class="comp-cell text-muted" style="font-size:12px">{{ comp.expected_date|date:"Y-m-d"|default:"—" }}</div>
@@ -179,6 +180,57 @@
   {% endif %}
 </div>
 
+
+{# ── PRODUCT BATCH LINK ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Linked Product Batch</span>
+    <span class="text-muted" style="font-size:11px">Links finished goods output to this run</span>
+  </div>
+  <div class="card-body">
+    {% if run.product_batch %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)">
+      <div>
+        <a href="{% url 'product-batch-detail' run.product_batch.pk %}" style="color:var(--accent);text-decoration:none;font-weight:500">
+          {{ run.product_batch.batch_number }}
+        </a>
+        <span class="text-muted" style="font-size:12px;margin-left:10px">
+          {{ run.product_batch.material.name }} · {{ run.product_batch.quantity_produced|smart_qty:run.material.unit.name }} {{ run.product_batch.material.unit.name }}
+        </span>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="link_batch">
+        <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger)">Unlink</button>
+      </form>
+    </div>
+    {% else %}
+    <form method="post" style="display:grid;grid-template-columns:2fr auto;gap:10px;align-items:end">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="link_batch">
+      <div class="form-group">
+        <label>Select Product Batch <span class="text-muted">(same material as this run)</span></label>
+        <select name="product_batch_id" required>
+          <option value="">Choose a product batch…</option>
+          {% for pb in linkable_batches %}
+          <option value="{{ pb.pk }}">{{ pb.batch_number }} — {{ pb.quantity_produced }} {{ pb.material.unit.name }} ({{ pb.created_at|date:"Y-m-d" }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="padding-bottom:1px">
+        <button type="submit" class="btn btn-primary">Link Batch</button>
+      </div>
+    </form>
+    {% if not linkable_batches %}
+    <p class="text-muted" style="font-size:13px;margin-top:8px">
+      No product batches found for {{ run.material.name }}.
+      <a href="{% url 'product-batch-create' %}?material={{ run.material.pk }}" style="color:var(--accent)">Create one →</a>
+    </p>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+
 {# ── ORDER ALLOCATIONS ── #}
 <div class="card mb-3">
   <div class="card-header"><span class="card-title">Order Allocations</span></div>
@@ -201,7 +253,7 @@
             </td>
             <td>{{ alloc.order_line.order.client.name }}</td>
             <td>{{ alloc.order_line.material.name }}</td>
-            <td class="td-mono">{{ alloc.quantity_allocated }}</td>
+            <td class="td-mono">{{ alloc.quantity_allocated|smart_qty:run.material.unit.name }}</td>
             <td>
               {% if alloc.order_line.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
               {% elif alloc.order_line.status == 'ALLOCATED' %}<span class="badge badge-blue">Allocated</span>
@@ -243,7 +295,7 @@
         </div>
       </div>
       <div style="font-size:12px;color:var(--muted);margin-top:4px">
-        Unallocated capacity: <span class="text-mono">{{ run.unallocated_quantity }}</span>
+        Unallocated capacity: <span class="text-mono">{{ run.unallocated_quantity|smart_qty:run.material.unit.name }}</span>
       </div>
     </form>
     {% endif %}

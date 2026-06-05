@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}{{ batch.lot_number }} — Batch Detail{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
@@ -33,7 +34,7 @@
   <div class="card-body">
     {% include "partials/_batch_stock_card.html" with batch=batch %}
     <div style="margin-top:12px;font-size:12px;color:var(--muted)">
-      Total declared: <span class="text-mono">{{ batch.total_quantity }} {{ batch.material.unit.name }}</span>
+      Total declared: <span class="text-mono">{{ batch.total_quantity|smart_qty:batch.material.unit.name }} {{ batch.material.unit.name }}</span>
     </div>
   </div>
 </div>
@@ -59,7 +60,7 @@
             {% else %}<span class="badge badge-grey">RELEASED</span>
             {% endif %}
           </td>
-          <td class="td-mono">{{ tx.quantity }}</td>
+          <td class="td-mono">{{ tx.quantity|smart_qty:batch.material.unit.name }}</td>
           <td class="td-mono text-muted">
             {% if tx.product_batch %}
               <a href="{% url 'product-batch-detail' tx.product_batch.pk %}" style="color:var(--accent);text-decoration:none">{{ tx.product_batch.batch_number }}</a>
@@ -107,8 +108,8 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Quantity (available: {{ batch.available_quantity }})</label>
-          <input type="number" name="quantity" step="0.001" min="0.001" max="{{ batch.available_quantity }}" required>
+          <label>Quantity (available: {{ batch.available_quantity|smart_qty:batch.material.unit.name }})</label>
+          <input type="number" name="quantity" step="0.001" min="0.001" max="{{ batch.available_quantity|smart_qty:batch.material.unit.name }}" required>
         </div>
       </div>
       <div class="modal-actions">

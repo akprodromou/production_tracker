@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}{{ location.name }} — Location{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
@@ -57,15 +58,15 @@
           </td>
           <td>{{ b.material.name }}</td>
           <td class="td-mono text-muted">{{ b.material.sku }}</td>
-          <td class="td-mono">{{ b.total_quantity }} {{ b.material.unit.name }}</td>
+          <td class="td-mono">{{ b.total_quantity|smart_qty:b.material.unit.name }} {{ b.material.unit.name }}</td>
           <td>
             {% if b.available_quantity > 0 %}
-              <span class="badge badge-green">{{ b.available_quantity }}</span>
+              <span class="badge badge-green">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span>
             {% else %}
-              <span class="badge badge-red">{{ b.available_quantity }}</span>
+              <span class="badge badge-red">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span>
             {% endif %}
           </td>
-          <td><span class="badge badge-orange">{{ b.reserved_quantity }}</span></td>
+          <td><span class="badge badge-orange">{{ b.reserved_quantity|smart_qty:b.material.unit.name }}</span></td>
           <td><a href="{% url 'batch-detail' b.pk %}" class="btn btn-ghost btn-sm">→</a></td>
         </tr>
         {% endfor %}
@@ -100,7 +101,7 @@
           </td>
           <td>{{ pb.material.name }}</td>
           <td class="td-mono text-muted">{{ pb.material.sku }}</td>
-          <td class="td-mono">{{ pb.quantity_produced }} {{ pb.material.unit.name }}</td>
+          <td class="td-mono">{{ pb.quantity_produced|smart_qty:pb.material.unit.name }} {{ pb.material.unit.name }}</td>
           <td class="text-muted" style="font-size:12px">{{ pb.created_at|date:"Y-m-d" }}</td>
           <td><a href="{% url 'product-batch-detail' pb.pk %}" class="btn btn-ghost btn-sm">→</a></td>
         </tr>

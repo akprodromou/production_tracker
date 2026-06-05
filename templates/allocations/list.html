@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}Allocations — InventoryOS{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Allocations{% endblock %}
 
@@ -67,10 +68,10 @@
             </a>
           </td>
           <td>{{ alloc.production_run.material.name }}</td>
-          <td class="td-mono">{{ alloc.production_run.planned_quantity }}</td>
+          <td class="td-mono">{{ alloc.production_run.planned_quantity|smart_qty:alloc.production_run.material.unit.name }}</td>
           <td class="td-mono">
             {% if alloc.production_run.unallocated_quantity > 0 %}
-              <span style="color:var(--warn)">{{ alloc.production_run.unallocated_quantity }}</span>
+              <span style="color:var(--warn)">{{ alloc.production_run.unallocated_quantity|smart_qty:alloc.production_run.material.unit.name }}</span>
             {% else %}
               <span class="text-muted">0</span>
             {% endif %}
@@ -82,7 +83,7 @@
           </td>
           <td>{{ alloc.order_line.order.client.name }}</td>
           <td>{{ alloc.order_line.material.name }}</td>
-          <td class="td-mono" style="color:var(--accent2)">{{ alloc.quantity_allocated }}</td>
+          <td class="td-mono" style="color:var(--accent2)">{{ alloc.quantity_allocated|smart_qty:alloc.production_run.material.unit.name }}</td>
           <td class="text-muted" style="font-size:12px">{{ alloc.created_at|date:"Y-m-d" }}</td>
         </tr>
         {% endfor %}

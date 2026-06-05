@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}Production Runs — InventoryOS{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Production Runs{% endblock %}
 
@@ -60,7 +61,7 @@
             {% else %}<span class="badge badge-red">Cancelled</span>
             {% endif %}
           </td>
-          <td class="td-mono">{{ run.planned_quantity }}</td>
+          <td class="td-mono">{{ run.planned_quantity|smart_qty:run.material.unit.name }}</td>
           <td class="td-mono">
             {% with a=run.allocated_quantity %}
             {% if a > 0 %}<span style="color:var(--accent2)">{{ a }}</span>

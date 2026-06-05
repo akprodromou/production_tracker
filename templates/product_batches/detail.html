@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}{{ batch.batch_number }} — Product Batch{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
@@ -27,19 +28,19 @@
   <div class="stat-card">
     <div class="stat-label">Total Produced</div>
     <div class="text-mono" style="font-size:22px;font-weight:600;color:var(--accent)">
-      {{ batch.quantity_produced }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
+      {{ batch.quantity_produced|smart_qty:batch.material.unit.name }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Reserved for Orders</div>
     <div class="text-mono" style="font-size:22px;font-weight:600;color:var(--warn)">
-      {{ total_reserved }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
+      {{ total_reserved|smart_qty:batch.material.unit.name }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Available</div>
     <div class="text-mono" style="font-size:22px;font-weight:600;{% if available > 0 %}color:var(--accent2){% else %}color:var(--danger){% endif %}">
-      {{ available }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
+      {{ available|smart_qty:batch.material.unit.name }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
     </div>
   </div>
 </div>
@@ -66,7 +67,7 @@
             </td>
             <td>{{ res.order_line.order.client.name }}</td>
             <td>{{ res.order_line.material.name }}</td>
-            <td class="td-mono" style="color:var(--warn)">{{ res.quantity_reserved }}</td>
+            <td class="td-mono" style="color:var(--warn)">{{ res.quantity_reserved|smart_qty:batch.material.unit.name }}</td>
             <td class="text-muted" style="font-size:12px">{{ res.created_at|date:"Y-m-d" }}</td>
             <td>
               <form method="post">
@@ -102,8 +103,8 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Quantity (max {{ available }})</label>
-          <input type="number" name="quantity_reserved" step="0.001" min="0.001" max="{{ available }}" required>
+          <label>Quantity (max {{ available|smart_qty:batch.material.unit.name }})</label>
+          <input type="number" name="quantity_reserved" step="0.001" min="0.001" max="{{ available|smart_qty:batch.material.unit.name }}" required>
         </div>
         <div class="form-group">
           <label>Notes <span class="text-muted">(optional)</span></label>

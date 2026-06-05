@@ -1,13 +1,21 @@
 {% extends "base.html" %}
+{% load inventory_extras %}
 {% block title %}Raw Material Batches — InventoryOS{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Raw Batches{% endblock %}
 
+{% block extra_head %}
+<style>
+  th.sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+  th.sortable:hover { color:var(--accent); }
+  th.sortable::after { content:' \21C5'; font-size:10px; color:var(--muted); }
+  th.sortable.asc::after  { content:' \2191'; color:var(--accent); }
+  th.sortable.desc::after { content:' \2193'; color:var(--accent); }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
-  <div>
-    <h1>Raw Material Batches</h1>
-    <p>Stock tracking by lot number</p>
-  </div>
+  <div><h1>Raw Material Batches</h1><p>Stock tracking by lot number</p></div>
   <div class="page-actions">
     <a href="{% url 'batch-create' %}" class="btn btn-primary">+ New Batch</a>
   </div>
@@ -17,7 +25,7 @@
   <form method="get" style="display:contents">
     <div class="form-group">
       <label>Material</label>
-      <select name="material_id">
+      <select name="material_id" onchange="this.form.submit()">
         <option value="">All materials</option>
         {% for m in all_materials %}
         <option value="{{ m.pk }}" {% if request.GET.material_id == m.pk|stringformat:'s' %}selected{% endif %}>{{ m.name }}</option>
@@ -26,7 +34,7 @@
     </div>
     <div class="form-group">
       <label>Location</label>
-      <select name="location_id">
+      <select name="location_id" onchange="this.form.submit()">
         <option value="">All locations</option>
         {% for loc in all_locations %}
         <option value="{{ loc.pk }}" {% if request.GET.location_id == loc.pk|stringformat:'s' %}selected{% endif %}>{{ loc.name }}</option>
@@ -34,8 +42,8 @@
       </select>
     </div>
     <div class="form-group">
-      <label>Search lot</label>
-      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Lot number…">
+      <label>Search</label>
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search lot, SKU or name…">
     </div>
     <div style="padding-bottom:1px">
       <button type="submit" class="btn btn-secondary">Filter</button>
@@ -47,16 +55,16 @@
 <div class="card">
   <div class="table-wrap">
     {% if batches %}
-    <table>
+    <table id="batchTable">
       <thead>
         <tr>
           <th>Lot Number</th>
           <th>Material</th>
+          <th>SKU</th>
           <th>Location</th>
           <th>Total</th>
           <th>Available</th>
           <th>Reserved</th>
-          <th>Created</th>
           <th style="text-align:right">Actions</th>
         </tr>
       </thead>
@@ -66,18 +74,18 @@
           <td class="td-mono">
             <a href="{% url 'batch-detail' b.pk %}" style="color:var(--accent);text-decoration:none">{{ b.lot_number }}</a>
           </td>
-          <td>{{ b.material.name }}<br><span class="text-muted text-mono">{{ b.material.sku }}</span></td>
+          <td>{{ b.material.name }}</td>
+          <td class="td-mono text-muted">{{ b.material.sku }}</td>
           <td>{{ b.location.name }}</td>
-          <td class="td-mono">{{ b.total_quantity }} {{ b.material.unit.name }}</td>
+          <td class="td-mono">{{ b.total_quantity|smart_qty:b.material.unit.name }}</td>
           <td>
             {% if b.available_quantity > 0 %}
-              <span class="badge badge-green">{{ b.available_quantity }}</span>
+              <span class="badge badge-green">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span>
             {% else %}
-              <span class="badge badge-red">{{ b.available_quantity }}</span>
+              <span class="badge badge-red">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span>
             {% endif %}
           </td>
-          <td><span class="badge badge-orange">{{ b.reserved_quantity }}</span></td>
-          <td class="text-muted" style="font-size:12px">{{ b.created_at|date:"Y-m-d" }}</td>
+          <td><span class="badge badge-orange">{{ b.reserved_quantity|smart_qty:b.material.unit.name }}</span></td>
           <td>
             <div class="td-actions" style="justify-content:flex-end">
               <a href="{% url 'batch-detail' b.pk %}" class="btn btn-ghost btn-sm">View</a>
@@ -97,4 +105,34 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var table = document.getElementById('batchTable');
+  if (!table) return;
+  var headers = table.querySelectorAll('thead th');
+  headers.forEach(function(th, colIdx) {
+    if (th.style.textAlign === 'right' || th.textContent.trim() === 'Actions') return;
+    th.classList.add('sortable');
+    th.addEventListener('click', function() {
+      var asc = !this.classList.contains('asc');
+      headers.forEach(function(h) { h.classList.remove('asc','desc'); });
+      this.classList.add(asc ? 'asc' : 'desc');
+      var tbody = table.querySelector('tbody');
+      var rows  = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aVal = ((a.querySelectorAll('td')[colIdx] || {}).textContent || '').trim();
+        var bVal = ((b.querySelectorAll('td')[colIdx] || {}).textContent || '').trim();
+        var aNum = parseFloat(aVal.replace(/[^0-9.]/g, ''));
+        var bNum = parseFloat(bVal.replace(/[^0-9.]/g, ''));
+        if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
+        return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      });
+      rows.forEach(function(r) { tbody.appendChild(r); });
+    });
+  });
+})();
+</script>
 {% endblock %}
