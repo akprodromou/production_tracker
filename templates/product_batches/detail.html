@@ -45,6 +45,46 @@
   </div>
 </div>
 
+
+{# ── LINKED PRODUCTION RUN ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Linked Production Run</span>
+  </div>
+  <div class="card-body">
+    {% if batch.production_run %}
+    <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)">
+      <div>
+        <a href="{% url 'production-run-detail' batch.production_run.pk %}"
+           style="color:var(--accent);text-decoration:none;font-weight:500;font-family:var(--mono)">
+          {{ batch.production_run.reference }}
+        </a>
+        <span class="text-muted" style="font-size:12px;margin-left:10px">
+          {{ batch.production_run.material.name }} ·
+          Planned {{ batch.production_run.planned_quantity|smart_qty:batch.production_run.material.unit.name }}
+          {{ batch.production_run.material.unit.name }}
+        </span>
+      </div>
+      <div style="margin-left:auto">
+        {% with bs=batch.production_run.board_status %}
+        {% if bs == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+        {% elif bs == 'ORDERED' %}<span class="badge badge-blue">Ordered from Supplier</span>
+        {% elif bs == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-green">In Warehouse</span>
+        {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+    {% else %}
+    <p class="text-muted" style="font-size:13px">
+      No production run linked to this batch.
+      Link one from the
+      <a href="{% url 'production-run-list' %}" style="color:var(--accent)">Production Runs</a>
+      page.
+    </p>
+    {% endif %}
+  </div>
+</div>
+
 {# ── ORDER RESERVATIONS ── #}
 <div class="card mb-3">
   <div class="card-header"><span class="card-title">Order Reservations</span></div>
@@ -147,46 +187,6 @@
 {% endif %}
 
 {# ── TRANSACTIONS ── #}
-<div class="card">
-  <div class="card-header">
-    <span class="card-title">Material Transactions</span>
-    <a href="{% url 'transaction-list' %}?product_batch_id={{ batch.pk }}" class="btn btn-ghost btn-sm">Full ledger →</a>
-  </div>
-  <div class="table-wrap">
-    {% if transactions %}
-    <table>
-      <thead>
-        <tr><th>Type</th><th>Raw Batch / Lot</th><th>Qty</th><th>Reference</th><th>When</th></tr>
-      </thead>
-      <tbody>
-        {% for tx in transactions %}
-        <tr>
-          <td>
-            {% if tx.transaction_type == 'RESERVED' %}<span class="badge badge-orange">RESERVED</span>
-            {% elif tx.transaction_type == 'CONSUMED' %}<span class="badge badge-red">CONSUMED</span>
-            {% elif tx.transaction_type == 'RELEASED' %}<span class="badge badge-grey">RELEASED</span>
-            {% else %}<span class="badge badge-blue">{{ tx.transaction_type }}</span>
-            {% endif %}
-          </td>
-          <td class="td-mono">
-            <a href="{% url 'batch-detail' tx.raw_material_batch.pk %}" style="color:var(--accent);text-decoration:none">
-              {{ tx.raw_material_batch.lot_number }}
-            </a>
-            <span class="text-muted"> · {{ tx.raw_material_batch.material.name }}</span>
-          </td>
-          <td class="td-mono">{{ tx.quantity }}</td>
-          <td class="text-muted" style="font-size:12px">{{ tx.reference|default:"—" }}</td>
-          <td class="text-muted" style="font-size:12px">{{ tx.created_at|date:"Y-m-d H:i" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="empty"><div class="empty-icon">📋</div><h3>No transactions linked to this batch</h3></div>
-    {% endif %}
-  </div>
-</div>
-
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal">
     <h3>⚠ Confirm Delete</h3>

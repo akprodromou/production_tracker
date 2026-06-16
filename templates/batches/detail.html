@@ -133,14 +133,18 @@
           <label>Production Run</label>
           <select name="production_run_id" required>
             <option value="">Select run…</option>
-            {% for run in eligible_runs %}
-            <option value="{{ run.pk }}">{{ run.reference }} — {{ run.material.name }}</option>
+            {% for item in eligible_runs %}
+            <option value="{{ item.run.pk }}"
+              data-max="{{ item.still_needed }}">
+              {{ item.run.reference }} — {{ item.run.material.name }}
+              (needs {{ item.still_needed|floatformat:0 }})
+            </option>
             {% endfor %}
           </select>
         </div>
         <div class="form-group">
-          <label>Quantity (max {{ available|smart_qty:batch.material.unit.name }})</label>
-          <input type="number" name="quantity" step="1" min="1" max="{{ available }}" required>
+          <label>Quantity <span class="text-muted" style="font-weight:400;font-size:11px" id="alloc-qty-hint">(max {{ available|smart_qty:batch.material.unit.name }} available)</span></label>
+          <input type="number" name="quantity" id="alloc-qty-input" step="1" min="1" max="{{ available }}" required>
         </div>
         <div class="form-group">
           <label>Notes</label>
@@ -151,7 +155,7 @@
         </div>
       </div>
     </form>
-    {% elif not eligible_runs %}
+    {% elif eligible_runs|length == 0 %}
     <p class="text-muted" style="font-size:13px">
       No active production runs found that contain <strong>{{ batch.material.name }}</strong> as a component.
     </p>
@@ -208,6 +212,24 @@
 <script>
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
+});
+
+
+// Update max quantity when production run is selected
+document.addEventListener('DOMContentLoaded', function() {
+  var runSelect  = document.querySelector('select[name="production_run_id"]');
+  var qtyInput   = document.getElementById('alloc-qty-input');
+  var qtyHint    = document.getElementById('alloc-qty-hint');
+  var batchAvail = {{ available }};
+  if (!runSelect || !qtyInput) return;
+
+  runSelect.addEventListener('change', function() {
+    var opt      = this.options[this.selectedIndex];
+    var maxNeeded = parseFloat(opt.getAttribute('data-max') || 0);
+    var maxAlloc  = Math.min(maxNeeded, batchAvail);
+    qtyInput.max  = maxAlloc;
+    if (qtyHint) qtyHint.textContent = 'Max: ' + maxAlloc + ' (run needs ' + maxNeeded + ', batch has ' + batchAvail + ' available)';
+  });
 });
 
 function toggleEdit(allocPk, currentQty) {

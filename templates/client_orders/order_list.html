@@ -54,12 +54,13 @@
           <td class="td-mono"><a href="{% url 'order-detail' o.pk %}" style="color:var(--accent);text-decoration:none">{{ o.reference }}</a></td>
           <td>{{ o.client.name }}</td>
           <td>
-            {% if o.status == 'DRAFT' %}<span class="badge badge-grey">Draft</span>
+            {% if o.status == 'PURCHASE_ORDER' %}<span class="badge badge-grey">Purchase Order</span>
             {% elif o.status == 'CONFIRMED' %}<span class="badge badge-blue">Confirmed</span>
-            {% elif o.status == 'IN_PRODUCTION' %}<span class="badge badge-orange">In Production</span>
             {% elif o.status == 'PARTIALLY_FULFILLED' %}<span class="badge badge-orange">Partial</span>
             {% elif o.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
-            {% else %}<span class="badge badge-red">Cancelled</span>
+            {% elif o.status == 'SHIPPED' %}<span class="badge badge-green" style="background:rgba(45,212,160,.2)">Shipped</span>
+            {% elif o.status == 'CANCELLED' %}<span class="badge badge-red">Cancelled</span>
+            {% else %}<span class="badge badge-grey">{{ o.status }}</span>
             {% endif %}
           </td>
           <td class="td-mono">{{ o.total_lines }}</td>

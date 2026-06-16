@@ -47,7 +47,8 @@
     {% if runs %}
     <table>
       <thead>
-        <tr><th>Reference</th><th>Product</th><th>Status</th><th>Planned Qty</th><th>Allocated</th><th>Planned End</th><th style="text-align:right">Actions</th></tr>
+        <tr><th>Reference</th><th>Product</th><th>Status</th>
+          <th>Procurement</th><th>Planned Qty</th><th>Planned End</th><th style="text-align:right">Actions</th></tr>
       </thead>
       <tbody>
         {% for run in runs %}
@@ -61,13 +62,15 @@
             {% else %}<span class="badge badge-red">Cancelled</span>
             {% endif %}
           </td>
-          <td class="td-mono">{{ run.planned_quantity|smart_qty:run.material.unit.name }}</td>
-          <td class="td-mono">
-            {% with a=run.allocated_quantity %}
-            {% if a > 0 %}<span style="color:var(--accent2)">{{ a }}</span>
-            {% else %}<span class="text-muted">0</span>{% endif %}
+          <td>
+            {% with bs=run.board_status %}
+            {% if bs == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+            {% elif bs == 'ORDERED' %}<span class="badge badge-blue">Ordered</span>
+            {% elif bs == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-green">In Warehouse</span>
+            {% endif %}
             {% endwith %}
           </td>
+          <td class="td-mono">{{ run.planned_quantity|smart_qty:run.material.unit.name }}</td>
           <td class="text-muted" style="font-size:12px">{{ run.planned_end|date:"Y-m-d"|default:"—" }}</td>
           <td>
             <div class="td-actions" style="justify-content:flex-end">

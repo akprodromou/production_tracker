@@ -356,8 +356,13 @@ class RawMaterialBatchListView(View):
                     Q(material__sku__icontains=term) |
                     Q(material__name__icontains=term)
                 )
+        from django.db.models import F
         qs = qs.annotate(
             total_allocated=Coalesce(
+                Sum('allocations__quantity'), Decimal('0'), output_field=DecimalField()
+            )
+        ).annotate(
+            computed_available=F('total_quantity') - Coalesce(
                 Sum('allocations__quantity'), Decimal('0'), output_field=DecimalField()
             )
         )
@@ -401,10 +406,30 @@ class RawMaterialBatchDetailView(View):
             RawMaterialBatch.objects.select_related('material', 'location'), pk=pk
         )
         # Production runs that contain this material as a component
-        eligible_runs = ProductionRun.objects.filter(
+        # Annotate with quantity_required for this material and already allocated
+        from django.db.models import OuterRef, Subquery
+        eligible_runs_qs = ProductionRun.objects.filter(
             components__material=batch.material,
             status__in=['PLANNED', 'ACTIVE']
         ).select_related('material').distinct().order_by('-created_at')
+
+        # Build enriched run info with needed qty and already allocated qty
+        eligible_runs = []
+        for run in eligible_runs_qs:
+            comp = run.components.filter(material=batch.material).first()
+            qty_required = comp.quantity_required if comp else 0
+            already_allocated = RawBatchAllocation.objects.filter(
+                production_run=run,
+                raw_batch__material=batch.material
+            ).aggregate(
+                total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+            )['total']
+            still_needed = max(Decimal('0'), qty_required - already_allocated)
+            eligible_runs.append({
+                'run':           run,
+                'qty_required':  qty_required,
+                'still_needed':  still_needed,
+            })
 
         # Existing allocations for this batch
         allocations = RawBatchAllocation.objects.filter(
@@ -461,16 +486,32 @@ class RawMaterialBatchDetailView(View):
                         f'{run.reference} does not contain {batch.material.name} as a component.'
                     )
                 else:
-                    RawBatchAllocation.objects.create(
-                        raw_batch=batch,
+                    # Check how much is still needed for this run
+                    comp = run.components.filter(material=batch.material).first()
+                    qty_required = comp.quantity_required if comp else Decimal('0')
+                    already_allocated = RawBatchAllocation.objects.filter(
                         production_run=run,
-                        quantity=qty,
-                        notes=request.POST.get('notes', ''),
-                    )
-                    messages.success(
-                        request,
-                        f'Allocated {qty} units to {run.reference}.'
-                    )
+                        raw_batch__material=batch.material
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    still_needed = max(Decimal('0'), qty_required - already_allocated)
+                    if qty > still_needed:
+                        messages.error(
+                            request,
+                            f'{run.reference} only needs {still_needed} more units of {batch.material.name}.'
+                        )
+                    else:
+                        RawBatchAllocation.objects.create(
+                            raw_batch=batch,
+                            production_run=run,
+                            quantity=qty,
+                            notes=request.POST.get('notes', ''),
+                        )
+                        messages.success(
+                            request,
+                            f'Allocated {qty} units to {run.reference}.'
+                        )
             except (ProductionRun.DoesNotExist, ValueError, InvalidOperation):
                 messages.error(request, 'Invalid run or quantity.')
 
@@ -780,7 +821,7 @@ class ProductBatchCreateView(View):
 
 class ProductBatchEditView(View):
     def get(self, request, pk):
-        batch = get_object_or_404(ProductBatch, pk=pk)
+        batch = get_object_or_404(ProductBatch.objects.select_related('material__unit', 'location', 'production_run__material__unit'), pk=pk)
         fin_mats = list(Material.objects.filter(
             category='FIN'
         ).order_by('name').values('id', 'name', 'sku'))
@@ -794,7 +835,7 @@ class ProductBatchEditView(View):
         })
 
     def post(self, request, pk):
-        batch = get_object_or_404(ProductBatch, pk=pk)
+        batch = get_object_or_404(ProductBatch.objects.select_related('material__unit', 'location', 'production_run__material__unit'), pk=pk)
         fin_mats = list(Material.objects.filter(
             category='FIN'
         ).order_by('name').values('id', 'name', 'sku'))
@@ -1043,35 +1084,47 @@ class ClientOrderDetailView(View):
     def get(self, request, pk):
         order = get_object_or_404(
             ClientOrder.objects.select_related('client').prefetch_related(
-                Prefetch('lines', queryset=ClientOrderLine.objects.select_related('material').prefetch_related(
-                    Prefetch('allocations', queryset=ProductionRunAllocation.objects.select_related('production_run')),
+                Prefetch('lines', queryset=ClientOrderLine.objects.select_related('material__unit').prefetch_related(
                     Prefetch('batch_reservations', queryset=ProductBatchReservation.objects.select_related('product_batch'))
                 ))
             ), pk=pk
         )
+        # Compute available quantity for every product batch
+        from django.db.models import Sum as _Sum
+        pb_reserved = {
+            r['product_batch_id']: r['total']
+            for r in ProductBatchReservation.objects.values('product_batch_id').annotate(total=_Sum('quantity_reserved'))
+        }
+        pb_available = {}
+        for pb in ProductBatch.objects.all():
+            reserved = pb_reserved.get(pb.pk, Decimal('0'))
+            pb_available[pb.pk] = pb.quantity_produced - reserved
 
-        # Bill of Quantities
+        # Bill of Quantities — sourced from product batches reserved against this order
         from collections import defaultdict
-        run_ids = ProductionRunAllocation.objects.filter(
+        # Step 1: find all product batches reserved against this order's lines
+        reserved_batch_ids = ProductBatchReservation.objects.filter(
             order_line__order=order
-        ).values_list('production_run_id', flat=True).distinct()
+        ).values_list('product_batch_id', flat=True).distinct()
+
+        # Step 2: find production runs linked to those batches
+        run_ids = ProductionRun.objects.filter(
+            product_batch_id__in=reserved_batch_ids
+        ).values_list('id', flat=True).distinct()
 
         boq = defaultdict(lambda: {
             'material': None,
             'required': Decimal('0'),
             'statuses': set(),
         })
-
         components = ProductionComponent.objects.filter(
             production_run_id__in=run_ids
         ).select_related('material__unit')
-
         for comp in components:
             m = comp.material
             boq[m.pk]['material']  = m
             boq[m.pk]['required'] += comp.quantity_required
             boq[m.pk]['statuses'].add(comp.status)
-
         STATUS_PRIORITY = [
             'PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT'
         ]
@@ -1100,9 +1153,32 @@ class ClientOrderDetailView(View):
             r['material'].name
         ))
 
+        # Derive fulfilment status from order lines (worst-case)
+        lines = list(order.lines.all())
+        if not lines:
+            fulfilment_status = None
+        else:
+            priority = ['PENDING', 'PARTIAL', 'FULFILLED']
+            line_statuses = []
+            for line in lines:
+                if line.status in ('PENDING', 'ALLOCATED'):
+                    line_statuses.append('PENDING')
+                elif line.status == 'PARTIAL':
+                    line_statuses.append('PARTIAL')
+                elif line.status == 'FULFILLED':
+                    line_statuses.append('FULFILLED')
+                else:
+                    line_statuses.append('PENDING')
+            fulfilment_status = min(
+                line_statuses,
+                key=lambda s: priority.index(s) if s in priority else 0
+            )
+
         return render(request, 'client_orders/order_detail.html', {
-            'order':    order,
-            'boq_rows': boq_rows,
+            'order':             order,
+            'boq_rows':          boq_rows,
+            'fulfilment_status': fulfilment_status,
+            'pb_available':      pb_available,
         })
 
     def post(self, request, pk):
@@ -1110,7 +1186,6 @@ class ClientOrderDetailView(View):
         action = request.POST.get('action', 'status')
 
         if action == 'ship':
-            # Mark order as shipped
             order.status = 'SHIPPED'
             order.save()
             messages.success(request, f'Order {order.reference} marked as Shipped.')
@@ -1121,6 +1196,76 @@ class ClientOrderDetailView(View):
                 order.status = new_status
                 order.save()
                 messages.success(request, f'Order status updated to {order.get_status_display()}.')
+
+        elif action == 'reserve_batch':
+            line_id    = request.POST.get('line_id')
+            batch_id   = request.POST.get('product_batch_id')
+            qty_str    = request.POST.get('quantity_reserved', '').strip()
+            try:
+                line  = ClientOrderLine.objects.get(pk=line_id, order=order)
+                batch = ProductBatch.objects.get(pk=batch_id)
+                qty   = Decimal(qty_str)
+                if qty <= 0:
+                    raise ValueError
+                if batch.material != line.material:
+                    messages.error(request, 'Batch material does not match order line material.')
+                else:
+                    # Check available on batch
+                    batch_reserved = ProductBatchReservation.objects.filter(
+                        product_batch=batch
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    batch_available = batch.quantity_produced - batch_reserved
+
+                    # Check against order line remaining quantity
+                    line_reserved = ProductBatchReservation.objects.filter(
+                        order_line=line
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    line_remaining = line.quantity_ordered - line_reserved
+
+                    if qty > batch_available:
+                        messages.error(request, f'Only {batch_available} units available in this batch.')
+                    elif qty > line_remaining:
+                        messages.error(request, f'Only {line_remaining} units still needed for this order line.')
+                    else:
+                        ProductBatchReservation.objects.create(
+                            product_batch=batch,
+                            order_line=line,
+                            quantity_reserved=qty,
+                        )
+                        # Recalculate fulfilled from all reservations
+                        total_reserved = line_reserved + qty
+                        line.quantity_fulfilled = total_reserved
+                        if line.quantity_fulfilled >= line.quantity_ordered:
+                            line.status = 'FULFILLED'
+                        else:
+                            line.status = 'PARTIAL'
+                        line.save()
+                        messages.success(request, f'Reserved {qty} units from {batch.batch_number}.')
+            except (ClientOrderLine.DoesNotExist, ProductBatch.DoesNotExist, ValueError, InvalidOperation) as e:
+                messages.error(request, f'Error: {e}')
+
+        elif action == 'remove_reservation':
+            res_id = request.POST.get('reservation_id')
+            try:
+                res  = ProductBatchReservation.objects.get(pk=res_id)
+                line = res.order_line
+                qty  = res.quantity_reserved
+                if line.order != order:
+                    raise ProductBatchReservation.DoesNotExist
+                res.delete()
+                line.quantity_fulfilled = max(Decimal('0'), (line.quantity_fulfilled or Decimal('0')) - qty)
+                if line.quantity_fulfilled == 0:
+                    line.status = 'PENDING'
+                elif line.quantity_fulfilled < line.quantity_ordered:
+                    line.status = 'PARTIAL'
+                line.save()
+                messages.success(request, 'Reservation removed.')
+            except ProductBatchReservation.DoesNotExist:
+                messages.error(request, 'Reservation not found.')
 
         return redirect('order-detail', pk=pk)
 

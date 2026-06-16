@@ -21,27 +21,45 @@
 
 {# ── STATUS BAR ── #}
 <div class="card mb-3">
-  <div class="card-body" style="display:grid;grid-template-columns:repeat(5,1fr);gap:18px">
+  <div class="card-body" style="display:grid;grid-template-columns:repeat(6,1fr);gap:18px">
     <div>
-      <div class="stat-label">Status</div>
-      {% if order.status == 'DRAFT' %}<span class="badge badge-grey">Draft</span>
+      <div class="stat-label">Order Status</div>
+      {% if order.status == 'PURCHASE_ORDER' %}<span class="badge badge-grey">Purchase Order</span>
       {% elif order.status == 'CONFIRMED' %}<span class="badge badge-blue">Confirmed</span>
-      {% elif order.status == 'IN_PRODUCTION' %}<span class="badge badge-orange">In Production</span>
       {% elif order.status == 'PARTIALLY_FULFILLED' %}<span class="badge badge-orange">Partial</span>
       {% elif order.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
-      {% else %}<span class="badge badge-red">Cancelled</span>
+      {% elif order.status == 'SHIPPED' %}<span class="badge badge-green" style="background:rgba(45,212,160,.2)">Shipped</span>
+      {% elif order.status == 'CANCELLED' %}<span class="badge badge-red">Cancelled</span>
+      {% else %}<span class="badge badge-grey">{{ order.status }}</span>
+      {% endif %}
+    </div>
+    <div>
+      <div class="stat-label">Fulfilment Status</div>
+      {% if fulfilment_status == 'PENDING' %}
+        <span class="badge badge-grey">Pending</span>
+        <div class="stat-sub">Some lines not yet fulfilled</div>
+      {% elif fulfilment_status == 'PARTIAL' %}
+        <span class="badge badge-orange">Partially Fulfilled</span>
+        <div class="stat-sub">Some lines partially fulfilled</div>
+      {% elif fulfilment_status == 'FULFILLED' %}
+        <span class="badge badge-green">Fulfilled</span>
+        <div class="stat-sub">All lines fulfilled</div>
+      {% else %}
+        <span class="text-muted" style="font-size:12px">No lines</span>
       {% endif %}
     </div>
     <div><div class="stat-label">Client</div>{{ order.client.name }}</div>
     <div><div class="stat-label">Order Date</div><span class="text-mono">{{ order.order_date|date:"Y-m-d" }}</span></div>
     <div><div class="stat-label">Required By</div><span class="text-mono">{{ order.required_by|date:"Y-m-d"|default:"—" }}</span></div>
     <div>
-      <div class="stat-label">Quick Status Update</div>
+      <div class="stat-label">Order Status Update</div>
       <form method="post" style="display:flex;gap:6px;align-items:center">
         {% csrf_token %}
         <select name="status" style="font-size:12px;padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
           {% for val, label in order.STATUS_CHOICES %}
+          {% if val in 'PURCHASE_ORDER,CONFIRMED,SHIPPED,CANCELLED' %}
           <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+          {% endif %}
           {% endfor %}
         </select>
         <button type="submit" class="btn btn-secondary btn-sm">Set</button>
@@ -111,50 +129,38 @@
 </div>
 {% endif %}
 
-{# ── ORDER LINES ── #}
+
+{# ── ORDER LINES + FULFIL FROM BATCH ── #}
 <div class="card mb-3">
   <div class="card-header">
     <span class="card-title">Order Lines</span>
-    <a href="{% url 'production-run-create' %}" class="btn btn-primary btn-sm">+ New Production Run</a>
+    {% if order.status == 'CONFIRMED' or order.status == 'PARTIALLY_FULFILLED' %}
+    <span class="text-muted" style="font-size:11px">Reserve product batches against each line below</span>
+    {% endif %}
   </div>
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>Product</th><th>Qty Ordered</th><th>Qty Fulfilled</th><th>Remaining</th><th>Allocated to Runs</th><th>Status</th></tr>
+        <tr>
+          <th>Product</th>
+          <th>Ordered</th>
+          <th>Fulfilled</th>
+          <th>Remaining</th>
+          <th>Status</th>
+          <th>Reserved Batches</th>
+        </tr>
       </thead>
       <tbody>
         {% for line in order.lines.all %}
         <tr>
           <td>
             <strong>{{ line.material.name }}</strong><br>
-            <span class="text-mono text-muted">{{ line.material.sku }}</span>
+            <span class="text-mono text-muted" style="font-size:11px">{{ line.material.sku }}</span>
           </td>
           <td class="td-mono">{{ line.quantity_ordered|smart_qty:line.material.unit.name }}</td>
           <td class="td-mono">{{ line.quantity_fulfilled|smart_qty:line.material.unit.name }}</td>
-          <td class="td-mono" style="{% if line.quantity_remaining > 0 %}color:var(--warn){% endif %}">
+          <td class="td-mono {% if line.quantity_remaining > 0 %}style="color:var(--warn)"{% endif %}">
             {{ line.quantity_remaining|smart_qty:line.material.unit.name }}
-          </td>
-          <td>
-            {% for alloc in line.allocations.all %}
-            <div style="font-size:12px;margin-bottom:3px">
-              <a href="{% url 'production-run-detail' alloc.production_run.pk %}" style="color:var(--accent);text-decoration:none">
-                {{ alloc.production_run.reference }}
-              </a>
-              <span class="text-muted">× {{ alloc.quantity_allocated|smart_qty:line.material.unit.name }}</span>
-            </div>
-            {% endfor %}
-            {% for res in line.batch_reservations.all %}
-            <div style="font-size:12px;margin-bottom:3px">
-              <a href="{% url 'product-batch-detail' res.product_batch.pk %}" style="color:var(--accent2);text-decoration:none">
-                {{ res.product_batch.batch_number }}
-              </a>
-              <span class="text-muted">× {{ res.quantity_reserved|smart_qty:line.material.unit.name }}</span>
-              <span class="badge badge-green" style="font-size:10px;padding:1px 5px">stock</span>
-            </div>
-            {% endfor %}
-            {% if not line.allocations.all and not line.batch_reservations.all %}
-            <span class="text-muted" style="font-size:12px">Not allocated</span>
-            {% endif %}
           </td>
           <td>
             {% if line.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
@@ -164,6 +170,51 @@
             {% else %}<span class="badge badge-red">Cancelled</span>
             {% endif %}
           </td>
+          <td>
+            {% for res in line.batch_reservations.all %}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px">
+              <a href="{% url 'product-batch-detail' res.product_batch.pk %}" style="color:var(--accent);text-decoration:none">
+                {{ res.product_batch.batch_number }}
+              </a>
+              <span class="text-mono">× {{ res.quantity_reserved|smart_qty:line.material.unit.name }}</span>
+              <form method="post" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="remove_reservation">
+                <input type="hidden" name="reservation_id" value="{{ res.pk }}">
+                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);padding:1px 6px">✕</button>
+              </form>
+            </div>
+            {% endfor %}
+            {% if line.status != 'FULFILLED' and order.status != 'PURCHASE_ORDER' and order.status != 'SHIPPED' %}
+            <button type="button" class="btn btn-ghost btn-sm"
+              onclick="toggleBatchForm('batch-form-{{ line.pk }}')"
+              style="font-size:11px;color:var(--accent);margin-top:2px">+ Reserve batch</button>
+            <div id="batch-form-{{ line.pk }}" style="display:none;margin-top:6px">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reserve_batch">
+                <input type="hidden" name="line_id" value="{{ line.pk }}">
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                  <select name="product_batch_id" required
+                    style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;max-width:220px;">
+                    <option value="">Select batch…</option>
+                    {% for pb in line.material.productbatch_set.all %}
+                    <option value="{{ pb.pk }}">
+                      {{ pb.batch_number }} ({{ pb_available|getitem:pb.pk|smart_qty:line.material.unit.name }} available)
+                    </option>
+                    {% endfor %}
+                  </select>
+                  <input type="number" name="quantity_reserved" step="1" min="1"
+                    placeholder="Qty"
+                    style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;">
+                  <button type="submit" class="btn btn-primary btn-sm">Reserve</button>
+                  <button type="button" class="btn btn-ghost btn-sm"
+                    onclick="toggleBatchForm('batch-form-{{ line.pk }}')">Cancel</button>
+                </div>
+              </form>
+            </div>
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -171,73 +222,18 @@
   </div>
 </div>
 
-{# ── LINKED PRODUCTION RUNS ── #}
-{% with runs=order.lines.all %}
-<div class="card">
-  <div class="card-header"><span class="card-title">Linked Production Runs</span></div>
-  <div class="table-wrap">
-    {% if order.lines.all %}
-    <table>
-      <thead>
-        <tr><th>Run Reference</th><th>Product</th><th>Status</th><th>Allocated Qty</th><th>Components Ready?</th><th></th></tr>
-      </thead>
-      <tbody>
-        {% for line in order.lines.all %}
-          {% for alloc in line.allocations.all %}
-          <tr>
-            <td class="td-mono">
-              <a href="{% url 'production-run-detail' alloc.production_run.pk %}" style="color:var(--accent);text-decoration:none">
-                {{ alloc.production_run.reference }}
-              </a>
-            </td>
-            <td>{{ alloc.production_run.material.name }}</td>
-            <td>
-              {% with s=alloc.production_run.status %}
-              {% if s == 'PLANNED' %}<span class="badge badge-grey">Planned</span>
-              {% elif s == 'ACTIVE' %}<span class="badge badge-blue">Active</span>
-              {% elif s == 'COMPLETED' %}<span class="badge badge-green">Completed</span>
-              {% else %}<span class="badge badge-red">Cancelled</span>
-              {% endif %}
-              {% endwith %}
-            </td>
-            <td class="td-mono">{{ alloc.quantity_allocated|smart_qty:line.material.unit.name }}</td>
-            <td>
-              {% with comps=alloc.production_run.components.all %}
-              {% if comps %}
-                {% with ready=alloc.production_run.components.all|length %}
-                <span style="font-size:12px">
-                  {{ comps|length }} component{{ comps|length|pluralize }}
-                </span>
-                {% endwith %}
-              {% else %}
-                <span class="text-muted" style="font-size:12px">No components defined</span>
-              {% endif %}
-              {% endwith %}
-            </td>
-            <td><a href="{% url 'production-run-detail' alloc.production_run.pk %}" class="btn btn-ghost btn-sm">→</a></td>
-          </tr>
-          {% endfor %}
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="empty"><div class="empty-icon">⚙️</div><h3>No production runs linked yet</h3></div>
-    {% endif %}
-  </div>
-</div>
-{% endwith %}
+{# ── ORDER LINES original placeholder removed ── #}
 
-<div class="modal-backdrop" id="deleteModal">
-  <div class="modal">
-    <h3>⚠ Confirm Delete</h3>
-    <p>Delete order <strong style="color:var(--text)">{{ order.reference }}</strong> and all its lines?</p>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
-      <form method="post" action="{% url 'order-delete' order.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
-    </div>
-  </div>
-</div>
+  
 {% endblock %}
 {% block extra_js %}
-<script>document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });</script>
+<script>var PB_AVAILABLE = {{ pb_available|default:"{}" }};</script>
+<script>
+function toggleBatchForm(id) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'none' || el.style.display === '' ? 'block' : 'none';
+}
+var dm = document.getElementById('deleteModal');
+if (dm) dm.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+</script>
 {% endblock %}

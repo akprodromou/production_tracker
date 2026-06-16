@@ -85,10 +85,10 @@
           <td>{{ b.location.name }}</td>
           <td class="td-mono">{{ b.total_quantity|smart_qty:b.material.unit.name }}</td>
           <td>
-            {% if b.available_quantity > 0 %}
-              <span class="badge badge-green">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span>
+            {% if b.computed_available > 0 %}
+              <span class="badge badge-green">{{ b.computed_available|smart_qty:b.material.unit.name }}</span>
             {% else %}
-              <span class="badge badge-red">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span>
+              <span class="badge badge-red">{{ b.computed_available|smart_qty:b.material.unit.name }}</span>
             {% endif %}
           </td>
           <td><span class="badge badge-orange">{{ b.total_allocated|smart_qty:b.material.unit.name }}</span></td>
