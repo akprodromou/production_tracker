@@ -15,6 +15,7 @@
   </div>
   <div class="page-actions">
     <a href="{% url 'order-edit' order.pk %}" class="btn btn-secondary">Edit</a>
+    <a href="{% url 'production-board' %}?order={{ order.pk }}" class="btn btn-secondary">📋 View on Board</a>
     <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteModal').classList.add('open')">Delete</button>
   </div>
 </div>

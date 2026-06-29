@@ -269,13 +269,41 @@ class MaterialDetailView(View):
             ).prefetch_related(
                 Prefetch('components', queryset=ProductionComponent.objects.select_related('material'))
             ).exclude(status='CANCELLED').order_by('-created_at')
+        from django.db.models import Sum as _Sum
+        material = m
+        raw_batches  = list(RawMaterialBatch.objects.filter(material=m).select_related('location')) if m.category in ('RAW', 'PKG') else []
+        prod_batches = list(ProductBatch.objects.filter(material=m).select_related('location')) if m.category == 'FIN' else []
+
+        if m.category in ('RAW', 'PKG'):
+            total_qty = sum(b.total_quantity for b in raw_batches) or Decimal('0')
+            from inventory.models import RawBatchAllocation as RBA
+            allocated = RBA.objects.filter(
+                raw_batch__material=m
+            ).aggregate(t=_Sum('quantity'))['t'] or Decimal('0')
+            net_available = total_qty - allocated
+            stock_summary = {
+                'total': total_qty, 'allocated': allocated,
+                'net_available': net_available, 'type': 'raw',
+            }
+        elif m.category == 'FIN':
+            total_qty = sum(b.quantity_produced for b in prod_batches) or Decimal('0')
+            from inventory.models import ProductBatchReservation as PBR
+            reserved = PBR.objects.filter(
+                product_batch__material=m
+            ).aggregate(t=_Sum('quantity_reserved'))['t'] or Decimal('0')
+            net_available = total_qty - reserved
+            stock_summary = {
+                'total': total_qty, 'reserved': reserved,
+                'net_available': net_available, 'type': 'fin',
+            }
+        else:
+            stock_summary = None
+
         return render(request, 'materials/detail.html', {
-            'material':       m,
-            'raw_batches':    RawMaterialBatch.objects.filter(material=m).select_related('location')
-                              if m.category in ('RAW', 'PKG') else [],
-            'product_batches': ProductBatch.objects.filter(material=m).select_related('location')
-                               if m.category == 'FIN' else [],
-            'production_runs': runs,
+            'material':      m,
+            'raw_batches':   raw_batches,
+            'product_batches': prod_batches,
+            'stock_summary': stock_summary,
         })
 
 
@@ -1186,9 +1214,32 @@ class ClientOrderDetailView(View):
         action = request.POST.get('action', 'status')
 
         if action == 'ship':
+            # Deduct reserved quantities from product batches and delete reservations
+            reservations = ProductBatchReservation.objects.filter(
+                order_line__order=order
+            ).select_related('product_batch')
+
+            deducted = {}
+            for res in reservations:
+                pb  = res.product_batch
+                qty = res.quantity_reserved
+                pb.quantity_produced = max(Decimal('0'), pb.quantity_produced - qty)
+                pb.save()
+                deducted[pb.batch_number] = deducted.get(pb.batch_number, Decimal('0')) + qty
+
+            reservations.delete()
+
+            # Mark all order lines as fulfilled
+            order.lines.all().update(status='FULFILLED')
+
             order.status = 'SHIPPED'
             order.save()
-            messages.success(request, f'Order {order.reference} marked as Shipped.')
+
+            summary = ', '.join(f'{b}: -{q}' for b, q in deducted.items())
+            messages.success(
+                request,
+                f'Order {order.reference} shipped. Stock deducted: {summary or "none"}.'
+            )
 
         elif action == 'status':
             new_status = request.POST.get('status')
@@ -1393,7 +1444,11 @@ class ProductionRunListView(View):
             except (ValueError, TypeError):
                 pass
         if q:
-            qs = qs.filter(reference__icontains=q)
+            qs = qs.filter(
+                Q(reference__icontains=q) |
+                Q(material__name__icontains=q) |
+                Q(material__sku__icontains=q)
+            )
         paginator = Paginator(qs.order_by('-created_at'), 25)
         return render(request, 'production_runs/list.html', {
             'runs':           paginator.get_page(request.GET.get('page')),
@@ -1800,59 +1855,47 @@ BOARD_STATUS_META = {
 
 
 class ProductionBoardView(View):
-    """
-    Kanban board of production runs grouped by their bottleneck component status.
-    Shipped (completed) runs are excluded — they appear in ShipmentHistoryView.
-    """
     def get(self, request):
-        # Load all non-shipped, non-cancelled runs with their components
-        runs = list(
-            ProductionRun.objects.filter(
-                status__in=['PLANNED', 'ACTIVE', 'COMPLETED']
-            ).exclude(
-                pk__in=ProductionRunShipment.objects.values_list('production_run_id', flat=True)
-            ).select_related('material').prefetch_related(
-                Prefetch('components', queryset=ProductionComponent.objects.select_related('material'))
-            )
-        )
+        order_id = request.GET.get('order', '').strip()
 
-        # Group runs by board_status
-        columns = {s: [] for s in COMPONENT_STATUS_PRIORITY}
+        runs = ProductionRun.objects.exclude(
+            status__in=['COMPLETED', 'CANCELLED']
+        ).select_related('material', 'location').prefetch_related(
+            Prefetch('components', queryset=ProductionComponent.objects.select_related('material__unit'))
+        ).order_by('planned_start')
+
+        selected_order = None
+        if order_id:
+            try:
+                selected_order = ClientOrder.objects.get(pk=int(order_id))
+                # Get materials of product batches reserved against this order
+                material_ids = ProductBatchReservation.objects.filter(
+                    order_line__order=selected_order
+                ).values_list(
+                    'product_batch__material_id', flat=True
+                ).distinct()
+                # Show runs producing any of those materials
+                runs = runs.filter(material_id__in=material_ids)
+            except (ClientOrder.DoesNotExist, ValueError):
+                pass
+
+        orders = ClientOrder.objects.exclude(
+            status__in=['SHIPPED', 'CANCELLED']
+        ).select_related('client').order_by('-order_date')
+
+        # Group runs into board columns by board_status
+        columns = {'PENDING': [], 'ORDERED': [], 'IN_WAREHOUSE_RAW': []}
         for run in runs:
             bs = run.board_status
             if bs in columns:
                 columns[bs].append(run)
 
         return render(request, 'production_runs/board.html', {
-            'columns':          columns,
-            'status_priority':  COMPONENT_STATUS_PRIORITY,
-            'status_meta':      BOARD_STATUS_META,
+            'runs':           runs,
+            'columns':        columns,
+            'orders':         orders,
+            'selected_order': selected_order,
         })
-
-    def post(self, request):
-        """Ship a run — moves it to history."""
-        run_pk = request.POST.get('run_id')
-        run    = get_object_or_404(ProductionRun, pk=run_pk)
-        qty    = request.POST.get('quantity_shipped', '').strip()
-        order_line_id = request.POST.get('order_line_id', '').strip()
-        try:
-            qty_dec    = Decimal(qty)
-            order_line = ClientOrderLine.objects.get(pk=int(order_line_id)) \
-                         if order_line_id else None
-            ProductionRunShipment.objects.create(
-                production_run=run,
-                order_line=order_line,
-                quantity_shipped=qty_dec,
-                notes=request.POST.get('ship_notes', ''),
-            )
-            run.status   = 'COMPLETED'
-            run.actual_end = timezone.now().date()
-            run.save()
-            messages.success(request, f'{run.reference} shipped — moved to history.')
-        except Exception as ex:
-            messages.error(request, f'Shipment error: {ex}')
-        return redirect('production-board')
-
 
 class ShipmentHistoryView(View):
     """Read-only archive of shipped production runs."""

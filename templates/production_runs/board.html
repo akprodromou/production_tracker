@@ -83,11 +83,30 @@
     <h1>Production Board</h1>
     <p>Runs grouped by their most-blocking component. Shipped runs move to history.</p>
   </div>
-  <div class="page-actions">
-    <a href="{% url 'shipment-history' %}" class="btn btn-secondary">🚚 History</a>
+  <div class="page-actions" style="gap:8px">
+    <form method="get" style="display:flex;gap:8px;align-items:center">
+      <select name="order"
+        style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:6px 10px;outline:none;min-width:220px"
+        onchange="this.form.submit()">
+        <option value="">All orders</option>
+        {% for o in orders %}
+        <option value="{{ o.pk }}" {% if selected_order.pk == o.pk %}selected{% endif %}>
+          {{ o.reference }} — {{ o.client.name }}
+        </option>
+        {% endfor %}
+      </select>
+      {% if selected_order %}
+      <a href="{% url 'production-board' %}" class="btn btn-ghost btn-sm">Clear</a>
+      {% endif %}
+    </form>
     <a href="{% url 'production-run-create' %}" class="btn btn-primary">+ New Run</a>
   </div>
 </div>
+{% if selected_order %}
+<div style="padding:8px 14px;background:rgba(79,142,247,.1);border:1px solid var(--accent);border-radius:var(--radius);margin-bottom:16px;font-size:13px">
+  Showing runs for order <strong>{{ selected_order.reference }}</strong> — {{ selected_order.client.name }}
+</div>
+{% endif %}
 
 <div class="board">
 

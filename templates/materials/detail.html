@@ -184,7 +184,44 @@
 
 {# ── PRODUCT BATCHES ── #}
 <div class="card">
-  <div class="card-header">
+  
+{# ── STOCK SUMMARY ── #}
+{% if stock_summary %}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Stock Summary</span></div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      <div class="stat-card">
+        <div class="stat-label">Total in Stock</div>
+        <div class="stat-value">{{ stock_summary.total|smart_qty:material.unit.name }}</div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+      {% if stock_summary.type == 'raw' %}
+      <div class="stat-card">
+        <div class="stat-label">Allocated to Runs</div>
+        <div class="stat-value" style="color:var(--warn)">{{ stock_summary.allocated|smart_qty:material.unit.name }}</div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+      {% else %}
+      <div class="stat-card">
+        <div class="stat-label">Reserved for Orders</div>
+        <div class="stat-value" style="color:var(--warn)">{{ stock_summary.reserved|smart_qty:material.unit.name }}</div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+      {% endif %}
+      <div class="stat-card">
+        <div class="stat-label">Net Available</div>
+        <div class="stat-value" style="{% if stock_summary.net_available > 0 %}color:var(--accent2){% else %}color:var(--danger){% endif %}">
+          {{ stock_summary.net_available|smart_qty:material.unit.name }}
+        </div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card-header">
     <span class="card-title">Product Batches</span>
     <a href="{% url 'product-batch-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Batch</a>
   </div>
@@ -199,7 +236,7 @@
         <tr>
           <td class="td-mono"><a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a></td>
           <td>{{ pb.location.name }}</td>
-          <td class="td-mono">{{ pb.quantity_produced }}</td>
+          <td class="td-mono">{{ pb.quantity_produced|smart_qty:material.unit.name }}</td>
           <td class="text-muted" style="font-size:12px">{{ pb.created_at|date:"Y-m-d" }}</td>
           <td><a href="{% url 'product-batch-detail' pb.pk %}" class="btn btn-ghost btn-sm">→</a></td>
         </tr>
@@ -213,6 +250,19 @@
 </div>
 
 {% else %}
+
+
+      <div class="stat-card">
+        <div class="stat-label">Net Available</div>
+        <div class="stat-value" style="{% if stock_summary.net_available > 0 %}color:var(--accent2){% else %}color:var(--danger){% endif %}">
+          {{ stock_summary.net_available|smart_qty:material.unit.name }}
+        </div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 {# ── RAW MATERIAL BATCHES ── #}
 <div class="card">
@@ -249,7 +299,6 @@
   </div>
 </div>
 
-{% endif %}
 
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal">
