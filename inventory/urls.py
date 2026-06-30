@@ -64,6 +64,7 @@ urlpatterns = [
 
     # Production Runs
     path('production-runs/',                views.ProductionRunListView.as_view(),   name='production-run-list'),
+    path('production-runs/template-lookup/', views.ProductionTemplateLookupView.as_view(), name='production-template-lookup'),
     path('production-runs/create/',         views.ProductionRunCreateView.as_view(), name='production-run-create'),
     path('production-runs/<int:pk>/',       views.ProductionRunDetailView.as_view(), name='production-run-detail'),
     path('production-runs/<int:pk>/edit/',  views.ProductionRunEditView.as_view(),   name='production-run-edit'),

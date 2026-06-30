@@ -13,6 +13,10 @@ Weekly ERP inventory sync:
 
 import os
 import sys
+
+# Ensure project root (parent of this scripts/ folder) is on sys.path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import django
 import pandas as pd
 from decimal import Decimal, InvalidOperation
@@ -62,10 +66,7 @@ def sku_to_category(sku):
 
 def get_or_create_unit(erp_unit_name):
     unit_name = UNIT_MAP.get(erp_unit_name, erp_unit_name)
-    unit, created = Unit.objects.get_or_create(
-        name=unit_name,
-        defaults={'abbreviation': unit_name[:10]}
-    )
+    unit, created = Unit.objects.get_or_create(name=unit_name)
     if created:
         print(f"    Created unit: {unit_name}")
     return unit

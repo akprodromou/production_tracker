@@ -93,6 +93,7 @@
 <script>
 const MAT_DATA = {{ all_raw_materials_json|safe }};
 const FIN_DATA = {{ fin_materials_json|safe }};
+const TEMPLATE_LOOKUP_URL = "{% url 'production-template-lookup' %}";
 
 // Pre-populate finished product from ?material=N
 (function() {
@@ -167,15 +168,10 @@ const FIN_DATA = {{ fin_materials_json|safe }};
         <div class="form-group">
           <label>Status</label>{{ form.status }}
         </div>
-        <div class="form-group">
-          <label>Actual Quantity</label>{{ form.actual_quantity }}
-        </div>
       </div>
       <div class="form-grid form-grid-2 mt-3">
         <div class="form-group"><label>Planned Start</label>{{ form.planned_start }}</div>
         <div class="form-group"><label>Planned End</label>{{ form.planned_end }}</div>
-        <div class="form-group"><label>Actual Start</label>{{ form.actual_start }}</div>
-        <div class="form-group"><label>Actual End</label>{{ form.actual_end }}</div>
       </div>
       <div class="form-group mt-3"><label>Notes</label>{{ form.notes }}</div>
     </div>
@@ -321,6 +317,101 @@ function attachAutocomplete(row) {
 }
 
 document.querySelectorAll('.comp-row').forEach(attachAutocomplete);
+
+// ── Auto-populate Components Required from saved ProductionTemplate ──
+//
+// When the user selects a finished product, or changes Planned Quantity,
+// call the template-lookup endpoint. If a ProductionTemplate exists for
+// that product, replace the Components Required table with the template's
+// materials, with Qty Required = ratio x planned quantity. Rows remain
+// fully editable afterwards (add/remove/change) — this just seeds them.
+
+function getPlannedQtyField() {
+  return document.querySelector('input[name="planned_quantity"]');
+}
+
+function clearCompRows() {
+  compContainer.innerHTML = '';
+}
+
+function buildTemplateRow(idx, comp) {
+  const row = document.createElement('div');
+  row.className = 'comp-row';
+  row.innerHTML =
+    '<div class="mat-wrap">' +
+      '<input type="text" class="mat-search" autocomplete="off" value="' + comp.name + ' (' + comp.sku + ')">' +
+      '<div class="mat-drop"></div>' +
+      '<div style="display:none">' +
+        '<select name="comp-' + idx + '-material" id="id_comp-' + idx + '-material">' +
+          '<option value="' + comp.material_id + '" selected>' + comp.name + ' (' + comp.sku + ')</option>' +
+        '</select>' +
+      '</div>' +
+    '</div>' +
+    '<div><input type="number" step="0.001" name="comp-' + idx + '-quantity_required" ' +
+      'id="id_comp-' + idx + '-quantity_required" value="' + comp.quantity_required + '"></div>' +
+    '<div class="text-muted" style="font-size:12px;padding:8px 0">Pending</div>' +
+    '<div><input type="date" name="comp-' + idx + '-expected_date" id="id_comp-' + idx + '-expected_date"></div>' +
+    '<div style="display:flex;align-items:center;padding-top:0px">' +
+      '<button type="button" class="btn btn-danger btn-sm remove-comp">Remove</button>' +
+    '</div>';
+  return row;
+}
+
+function applyTemplateComponents(components) {
+  clearCompRows();
+  components.forEach(function(comp, idx) {
+    const row = buildTemplateRow(idx, comp);
+    compContainer.appendChild(row);
+    attachAutocomplete(row);
+    row.querySelector('.remove-comp').addEventListener('click', function() { row.remove(); });
+  });
+  compTotal.value = components.length;
+}
+
+let _lastTemplateFetchKey = null;
+
+function fetchAndApplyTemplate() {
+  const hiddenSel = document.querySelector('#fin-product-wrap select');
+  const qtyField  = getPlannedQtyField();
+  if (!hiddenSel || !hiddenSel.value) return;
+  const materialId = hiddenSel.value;
+  const plannedQty = qtyField ? (qtyField.value || '0') : '0';
+
+  const key = materialId + '|' + plannedQty;
+  if (key === _lastTemplateFetchKey) return;
+  _lastTemplateFetchKey = key;
+
+  fetch(TEMPLATE_LOOKUP_URL + '?material_id=' + encodeURIComponent(materialId) +
+        '&planned_quantity=' + encodeURIComponent(plannedQty))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.found && data.components && data.components.length) {
+        applyTemplateComponents(data.components);
+      }
+    })
+    .catch(function() {});
+}
+
+(function() {
+  const hiddenSel = document.querySelector('#fin-product-wrap select');
+  if (hiddenSel) {
+    hiddenSel.addEventListener('change', fetchAndApplyTemplate);
+  }
+  const input = document.getElementById('fin-product-search');
+  if (input) {
+    // Picking an option sets hiddenSel.value via mousedown without firing
+    // 'change', so also check shortly after the search input loses focus.
+    input.addEventListener('blur', function() {
+      setTimeout(fetchAndApplyTemplate, 200);
+    });
+  }
+  const qtyField = getPlannedQtyField();
+  if (qtyField) {
+    qtyField.addEventListener('change', fetchAndApplyTemplate);
+    qtyField.addEventListener('blur', fetchAndApplyTemplate);
+  }
+})();
+
 
 
 // ── Add / remove rows ─────────────────────────────────────────────

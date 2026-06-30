@@ -286,8 +286,11 @@ function buildBlankRow(idx) {
 if (addBtn) {
   addBtn.addEventListener('click', function() {
     if (!totalForms) { console.error('TOTAL_FORMS not found'); return; }
-    var idx  = parseInt(totalForms.value);
     var rows = linesContainer.querySelectorAll('.line-row');
+    // Always derive idx from the actual rows present in the DOM,
+    // not from totalForms.value, since rows may have been removed
+    // client-side (unsaved) without totalForms being decremented.
+    var idx  = rows.length;
     var newRow;
 
     if (rows.length === 0) {
@@ -322,16 +325,37 @@ if (addBtn) {
     }
 
     linesContainer.appendChild(newRow);
-    totalForms.value = idx + 1;
+    totalForms.value = linesContainer.querySelectorAll('.line-row').length;
     attachProductSearch(newRow);
-    newRow.querySelector('.remove-line')?.addEventListener('click', function(){ newRow.remove(); });
+    var newRemoveBtn = newRow.querySelector('.remove-line');
+    if (newRemoveBtn) attachRemoveLineHandler(newRemoveBtn);
   });
 }
 
-// Remove unsaved lines
-document.querySelectorAll('.remove-line').forEach(function(btn) {
-  btn.addEventListener('click', function() { this.closest('.line-row').remove(); });
-});
+function reindexAllRows() {
+  var prefix = totalForms.id.replace('id_', '').replace('-TOTAL_FORMS', '');
+  var rows = linesContainer.querySelectorAll('.line-row');
+  rows.forEach(function(row, newIdx) {
+    row.querySelectorAll('input, select').forEach(function(el) {
+      if (el.name) {
+        el.name = el.name.replace(/-\d+-/, '-' + newIdx + '-');
+      }
+      if (el.id) {
+        el.id = el.id.replace(/_\d+_/, '_' + newIdx + '_');
+      }
+    });
+  });
+  totalForms.value = rows.length;
+}
+
+// Remove unsaved lines (new rows never saved to DB — safe to delete from DOM)
+function attachRemoveLineHandler(btn) {
+  btn.addEventListener('click', function() {
+    this.closest('.line-row').remove();
+    reindexAllRows();
+  });
+}
+document.querySelectorAll('.remove-line').forEach(attachRemoveLineHandler);
 
 // Mark saved lines for deletion
 document.querySelectorAll('.delete-line').forEach(function(btn) {

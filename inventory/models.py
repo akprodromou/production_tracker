@@ -283,6 +283,43 @@ class ClientOrderLine(models.Model):
 # PRODUCTION RUNS
 # ─────────────────────────────────────────────
 
+
+class ProductionTemplate(models.Model):
+    """
+    A reusable 'recipe' for a finished product: which raw materials/
+    packaging are required, and in what ratio per unit of finished product.
+    Sourced from the ERP 'Set Kit Specifications' export.
+    """
+    product    = models.OneToOneField(
+        'Material', on_delete=models.CASCADE,
+        related_name='production_template',
+        limit_choices_to={'category': 'FIN'},
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Template: {self.product.name}"
+
+
+class ProductionTemplateComponent(models.Model):
+    """
+    One raw material line within a ProductionTemplate.
+    ratio = quantity of this material required per 1 unit of finished product.
+    """
+    template = models.ForeignKey(
+        ProductionTemplate, on_delete=models.CASCADE,
+        related_name='components'
+    )
+    material = models.ForeignKey('Material', on_delete=models.PROTECT)
+    ratio    = models.DecimalField(max_digits=15, decimal_places=4)
+
+    def __str__(self):
+        return f"{self.template.product.name} -> {self.material.name} x{self.ratio}"
+
+    class Meta:
+        ordering = ['material__name']
+
+
 class ProductionRun(models.Model):
     STATUS_CHOICES = [
         ('PLANNED',    'Planned'),

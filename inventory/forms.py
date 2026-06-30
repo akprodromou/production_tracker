@@ -370,22 +370,16 @@ class ProductionRunForm(forms.ModelForm):
         fields = [
             'reference', 'material', 'planned_quantity',
             'planned_start', 'planned_end',
-            'actual_start', 'actual_end', 'actual_quantity',
             'location', 'notes'
         ]
         widgets = {
             'planned_start': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'planned_end':   forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
-            'actual_start':  forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
-            'actual_end':    forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['material'].queryset = Material.objects.filter(category='FIN')
-        self.fields['actual_start'].required = False
-        self.fields['actual_end'].required = False
-        self.fields['actual_quantity'].required = False
         # Default planned_start to today on new runs only
         if not self.instance.pk:
             from django.utils import timezone

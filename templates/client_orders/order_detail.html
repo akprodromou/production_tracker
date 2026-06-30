@@ -197,7 +197,7 @@
                 <input type="hidden" name="line_id" value="{{ line.pk }}">
                 <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
                   <select name="product_batch_id" required
-                    style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;max-width:220px;">
+                    style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;max-width:360px;">
                     <option value="">Select batch…</option>
                     {% for pb in line.material.productbatch_set.all %}
                     <option value="{{ pb.pk }}">
@@ -225,10 +225,21 @@
 
 {# ── ORDER LINES original placeholder removed ── #}
 
-  
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <h3>⚠ Confirm Delete</h3>
+    <p>Delete order <strong style="color:var(--text)">{{ order.reference }}</strong>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+      <form method="post" action="{% url 'order-delete' order.pk %}">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
+
 {% block extra_js %}
-<script>var PB_AVAILABLE = {{ pb_available|default:"{}" }};</script>
+<script>var PB_AVAILABLE = {{ pb_available_json|default:"{}"|safe }};</script>
 <script>
 function toggleBatchForm(id) {
   var el = document.getElementById(id);

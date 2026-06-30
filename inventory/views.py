@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.views import View
@@ -16,7 +17,8 @@ from .models import (
     Client, ClientOrder, ClientOrderLine,
     ProductionRun, ProductionRunAllocation,
     ProductionComponent, ProductionRunShipment,
-    ProductBatchReservation, RawBatchAllocation
+    ProductBatchReservation, RawBatchAllocation,
+    ProductionTemplate, ProductionTemplateComponent,
 )
 from .forms import (
     UnitForm, LocationForm, MaterialForm, RawMaterialBatchForm,
@@ -1128,6 +1130,9 @@ class ClientOrderDetailView(View):
             reserved = pb_reserved.get(pb.pk, Decimal('0'))
             pb_available[pb.pk] = pb.quantity_produced - reserved
 
+        import json as _json
+        pb_available_json = _json.dumps({str(k): float(v) for k, v in pb_available.items()})
+
         # Bill of Quantities — sourced from product batches reserved against this order
         from collections import defaultdict
         # Step 1: find all product batches reserved against this order's lines
@@ -1207,6 +1212,7 @@ class ClientOrderDetailView(View):
             'boq_rows':          boq_rows,
             'fulfilment_status': fulfilment_status,
             'pb_available':      pb_available,
+            'pb_available_json': pb_available_json,
         })
 
     def post(self, request, pk):
@@ -1380,20 +1386,49 @@ class ClientOrderEditView(View):
         order = get_object_or_404(ClientOrder, pk=pk)
         form  = ClientOrderForm(request.POST, instance=order)
 
-        # Delete lines BEFORE formset validation to avoid required field errors
-        total = int(request.POST.get('lines-TOTAL_FORMS', 0))
-        for i in range(total):
-            if request.POST.get(f'lines-{i}-DELETE'):
-                line_id = request.POST.get(f'lines-{i}-id')
-                if line_id:
-                    try:
-                        ClientOrderLine.objects.filter(
-                            pk=int(line_id), order=order
-                        ).delete()
-                    except (ValueError, TypeError):
-                        pass
+        # Build a mutable copy of POST data, dropping any lines marked DELETE
+        # before constructing the formset, and re-index the remaining lines.
+        # This avoids Django's formset validating against rows we are about
+        # to remove, which previously corrupted unrelated lines with
+        # "This field is required" errors.
+        post_data = request.POST.copy()
+        total = int(post_data.get('lines-TOTAL_FORMS', 0))
 
-        formset = ClientOrderLineFormSet(request.POST, instance=order)
+        deleted_ids  = []
+        kept_indices = []
+        for i in range(total):
+            if post_data.get('lines-%d-DELETE' % i):
+                line_id = post_data.get('lines-%d-id' % i)
+                if line_id:
+                    deleted_ids.append(line_id)
+            else:
+                kept_indices.append(i)
+
+        if deleted_ids:
+            ClientOrderLine.objects.filter(
+                pk__in=[int(x) for x in deleted_ids if x.isdigit()],
+                order=order
+            ).delete()
+
+            new_post = post_data.copy()
+            for key in list(new_post.keys()):
+                if key.startswith('lines-') and key not in (
+                    'lines-TOTAL_FORMS', 'lines-INITIAL_FORMS',
+                    'lines-MIN_NUM_FORMS', 'lines-MAX_NUM_FORMS'
+                ):
+                    del new_post[key]
+
+            for new_idx, old_idx in enumerate(kept_indices):
+                for field in ('id', 'material', 'quantity_ordered'):
+                    val = post_data.get('lines-%d-%s' % (old_idx, field))
+                    if val is not None:
+                        new_post['lines-%d-%s' % (new_idx, field)] = val
+
+            new_post['lines-TOTAL_FORMS']   = str(len(kept_indices))
+            new_post['lines-INITIAL_FORMS'] = post_data.get('lines-INITIAL_FORMS', '0')
+            post_data = new_post
+
+        formset = ClientOrderLineFormSet(post_data, instance=order)
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
@@ -1609,6 +1644,47 @@ class ProductionRunDetailView(View):
                 messages.error(request, 'Order line not found.')
 
         return redirect('production-run-detail', pk=pk)
+
+
+
+class ProductionTemplateLookupView(View):
+    """
+    GET /production-runs/template-lookup/?material_id=123&planned_quantity=500
+    Returns JSON: {"found": true, "components": [{"material_id":..,"name":..,"sku":..,
+                   "unit":.., "quantity_required":..}, ...]}
+    Used by the production run create form to auto-populate components
+    from the saved ProductionTemplate for the selected finished product.
+    """
+    def get(self, request):
+        material_id = request.GET.get('material_id', '').strip()
+        qty_str     = request.GET.get('planned_quantity', '0').strip()
+        try:
+            material_id = int(material_id)
+        except (ValueError, TypeError):
+            return JsonResponse({'found': False, 'components': []})
+        try:
+            planned_qty = Decimal(qty_str or '0')
+        except InvalidOperation:
+            planned_qty = Decimal('0')
+
+        try:
+            template = ProductionTemplate.objects.select_related('product').get(product_id=material_id)
+        except ProductionTemplate.DoesNotExist:
+            return JsonResponse({'found': False, 'components': []})
+
+        components = []
+        for comp in template.components.select_related('material__unit').all():
+            qty_required = (comp.ratio * planned_qty) if planned_qty else Decimal('0')
+            components.append({
+                'material_id':      comp.material.id,
+                'name':             comp.material.name,
+                'sku':              comp.material.sku,
+                'unit':             comp.material.unit.name if comp.material.unit else '',
+                'ratio':            float(comp.ratio),
+                'quantity_required': float(qty_required),
+            })
+
+        return JsonResponse({'found': True, 'components': components})
 
 
 class ProductionRunCreateView(View):
