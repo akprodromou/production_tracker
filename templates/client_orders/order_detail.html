@@ -238,6 +238,33 @@
 
 {% endblock %}
 
+
+<div class="modal-backdrop" id="shipModal">
+  <div class="modal">
+    <h3>🚚 Ship Order</h3>
+    <p>Confirm shipment details for <strong style="color:var(--text)">{{ order.reference }}</strong>.</p>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="ship">
+      <div class="form-group mt-2">
+        <label>Date Shipped</label>
+        <input type="text" name="date_shipped" placeholder="YYYY-MM-DD"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div class="form-group mt-2">
+        <label>Transporter / Carrier</label>
+        <input type="text" name="transporter" placeholder="e.g. DHL, FedEx…"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div class="modal-actions mt-3">
+        <button type="button" class="btn btn-secondary"
+          onclick="document.getElementById('shipModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-success">Confirm Ship</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {% block extra_js %}
 <script>var PB_AVAILABLE = {{ pb_available_json|default:"{}"|safe }};</script>
 <script>
@@ -245,6 +272,8 @@ function toggleBatchForm(id) {
   var el = document.getElementById(id);
   if (el) el.style.display = el.style.display === 'none' || el.style.display === '' ? 'block' : 'none';
 }
+var sm = document.getElementById('shipModal');
+if (sm) sm.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
 var dm = document.getElementById('deleteModal');
 if (dm) dm.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
 </script>

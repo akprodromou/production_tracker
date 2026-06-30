@@ -165,9 +165,7 @@ const TEMPLATE_LOOKUP_URL = "{% url 'production-template-lookup' %}";
         <div class="form-group">
           <label>Location</label>{{ form.location }}
         </div>
-        <div class="form-group">
-          <label>Status</label>{{ form.status }}
-        </div>
+
       </div>
       <div class="form-grid form-grid-2 mt-3">
         <div class="form-group"><label>Planned Start</label>{{ form.planned_start }}</div>
@@ -180,7 +178,12 @@ const TEMPLATE_LOOKUP_URL = "{% url 'production-template-lookup' %}";
   <div class="card mb-3">
     <div class="card-header">
       <span class="card-title">Components Required</span>
-      <span class="text-muted" style="font-size:11px">Type to search by name or SKU</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="text-muted" style="font-size:11px">Type to search by name or SKU</span>
+        <button type="button" id="populate-components-btn" class="btn btn-secondary btn-sm">
+          🔄 Populate / Update Components
+        </button>
+      </div>
     </div>
     <div class="card-body">
       {{ formset.management_form }}
@@ -392,25 +395,57 @@ function fetchAndApplyTemplate() {
     .catch(function() {});
 }
 
-(function() {
-  const hiddenSel = document.querySelector('#fin-product-wrap select');
-  if (hiddenSel) {
-    hiddenSel.addEventListener('change', fetchAndApplyTemplate);
-  }
-  const input = document.getElementById('fin-product-search');
-  if (input) {
-    // Picking an option sets hiddenSel.value via mousedown without firing
-    // 'change', so also check shortly after the search input loses focus.
-    input.addEventListener('blur', function() {
-      setTimeout(fetchAndApplyTemplate, 200);
+const populateBtn = document.getElementById('populate-components-btn');
+if (populateBtn) {
+  populateBtn.addEventListener('click', function() {
+    const hiddenSel = document.querySelector('#fin-product-wrap select');
+    if (!hiddenSel || !hiddenSel.value) {
+      alert('Please select a Finished Product first.');
+      return;
+    }
+    const qtyField = getPlannedQtyField();
+    if (!qtyField || !qtyField.value || parseFloat(qtyField.value) <= 0) {
+      alert('Please enter a Planned Quantity greater than 0 first.');
+      return;
+    }
+    const existingRows = compContainer.querySelectorAll('.comp-row').length;
+    if (existingRows > 0) {
+      const ok = confirm(
+        'This will replace all ' + existingRows + ' current row(s) in ' +
+        'Components Required with the template for this product. Continue?'
+      );
+      if (!ok) return;
+    }
+    populateBtn.disabled = true;
+    populateBtn.textContent = 'Loading…';
+    _lastTemplateFetchKey = null; // force a fresh fetch even if same key
+    fetchAndApplyTemplateAsync().finally(function() {
+      populateBtn.disabled = false;
+      populateBtn.textContent = '🔄 Populate / Update Components';
     });
-  }
-  const qtyField = getPlannedQtyField();
-  if (qtyField) {
-    qtyField.addEventListener('change', fetchAndApplyTemplate);
-    qtyField.addEventListener('blur', fetchAndApplyTemplate);
-  }
-})();
+  });
+}
+
+function fetchAndApplyTemplateAsync() {
+  const hiddenSel = document.querySelector('#fin-product-wrap select');
+  const qtyField  = getPlannedQtyField();
+  const materialId = hiddenSel.value;
+  const plannedQty = qtyField.value || '0';
+
+  return fetch(TEMPLATE_LOOKUP_URL + '?material_id=' + encodeURIComponent(materialId) +
+        '&planned_quantity=' + encodeURIComponent(plannedQty))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.found && data.components && data.components.length) {
+        applyTemplateComponents(data.components);
+      } else {
+        alert('No saved template found for this finished product yet.');
+      }
+    })
+    .catch(function() {
+      alert('Could not load the template — please try again.');
+    });
+}
 
 
 

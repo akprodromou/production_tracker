@@ -1087,6 +1087,17 @@ class ClientDeleteView(View):
 # CLIENT ORDERS
 # ─────────────────────────────────────────────
 
+
+class ShippedOrdersListView(View):
+    def get(self, request):
+        orders = ClientOrder.objects.filter(
+            status='SHIPPED'
+        ).select_related('client').order_by('-date_shipped', '-updated_at')
+        return render(request, 'client_orders/shipped_list.html', {
+            'orders': orders,
+        })
+
+
 class ClientOrderListView(View):
     def get(self, request):
         qs = ClientOrder.objects.select_related('client').all()
@@ -1220,6 +1231,9 @@ class ClientOrderDetailView(View):
         action = request.POST.get('action', 'status')
 
         if action == 'ship':
+            date_shipped = request.POST.get('date_shipped', '').strip()
+            transporter  = request.POST.get('transporter', '').strip()
+
             # Deduct reserved quantities from product batches and delete reservations
             reservations = ProductBatchReservation.objects.filter(
                 order_line__order=order
@@ -1234,11 +1248,15 @@ class ClientOrderDetailView(View):
                 deducted[pb.batch_number] = deducted.get(pb.batch_number, Decimal('0')) + qty
 
             reservations.delete()
-
-            # Mark all order lines as fulfilled
             order.lines.all().update(status='FULFILLED')
-
-            order.status = 'SHIPPED'
+            order.status      = 'SHIPPED'
+            order.transporter = transporter
+            if date_shipped:
+                from datetime import date as _date
+                try:
+                    order.date_shipped = _date.fromisoformat(date_shipped)
+                except ValueError:
+                    pass
             order.save()
 
             summary = ', '.join(f'{b}: -{q}' for b, q in deducted.items())
@@ -1597,7 +1615,6 @@ class ProductionRunDetailView(View):
             if batch_id:
                 try:
                     pb = ProductBatch.objects.get(pk=int(batch_id))
-                    # Check material matches
                     if pb.material != run.material:
                         messages.error(
                             request,
@@ -1605,16 +1622,31 @@ class ProductionRunDetailView(View):
                             f'run material ({run.material.name}).'
                         )
                     else:
-                        run.product_batch = pb
-                        run.save()
-                        messages.success(
-                            request,
-                            f'Product batch {pb.batch_number} linked to this run.'
-                        )
+                        confirm_override = request.POST.get('confirm_override')
+                        has_existing_qty = pb.quantity_produced and pb.quantity_produced > 0
+
+                        if has_existing_qty and not confirm_override:
+                            # Ask for confirmation via a flag
+                            messages.warning(
+                                request,
+                                f'CONFIRM_OVERRIDE:{pb.pk}:{run.pk}:'
+                                f'Batch {pb.batch_number} already has quantity '
+                                f'{pb.quantity_produced}. Link anyway and set to '
+                                f'{run.planned_quantity} (planned quantity of this run)?'
+                            )
+                        else:
+                            pb.quantity_produced = run.planned_quantity
+                            pb.save()
+                            run.product_batch = pb
+                            run.save()
+                            messages.success(
+                                request,
+                                f'Linked {pb.batch_number} → quantity set to '
+                                f'{run.planned_quantity}.'
+                            )
                 except (ProductBatch.DoesNotExist, ValueError):
                     messages.error(request, 'Product batch not found.')
             else:
-                # Unlink
                 run.product_batch = None
                 run.save()
                 messages.success(request, 'Product batch unlinked.')

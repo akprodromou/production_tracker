@@ -59,9 +59,9 @@
   .comp-name { color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .comp-st   { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
 
-  .dot-PENDING          { background: var(--muted); }
-  .dot-ORDERED          { background: var(--warn); }
-  .dot-IN_WAREHOUSE_RAW { background: var(--accent2); }
+  .dot-green  { background: var(--accent2); }
+  .dot-orange { background: var(--warn); }
+  .dot-red    { background: var(--danger); }
 
   .run-card-footer {
     display: flex; align-items: center; justify-content: space-between;
@@ -88,7 +88,7 @@
       <select name="order"
         style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:6px 10px;outline:none;min-width:220px"
         onchange="this.form.submit()">
-        <option value="">All orders</option>
+        <option value="" disabled selected>Choose an order…</option>
         {% for o in orders %}
         <option value="{{ o.pk }}" {% if selected_order.pk == o.pk %}selected{% endif %}>
           {{ o.reference }} — {{ o.client.name }}
@@ -118,18 +118,6 @@
     </div>
     <div class="board-cards">
       {% for run in columns.PENDING %}{% include "production_runs/_board_card.html" %}{% empty %}
-      <div class="board-empty">No runs</div>{% endfor %}
-    </div>
-  </div>
-
-  {# ORDERED #}
-  <div class="board-col">
-    <div class="board-col-header">
-      <span class="board-col-title col-title-ORDERED">Ordered</span>
-      <span class="board-col-count">{{ columns.ORDERED|length }}</span>
-    </div>
-    <div class="board-cards">
-      {% for run in columns.ORDERED %}{% include "production_runs/_board_card.html" %}{% empty %}
       <div class="board-empty">No runs</div>{% endfor %}
     </div>
   </div>

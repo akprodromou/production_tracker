@@ -30,6 +30,7 @@
     <div class="text-mono" style="font-size:22px;font-weight:600;color:var(--accent)">
       {{ batch.quantity_produced|smart_qty:batch.material.unit.name }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
     </div>
+    {% if batch.production_run %}<div style="font-size:10px;color:var(--muted);margin-top:2px">from run</div>{% endif %}
   </div>
   <div class="stat-card">
     <div class="stat-label">Reserved for Orders</div>

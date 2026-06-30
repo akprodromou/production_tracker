@@ -7,7 +7,7 @@
   <div class="run-card-components">
     {% for comp in run.components.all %}
     <div class="comp-line">
-      <span class="comp-dot dot-{{ comp.status }}"></span>
+      <span class="comp-dot dot-{{ comp.availability_dot }}"></span>
       <span class="comp-name">{{ comp.material.name }}</span>
       <span class="comp-st">
         {% if comp.status == 'PENDING' %}Pending

@@ -56,6 +56,7 @@ urlpatterns = [
     path('clients/<int:pk>/delete/',  views.ClientDeleteView.as_view(), name='client-delete'),
 
     # Client Orders
+    path('shipped/', views.ShippedOrdersListView.as_view(), name='shipped-orders'),
     path('orders/',                  views.ClientOrderListView.as_view(),   name='order-list'),
     path('orders/create/',           views.ClientOrderCreateView.as_view(), name='order-create'),
     path('orders/<int:pk>/',         views.ClientOrderDetailView.as_view(), name='order-detail'),
@@ -79,8 +80,6 @@ urlpatterns = [
     path('production-runs/components/<int:pk>/status/',
          views.ProductionComponentUpdateView.as_view(), name='component-status'),
 
-    # Allocations table
-    path('allocations/', views.AllocationListView.as_view(), name='allocation-list'),
 
     # Production Board (Kanban) + Shipment history
     path('board/',    views.ProductionBoardView.as_view(),   name='production-board'),

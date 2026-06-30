@@ -229,6 +229,8 @@ class ClientOrder(models.Model):
     order_date = models.DateField(default=timezone.now)
     required_by = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
+    date_shipped   = models.DateField(null=True, blank=True)
+    transporter    = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -475,6 +477,19 @@ class ProductionComponent(models.Model):
     @property
     def is_ready(self):
         return self.status == 'IN_WAREHOUSE_RAW'
+
+    @property
+    def availability_dot(self):
+        """Returns 'green', 'orange', or 'red' based on allocated vs required."""
+        allocated = self.allocated_quantity
+        required  = self.quantity_required
+        if required <= 0:
+            return 'green'
+        if allocated <= 0:
+            return 'red'
+        if allocated >= required:
+            return 'green'
+        return 'orange'
 
     def __str__(self):
         return f"{self.production_run.reference} | {self.material.name} | {self.status}"

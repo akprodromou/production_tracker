@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load inventory_extras %}
+{% block title %}Shipped Orders{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Shipped Orders
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Shipped Orders</h1><p>Orders that have been dispatched</p></div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if orders %}
+    <table>
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Client</th>
+          <th>Date Shipped</th>
+          <th>Transporter</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="td-mono">
+            <a href="{% url 'order-detail' o.pk %}" style="color:var(--accent);text-decoration:none">
+              {{ o.reference }}
+            </a>
+          </td>
+          <td>{{ o.client.name }}</td>
+          <td class="text-muted" style="font-size:12px">
+            {{ o.date_shipped|date:"Y-m-d"|default:"—" }}
+          </td>
+          <td class="text-muted" style="font-size:12px">
+            {{ o.transporter|default:"—" }}
+          </td>
+          <td>
+            <div class="td-actions" style="justify-content:flex-end">
+              <a href="{% url 'order-detail' o.pk %}" class="btn btn-ghost btn-sm">View</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">🚚</div>
+      <h3>No shipped orders yet</h3>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

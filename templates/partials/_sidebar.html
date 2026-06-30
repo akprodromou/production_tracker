@@ -24,9 +24,6 @@
     <a href="{% url 'production-run-list' %}" class="{% if 'production-run' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">⚙️</span> Production Runs
     </a>
-    <a href="{% url 'allocation-list' %}" class="{% if 'allocation' in request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">🔗</span> Allocations
-    </a>
     <a href="{% url 'shipment-history' %}" class="{% if request.resolver_match.url_name == 'shipment-history' %}active{% endif %}">
       <span class="icon">🚚</span> Shipped
     </a>
