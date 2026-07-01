@@ -19,6 +19,7 @@ from .models import (
     ProductionComponent, ProductionRunShipment,
     ProductBatchReservation, RawBatchAllocation,
     ProductionTemplate, ProductionTemplateComponent,
+    ProductionRunReservation,
 )
 from .forms import (
     UnitForm, LocationForm, MaterialForm, RawMaterialBatchForm,
@@ -1092,7 +1093,7 @@ class ShippedOrdersListView(View):
     def get(self, request):
         orders = ClientOrder.objects.filter(
             status='SHIPPED'
-        ).select_related('client').order_by('-date_shipped', '-updated_at')
+        ).select_related('client').order_by('-date_shipped', '-created_at')
         return render(request, 'client_orders/shipped_list.html', {
             'orders': orders,
         })
@@ -1152,9 +1153,17 @@ class ClientOrderDetailView(View):
         ).values_list('product_batch_id', flat=True).distinct()
 
         # Step 2: find production runs linked to those batches
-        run_ids = ProductionRun.objects.filter(
+        run_ids_from_batches = ProductionRun.objects.filter(
             product_batch_id__in=reserved_batch_ids
         ).values_list('id', flat=True).distinct()
+
+        # Also include runs pre-reserved directly against this order's lines
+        run_ids_from_reservations = ProductionRunReservation.objects.filter(
+            order_line__order=order
+        ).values_list('production_run_id', flat=True).distinct()
+
+        from django.db.models import Value
+        run_ids = list(set(list(run_ids_from_batches) + list(run_ids_from_reservations)))
 
         boq = defaultdict(lambda: {
             'material': None,
@@ -1218,12 +1227,25 @@ class ClientOrderDetailView(View):
                 key=lambda s: priority.index(s) if s in priority else 0
             )
 
+        # Production runs eligible for pre-reservation per line material
+        line_materials = order.lines.values_list('material_id', flat=True).distinct()
+        eligible_runs = ProductionRun.objects.filter(
+            material_id__in=line_materials
+        ).exclude(status='CANCELLED').select_related('material').order_by('-created_at')
+
+        # Run reservations for this order
+        run_reservations = ProductionRunReservation.objects.filter(
+            order_line__order=order
+        ).select_related('production_run__material', 'order_line__material')
+
         return render(request, 'client_orders/order_detail.html', {
             'order':             order,
             'boq_rows':          boq_rows,
             'fulfilment_status': fulfilment_status,
             'pb_available':      pb_available,
             'pb_available_json': pb_available_json,
+            'eligible_runs':     eligible_runs,
+            'run_reservations':  run_reservations,
         })
 
     def post(self, request, pk):
@@ -1271,6 +1293,54 @@ class ClientOrderDetailView(View):
                 order.status = new_status
                 order.save()
                 messages.success(request, f'Order status updated to {order.get_status_display()}.')
+
+        elif action == 'reserve_run':
+            line_id  = request.POST.get('line_id')
+            run_id   = request.POST.get('production_run_id')
+            qty_str  = request.POST.get('quantity_reserved', '').strip()
+            try:
+                line = ClientOrderLine.objects.get(pk=line_id, order=order)
+                run  = ProductionRun.objects.get(pk=run_id)
+                qty  = Decimal(qty_str)
+                if qty <= 0:
+                    raise ValueError
+                if run.material != line.material:
+                    messages.error(request, 'Run product does not match order line material.')
+                else:
+                    # Check line remaining
+                    line_reserved_batch = ProductBatchReservation.objects.filter(
+                        order_line=line
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    line_reserved_run = ProductionRunReservation.objects.filter(
+                        order_line=line
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    line_remaining = line.quantity_ordered - line_reserved_batch - line_reserved_run
+                    if qty > line_remaining:
+                        messages.error(request, f'Only {line_remaining} units still needed for this line.')
+                    else:
+                        ProductionRunReservation.objects.create(
+                            production_run=run,
+                            order_line=line,
+                            quantity_reserved=qty,
+                        )
+                        messages.success(request, f'Reserved {qty} units from run {run.reference}.')
+            except (ClientOrderLine.DoesNotExist, ProductionRun.DoesNotExist, ValueError, InvalidOperation) as e:
+                messages.error(request, f'Error: {e}')
+
+        elif action == 'remove_run_reservation':
+            res_id = request.POST.get('reservation_id')
+            try:
+                res = ProductionRunReservation.objects.get(pk=res_id)
+                if res.order_line.order != order:
+                    raise ProductionRunReservation.DoesNotExist
+                res.delete()
+                messages.success(request, 'Run reservation removed.')
+            except ProductionRunReservation.DoesNotExist:
+                messages.error(request, 'Reservation not found.')
 
         elif action == 'reserve_batch':
             line_id    = request.POST.get('line_id')
@@ -1530,11 +1600,36 @@ class ProductionRunDetailView(View):
             material=run.material
         ).select_related('material').order_by('-created_at')
 
+        # Build available batch data per component material for inline reserve form
+        comp_batches = {}
+        for comp in run.components.select_related('material').all():
+            batches = RawMaterialBatch.objects.filter(
+                material=comp.material
+            ).select_related('location').order_by('location__name')
+            batch_list = []
+            for b in batches:
+                allocated = RawBatchAllocation.objects.filter(
+                    raw_batch=b
+                ).aggregate(
+                    total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                )['total']
+                available = b.total_quantity - allocated
+                batch_list.append({
+                    'pk':        b.pk,
+                    'lot':       b.lot_number,
+                    'location':  b.location.name,
+                    'status':    b.get_status_display(),
+                    'available': float(available),
+                    'total':     float(b.total_quantity),
+                })
+            comp_batches[str(comp.material.pk)] = batch_list
+
         return render(request, 'production_runs/detail.html', {
             'run':               run,
             'allocation_form':   allocation_form,
             'component_status_choices': ProductionComponent.STATUS_CHOICES,
             'linkable_batches':  linkable_batches,
+            'comp_batches_json': json.dumps(comp_batches),
         })
 
     def post(self, request, pk):
@@ -1566,6 +1661,31 @@ class ProductionRunDetailView(View):
                         )
                         run.product_batch = pb
                         run.save()
+                    # Auto-transfer any ProductionRunReservations to the new ProductBatch
+                    for prr in ProductionRunReservation.objects.filter(production_run=run):
+                        # Check batch still has capacity
+                        existing = ProductBatchReservation.objects.filter(
+                            product_batch=pb
+                        ).aggregate(
+                            total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                        )['total']
+                        available = pb.quantity_produced - existing
+                        qty = min(prr.quantity_reserved, available)
+                        if qty > 0:
+                            ProductBatchReservation.objects.create(
+                                product_batch=pb,
+                                order_line=prr.order_line,
+                                quantity_reserved=qty,
+                            )
+                            line = prr.order_line
+                            line.quantity_fulfilled = (line.quantity_fulfilled or Decimal('0')) + qty
+                            if line.quantity_fulfilled >= line.quantity_ordered:
+                                line.status = 'FULFILLED'
+                            else:
+                                line.status = 'PARTIAL'
+                            line.save()
+                        prr.delete()
+
                         messages.success(
                             request,
                             f'Run completed. Product batch {pb.batch_number} created.'
@@ -1966,24 +2086,22 @@ class ProductionBoardView(View):
     def get(self, request):
         order_id = request.GET.get('order', '').strip()
 
-        runs = ProductionRun.objects.exclude(
-            status__in=['COMPLETED', 'CANCELLED']
-        ).select_related('material', 'location').prefetch_related(
-            Prefetch('components', queryset=ProductionComponent.objects.select_related('material__unit'))
-        ).order_by('planned_start')
-
         selected_order = None
+        runs = ProductionRun.objects.none()  # show nothing until an order is chosen
+
         if order_id:
             try:
                 selected_order = ClientOrder.objects.get(pk=int(order_id))
-                # Get materials of product batches reserved against this order
                 material_ids = ProductBatchReservation.objects.filter(
                     order_line__order=selected_order
                 ).values_list(
                     'product_batch__material_id', flat=True
                 ).distinct()
-                # Show runs producing any of those materials
-                runs = runs.filter(material_id__in=material_ids)
+                runs = ProductionRun.objects.exclude(
+                    status__in=['COMPLETED', 'CANCELLED']
+                ).select_related('material', 'location').prefetch_related(
+                    Prefetch('components', queryset=ProductionComponent.objects.select_related('material__unit'))
+                ).filter(material_id__in=material_ids).order_by('planned_start')
             except (ClientOrder.DoesNotExist, ValueError):
                 pass
 

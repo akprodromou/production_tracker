@@ -9,33 +9,50 @@
 
 {% block extra_head %}
 <style>
-  .component-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 180px;
-    gap: 0;
-  }
-  .comp-header, .comp-row {
-    display: contents;
+  /* Component rows as flex table rows instead of CSS grid
+   so expandable reserve forms don't break the layout */
+  .comp-header {
+    display: flex;
+    padding: 6px 14px;
+    border-bottom: 1px solid var(--border);
   }
   .comp-header > span {
-    padding: 8px 18px;
     font-family: var(--mono);
     font-size: 10px;
     font-weight: 600;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
-    border-bottom: 1px solid var(--border);
+  }
+  .comp-row {
+    border-bottom: 1px solid rgba(42,47,61,.4);
+  }
+  .comp-row:last-child { border-bottom: none; }
+  .comp-row:hover .comp-row-cells { background: var(--surface2); }
+  .comp-row-cells {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    gap: 0;
   }
   .comp-cell {
-    padding: 12px 18px;
-    border-bottom: 1px solid rgba(42,47,61,.4);
     display: flex;
     align-items: center;
     font-size: 13px;
+    padding: 0 4px;
   }
-  .comp-row:last-child .comp-cell { border-bottom: none; }
-  .comp-row:hover .comp-cell { background: var(--surface2); }
+  .comp-cell-material { flex: 2; }
+  .comp-cell-qty     { flex: 1; font-family: var(--mono); }
+  .comp-cell-avail   { flex: 1; font-family: var(--mono); }
+  .comp-cell-date    { flex: 1; color: var(--muted); font-size:12px; }
+  .comp-cell-status  { flex: 1; }
+  .comp-cell-action  { width: 100px; flex-shrink: 0; }
+  .comp-reserve-form {
+    display: none;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+  }
   .status-select {
     width: 100%;
     background: var(--surface2);
@@ -104,44 +121,74 @@
 
   {% if run.components.all %}
   <div class="component-grid">
-    <div class="comp-header">
-      <span>Material</span>
-      <span>Required</span>
-      <span>Available</span>
-      <span>Expected</span>
-      <span>Status</span>
-    </div>
-    {% for comp in run.components.all %}
-    <div class="comp-row">
-      <div class="comp-cell" style="flex-direction:column;align-items:flex-start;gap:2px">
-        <strong>{{ comp.material.name }}</strong>
-        <span class="text-mono text-muted" style="font-size:11px">{{ comp.material.sku }}</span>
-        {% if comp.raw_material_batch %}
-        <a href="{% url 'batch-detail' comp.raw_material_batch.pk %}" style="font-size:11px;color:var(--accent);text-decoration:none">
-          LOT: {{ comp.raw_material_batch.lot_number }}
-        </a>
-        {% endif %}
+    <div>
+      <div class="comp-header">
+        <span class="comp-cell-material">Material</span>
+        <span class="comp-cell-qty">Required</span>
+        <span class="comp-cell-avail">Available</span>
+        <span class="comp-cell-date">Expected</span>
+        <span class="comp-cell-status">Status</span>
+        <span class="comp-cell-action"></span>
       </div>
-      <div class="comp-cell td-mono">{{ comp.quantity_required|smart_qty:comp.material.unit.name }} {{ comp.material.unit.name }}</div>
-      <div class="comp-cell td-mono">
-        {% if comp.quantity_shortfall > 0 %}
-          <span style="color:var(--danger)">{{ comp.allocated_quantity|smart_qty:comp.material.unit.name }}</span>
-          <span class="text-muted" style="font-size:11px;margin-left:4px">(short {{ comp.quantity_shortfall|smart_qty:comp.material.unit.name }})</span>
-        {% else %}
-          <span style="color:var(--accent2)">{{ comp.allocated_quantity|smart_qty:comp.material.unit.name }}</span>
-        {% endif %}
+      {% for comp in run.components.all %}
+      <div class="comp-row">
+        <div class="comp-row-cells">
+          <div class="comp-cell comp-cell-material" style="flex-direction:column;align-items:flex-start;gap:2px">
+            <strong>{{ comp.material.name }}</strong>
+            <span class="text-mono text-muted" style="font-size:11px">{{ comp.material.sku }}</span>
+          </div>
+          <div class="comp-cell comp-cell-qty">{{ comp.quantity_required|smart_qty:comp.material.unit.name }} {{ comp.material.unit.name }}</div>
+          <div class="comp-cell comp-cell-avail">
+            {% if comp.quantity_shortfall > 0 %}
+              <span style="color:var(--danger)">{{ comp.allocated_quantity|smart_qty:comp.material.unit.name }}</span>
+              <span class="text-muted" style="font-size:11px;margin-left:4px">(short {{ comp.quantity_shortfall|smart_qty:comp.material.unit.name }})</span>
+            {% else %}
+              <span style="color:var(--accent2)">{{ comp.allocated_quantity|smart_qty:comp.material.unit.name }}</span>
+            {% endif %}
+          </div>
+          <div class="comp-cell comp-cell-date">{{ comp.expected_date|date:"Y-m-d"|default:"—" }}</div>
+          <div class="comp-cell comp-cell-status">
+            {% if comp.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
+            {% elif comp.status == 'ORDERED' %}<span class="badge badge-blue">Ordered</span>
+            {% elif comp.status == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-green">In Warehouse</span>
+            {% endif %}
+            <span class="text-muted" style="font-size:11px;margin-left:6px">(from batches)</span>
+          </div>
+          <div class="comp-cell comp-cell-action">
+            <button type="button" class="btn btn-ghost btn-sm"
+              onclick="toggleCompReserve('comp-reserve-{{ comp.pk }}')"
+              style="font-size:11px;color:var(--accent)">+ Reserve</button>
+          </div>
+        </div>
+        <div id="comp-reserve-{{ comp.pk }}" class="comp-reserve-form">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reserve_component">
+            <input type="hidden" name="material_id" value="{{ comp.material.pk }}">
+            <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+              <div class="form-group" style="flex:2;min-width:200px">
+                <label style="font-size:11px">Raw Material Batch</label>
+                <select name="raw_batch_id" id="batch-sel-{{ comp.pk }}" required
+                  style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:6px 10px;outline:none;"
+                  onchange="updateMaxQty({{ comp.pk }}, this)">
+                  <option value="">Select batch…</option>
+                </select>
+              </div>
+              <div class="form-group" style="width:100px">
+                <label style="font-size:11px">Quantity</label>
+                <input type="number" name="quantity" id="qty-{{ comp.pk }}" step="1" min="1"
+                  style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:6px 10px;outline:none;">
+              </div>
+              <div style="display:flex;gap:6px;padding-bottom:1px">
+                <button type="submit" class="btn btn-primary btn-sm">Allocate</button>
+                <button type="button" class="btn btn-ghost btn-sm"
+                  onclick="toggleCompReserve('comp-reserve-{{ comp.pk }}')">Cancel</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="comp-cell text-muted" style="font-size:12px">{{ comp.expected_date|date:"Y-m-d"|default:"—" }}</div>
-      <div class="comp-cell">
-        {% if comp.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
-        {% elif comp.status == 'ORDERED' %}<span class="badge badge-blue">Ordered</span>
-        {% elif comp.status == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-green">In Warehouse</span>
-        {% endif %}
-        <span class="text-muted" style="font-size:11px;margin-left:6px">(from batches)</span>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
+      {% endfor %}
   {% else %}
   <div class="empty" style="padding:28px">
     <div class="empty-icon">📦</div>
@@ -214,6 +261,45 @@
 {% endif %}
 {% endblock %}
 {% block extra_js %}
+
+<script>
+var COMP_BATCHES = {{ comp_batches_json|default:"{}"|safe }};
+
+function toggleCompReserve(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var isHidden = el.style.display === "none" || el.style.display === "";
+  el.style.display = isHidden ? "block" : "none";
+  if (isHidden) {
+    var sel = el.querySelector("select[name=\"raw_batch_id\"]");
+    if (sel && sel.options.length <= 1) {
+      var matId = el.querySelector("input[name=\"material_id\"]").value;
+      var batches = COMP_BATCHES[matId] || [];
+      batches.forEach(function(b) {
+        var opt = document.createElement("option");
+        opt.value = b.pk;
+        opt.setAttribute("data-available", b.available);
+        var icon = b.status === "In Warehouse as Raw Material" ? "\u{1F7E2}" :
+                   b.status === "Ordered from supplier" ? "\u{1F535}" : "\u26AA";
+        opt.textContent = b.lot + " \u2014 " + b.location +
+                          " (" + Math.floor(b.available) + " avail) [" + b.status + "]";
+        sel.appendChild(opt);
+      });
+    }
+  }
+}
+
+function updateMaxQty(compPk, sel) {
+  var opt = sel.options[sel.selectedIndex];
+  var available = parseFloat(opt.getAttribute("data-available") || 0);
+  var qtyInput = document.getElementById("qty-" + compPk);
+  if (qtyInput) {
+    qtyInput.max = available;
+    qtyInput.placeholder = "max " + Math.floor(available);
+  }
+}
+</script>
+
 
 <script>
 // Detect override-confirmation warning from server and show inline confirm

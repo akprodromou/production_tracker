@@ -10293,7 +10293,7 @@
     "material": 706,
     "lot_number": "OPENING-07-0000260-7",
     "total_quantity": "23144.000",
-    "status": "PENDING",
+    "status": "ORDERED",
     "created_at": "2026-05-25T14:24:33.705Z",
     "location": 7
   }
@@ -12765,7 +12765,7 @@
     "material": 801,
     "lot_number": "OPENING-07-0000387-9",
     "total_quantity": "6594.000",
-    "status": "PENDING",
+    "status": "IN_WAREHOUSE_RAW",
     "created_at": "2026-05-25T14:24:36.306Z",
     "location": 9
   }
@@ -14727,6 +14727,18 @@
   }
 },
 {
+  "model": "inventory.rawmaterialbatch",
+  "pk": 492,
+  "fields": {
+    "material": 773,
+    "lot_number": "RMB-SNOWMAN-EU-500ML-2026-07",
+    "total_quantity": "3500.000",
+    "status": "ORDERED",
+    "created_at": "2026-07-01T04:38:34.874Z",
+    "location": 7
+  }
+},
+{
   "model": "inventory.rawbatchallocation",
   "pk": 1,
   "fields": {
@@ -14877,6 +14889,17 @@
     "production_run": 4,
     "quantity": "5775.000",
     "created_at": "2026-06-30T19:26:17.930Z",
+    "notes": ""
+  }
+},
+{
+  "model": "inventory.rawbatchallocation",
+  "pk": 15,
+  "fields": {
+    "raw_batch": 492,
+    "production_run": 4,
+    "quantity": "3500.000",
+    "created_at": "2026-07-01T04:39:18.333Z",
     "notes": ""
   }
 },
@@ -20993,6 +21016,18 @@
   }
 },
 {
+  "model": "inventory.materialtransaction",
+  "pk": 369,
+  "fields": {
+    "raw_material_batch": 492,
+    "product_batch": null,
+    "transaction_type": "PRODUCED",
+    "quantity": "3500.000",
+    "created_at": "2026-07-01T04:38:34.896Z",
+    "reference": ""
+  }
+},
+{
   "model": "inventory.client",
   "pk": 1,
   "fields": {
@@ -23470,7 +23505,7 @@
   "fields": {
     "reference": "ORDER-RUDOLF-CHRISTMAS-2026",
     "client": 203,
-    "status": "SHIPPED",
+    "status": "CONFIRMED",
     "order_date": "2026-04-20",
     "required_by": "2026-07-15",
     "notes": "",
@@ -23861,6 +23896,16 @@
     "quantity_fulfilled": "0.000",
     "status": "PENDING",
     "notes": ""
+  }
+},
+{
+  "model": "inventory.productionrunreservation",
+  "pk": 1,
+  "fields": {
+    "production_run": 3,
+    "order_line": 12,
+    "quantity_reserved": "4950.000",
+    "created_at": "2026-07-01T04:35:26.030Z"
   }
 },
 {
@@ -35637,6 +35682,25 @@
   }
 },
 {
+  "model": "inventory.productionrun",
+  "pk": 5,
+  "fields": {
+    "reference": "PR-SNOWMAN-500ML-US-2026-07",
+    "material": 743,
+    "planned_quantity": "2310.000",
+    "actual_quantity": null,
+    "status": "PLANNED",
+    "planned_start": "2026-07-01",
+    "planned_end": null,
+    "actual_start": null,
+    "actual_end": null,
+    "location": 7,
+    "notes": "",
+    "created_at": "2026-07-01T04:47:59.155Z",
+    "product_batch": null
+  }
+},
+{
   "model": "inventory.productioncomponent",
   "pk": 1,
   "fields": {
@@ -35855,6 +35919,84 @@
     "expected_date": null,
     "notes": "",
     "updated_at": "2026-06-30T19:19:11.098Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 20,
+  "fields": {
+    "production_run": 5,
+    "material": 230,
+    "quantity_required": "255.000",
+    "quantity_available": "0.000",
+    "expected_date": null,
+    "notes": "",
+    "updated_at": "2026-07-01T04:47:59.192Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 21,
+  "fields": {
+    "production_run": 5,
+    "material": 313,
+    "quantity_required": "2310.000",
+    "quantity_available": "0.000",
+    "expected_date": null,
+    "notes": "",
+    "updated_at": "2026-07-01T04:47:59.195Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 22,
+  "fields": {
+    "production_run": 5,
+    "material": 330,
+    "quantity_required": "2310.000",
+    "quantity_available": "0.000",
+    "expected_date": null,
+    "notes": "",
+    "updated_at": "2026-07-01T04:47:59.197Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 23,
+  "fields": {
+    "production_run": 5,
+    "material": 219,
+    "quantity_required": "2310.000",
+    "quantity_available": "0.000",
+    "expected_date": null,
+    "notes": "",
+    "updated_at": "2026-07-01T04:47:59.199Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 24,
+  "fields": {
+    "production_run": 5,
+    "material": 799,
+    "quantity_required": "2310.000",
+    "quantity_available": "0.000",
+    "expected_date": null,
+    "notes": "",
+    "updated_at": "2026-07-01T04:47:59.200Z"
+  }
+},
+{
+  "model": "inventory.productioncomponent",
+  "pk": 25,
+  "fields": {
+    "production_run": 5,
+    "material": 809,
+    "quantity_required": "2310.000",
+    "quantity_available": "0.000",
+    "expected_date": null,
+    "notes": "",
+    "updated_at": "2026-07-01T04:47:59.202Z"
   }
 },
 {

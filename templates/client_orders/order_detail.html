@@ -120,6 +120,32 @@
             {% elif row.status == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-orange">In Warehouse</span>
             {% elif row.status == 'IN_PROCESS' %}<span class="badge badge-warn" style="background:rgba(245,158,11,.15);color:#f59e0b">In Process</span>
             {% elif row.status == 'FINAL_PRODUCT' %}<span class="badge badge-green">Final Product</span>
+            {# Reserve production run inline form #}
+            <div id="run-form-{{ line.pk }}" style="display:none;margin-top:6px">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reserve_run">
+                <input type="hidden" name="line_id" value="{{ line.pk }}">
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                  <select name="production_run_id" required
+                    style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;max-width:360px;">
+                    <option value="">Select production run…</option>
+                    {% for run in eligible_runs %}
+                    {% if run.material == line.material %}
+                    <option value="{{ run.pk }}">{{ run.reference }} (planned {{ run.planned_quantity|smart_qty:run.material.unit.name }})</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                  <input type="number" name="quantity_reserved" step="1" min="1"
+                    placeholder="Qty"
+                    style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;">
+                  <button type="submit" class="btn btn-primary btn-sm">Reserve Run</button>
+                  <button type="button" class="btn btn-ghost btn-sm"
+                    onclick="toggleBatchForm('run-form-{{ line.pk }}')">Cancel</button>
+                </div>
+              </form>
+            </div>
+
             {% endif %}
           </td>
         </tr>
@@ -148,7 +174,7 @@
           <th>Fulfilled</th>
           <th>Remaining</th>
           <th>Status</th>
-          <th>Reserved Batches</th>
+          <th>Reserved Batches / Production Runs</th>
         </tr>
       </thead>
       <tbody>
@@ -172,24 +198,54 @@
             {% endif %}
           </td>
           <td>
-            {% for res in line.batch_reservations.all %}
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px">
-              <a href="{% url 'product-batch-detail' res.product_batch.pk %}" style="color:var(--accent);text-decoration:none">
-                {{ res.product_batch.batch_number }}
-              </a>
-              <span class="text-mono">× {{ res.quantity_reserved|smart_qty:line.material.unit.name }}</span>
-              <form method="post" style="display:inline">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="remove_reservation">
-                <input type="hidden" name="reservation_id" value="{{ res.pk }}">
-                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);padding:1px 6px">✕</button>
-              </form>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              {# Left: existing reservations #}
+              <div style="flex:1;min-width:0">
+                {% for res in line.batch_reservations.all %}
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px">
+                  <a href="{% url 'product-batch-detail' res.product_batch.pk %}" style="color:var(--accent);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">
+                    {{ res.product_batch.batch_number }}
+                  </a>
+                  <span class="text-mono" style="white-space:nowrap">× {{ res.quantity_reserved|smart_qty:line.material.unit.name }}</span>
+                  <form method="post" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove_reservation">
+                    <input type="hidden" name="reservation_id" value="{{ res.pk }}">
+                    <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);padding:1px 6px">✕</button>
+                  </form>
+                </div>
+                {% endfor %}
+                {% for rr in run_reservations %}
+                {% if rr.order_line.pk == line.pk %}
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px">
+                  <span style="color:var(--accent2)">🏭</span>
+                  <a href="{% url 'production-run-detail' rr.production_run.pk %}" style="color:var(--accent2);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">
+                    {{ rr.production_run.reference }}
+                  </a>
+                  <span class="text-mono" style="white-space:nowrap">× {{ rr.quantity_reserved|smart_qty:line.material.unit.name }}</span>
+                  <span class="badge badge-grey" style="font-size:10px">planned</span>
+                  <form method="post" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove_run_reservation">
+                    <input type="hidden" name="reservation_id" value="{{ rr.pk }}">
+                    <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);padding:1px 6px">✕</button>
+                  </form>
+                </div>
+                {% endif %}
+                {% endfor %}
+              </div>
+              {# Right: reserve buttons #}
+              {% if line.status != 'FULFILLED' and order.status != 'PURCHASE_ORDER' and order.status != 'SHIPPED' %}
+              <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+                <button type="button" class="btn btn-ghost btn-sm"
+                  onclick="toggleBatchForm('batch-form-{{ line.pk }}')"
+                  style="font-size:11px;color:var(--accent);white-space:nowrap">+ Reserve batch</button>
+                <button type="button" class="btn btn-ghost btn-sm"
+                  onclick="toggleBatchForm('run-form-{{ line.pk }}')"
+                  style="font-size:11px;color:var(--accent2);white-space:nowrap">+ Reserve production run</button>
+              </div>
+              {% endif %}
             </div>
-            {% endfor %}
-            {% if line.status != 'FULFILLED' and order.status != 'PURCHASE_ORDER' and order.status != 'SHIPPED' %}
-            <button type="button" class="btn btn-ghost btn-sm"
-              onclick="toggleBatchForm('batch-form-{{ line.pk }}')"
-              style="font-size:11px;color:var(--accent);margin-top:2px">+ Reserve batch</button>
             <div id="batch-form-{{ line.pk }}" style="display:none;margin-top:6px">
               <form method="post">
                 {% csrf_token %}
@@ -214,7 +270,32 @@
                 </div>
               </form>
             </div>
-            {% endif %}
+            {# Reserve production run inline form #}
+            <div id="run-form-{{ line.pk }}" style="display:none;margin-top:6px">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reserve_run">
+                <input type="hidden" name="line_id" value="{{ line.pk }}">
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                  <select name="production_run_id" required
+                    style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;max-width:360px;">
+                    <option value="">Select production run…</option>
+                    {% for run in eligible_runs %}
+                    {% if run.material == line.material %}
+                    <option value="{{ run.pk }}">{{ run.reference }} (planned {{ run.planned_quantity|smart_qty:run.material.unit.name }})</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                  <input type="number" name="quantity_reserved" step="1" min="1"
+                    placeholder="Qty"
+                    style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;">
+                  <button type="submit" class="btn btn-primary btn-sm">Reserve Run</button>
+                  <button type="button" class="btn btn-ghost btn-sm"
+                    onclick="toggleBatchForm('run-form-{{ line.pk }}')">Cancel</button>
+                </div>
+              </form>
+            </div>
+
           </td>
         </tr>
         {% endfor %}

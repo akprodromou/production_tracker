@@ -286,6 +286,33 @@ class ClientOrderLine(models.Model):
 # ─────────────────────────────────────────────
 
 
+
+class ProductionRunReservation(models.Model):
+    """
+    Pre-reserves a quantity from a planned ProductionRun against an order line.
+    When the run completes and a ProductBatch is created, this reservation
+    is automatically converted to a ProductBatchReservation and deleted.
+    If the run is cancelled, the reservation is simply deleted.
+    """
+    production_run   = models.ForeignKey(
+        'ProductionRun', on_delete=models.CASCADE,
+        related_name='order_reservations'
+    )
+    order_line       = models.ForeignKey(
+        'ClientOrderLine', on_delete=models.CASCADE,
+        related_name='run_reservations'
+    )
+    quantity_reserved = models.DecimalField(max_digits=15, decimal_places=3)
+    created_at        = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return (f"{self.production_run.reference} → "
+                f"{self.order_line.order.reference} × {self.quantity_reserved}")
+
+    class Meta:
+        ordering = ['-created_at']
+
+
 class ProductionTemplate(models.Model):
     """
     A reusable 'recipe' for a finished product: which raw materials/
