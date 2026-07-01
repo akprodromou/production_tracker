@@ -161,7 +161,7 @@
           </div>
         </div>
         <div id="comp-reserve-{{ comp.pk }}" class="comp-reserve-form">
-          <form method="post">
+          <form method="post" action="{% url 'production-run-detail' run.pk %}">
             {% csrf_token %}
             <input type="hidden" name="action" value="reserve_component">
             <input type="hidden" name="material_id" value="{{ comp.material.pk }}">

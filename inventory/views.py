@@ -1730,6 +1730,48 @@ class ProductionRunDetailView(View):
                     for e in errs:
                         messages.error(request, e)
 
+        elif action == 'reserve_component':
+            batch_id = request.POST.get('raw_batch_id')
+            qty_str  = request.POST.get('quantity', '').strip()
+            try:
+                batch = RawMaterialBatch.objects.get(pk=int(batch_id))
+                qty   = Decimal(qty_str)
+                if qty <= 0:
+                    raise ValueError
+
+                # Check batch has enough available
+                total_allocated = RawBatchAllocation.objects.filter(
+                    raw_batch=batch
+                ).aggregate(
+                    total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                )['total']
+                available = batch.total_quantity - total_allocated
+
+                if qty > available:
+                    messages.error(request, f'Only {available} units available in that batch.')
+                elif not run.components.filter(material=batch.material).exists():
+                    messages.error(request, f'{batch.material.name} is not a component of this run.')
+                else:
+                    comp = run.components.filter(material=batch.material).first()
+                    already_allocated = RawBatchAllocation.objects.filter(
+                        production_run=run,
+                        raw_batch__material=batch.material
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    still_needed = max(Decimal('0'), comp.quantity_required - already_allocated)
+                    if qty > still_needed:
+                        messages.error(request, f'Only {still_needed} more units needed for this component.')
+                    else:
+                        RawBatchAllocation.objects.create(
+                            raw_batch=batch,
+                            production_run=run,
+                            quantity=qty,
+                        )
+                        messages.success(request, f'Allocated {qty} units from {batch.lot_number}.')
+            except (RawMaterialBatch.DoesNotExist, ValueError, InvalidOperation) as e:
+                messages.error(request, f'Error: {e}')
+
         elif action == 'link_batch':
             batch_id = request.POST.get('product_batch_id')
             if batch_id:
