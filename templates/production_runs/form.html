@@ -361,14 +361,38 @@ function buildTemplateRow(idx, comp) {
 }
 
 function applyTemplateComponents(components) {
-  clearCompRows();
-  components.forEach(function(comp, idx) {
-    const row = buildTemplateRow(idx, comp);
-    compContainer.appendChild(row);
-    attachAutocomplete(row);
-    row.querySelector('.remove-comp').addEventListener('click', function() { row.remove(); });
-  });
-  compTotal.value = components.length;
+  // On edit forms, existing rows have saved PKs — update their quantities
+  // rather than clearing and rebuilding, to avoid duplicate-key errors.
+  var existingRows = compContainer.querySelectorAll('.comp-row');
+  var isEditMode   = existingRows.length > 0 &&
+                     compContainer.querySelector('input[name$="-id"][value]') !== null;
+
+  if (isEditMode) {
+    // Build a map of material_id -> existing row
+    var rowByMaterial = {};
+    existingRows.forEach(function(row) {
+      var sel = row.querySelector('select[name$="-material"]');
+      if (sel && sel.value) rowByMaterial[sel.value] = row;
+    });
+    // Update quantity_required for each template component
+    components.forEach(function(comp) {
+      var row = rowByMaterial[String(comp.material_id)];
+      if (row) {
+        var qtyInput = row.querySelector('input[name$="-quantity_required"]');
+        if (qtyInput) qtyInput.value = comp.quantity_required;
+      }
+    });
+  } else {
+    // Create mode — clear and rebuild
+    clearCompRows();
+    components.forEach(function(comp, idx) {
+      const row = buildTemplateRow(idx, comp);
+      compContainer.appendChild(row);
+      attachAutocomplete(row);
+      row.querySelector('.remove-comp').addEventListener('click', function() { row.remove(); });
+    });
+    compTotal.value = components.length;
+  }
 }
 
 let _lastTemplateFetchKey = null;

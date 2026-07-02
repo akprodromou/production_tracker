@@ -100,6 +100,7 @@
         </thead>
         <tbody>
           {% for res in reservations %}
+          {% if res.order_line %}
           <tr>
             <td class="td-mono">
               <a href="{% url 'order-detail' res.order_line.order.pk %}" style="color:var(--accent);text-decoration:none">
@@ -119,6 +120,7 @@
               </form>
             </td>
           </tr>
+          {% endif %}
           {% endfor %}
         </tbody>
       </table>

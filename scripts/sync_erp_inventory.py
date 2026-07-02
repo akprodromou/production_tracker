@@ -2,7 +2,10 @@
 sync_erp_inventory.py
 ---------------------
 Run from project root:
-    python sync_erp_inventory.py inventory-2026-06-29.xlsx [--dry-run]
+    python scripts\sync_erp_inventory.py inventory-2026-06-29.xlsx [--dry-run]
+
+xlsx file export from Pylon:
+    Αποθήκη / Αναφορές / Εκτυπώσεις / (Είδη / Υπηρεσίες / Πάγια) / Υπόλοιπα / Υπόλοιπα ανά Αποθήκη και Είδος
 
 Weekly ERP inventory sync:
   - Creates missing materials and batches for new SKUs

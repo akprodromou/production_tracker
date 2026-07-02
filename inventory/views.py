@@ -736,7 +736,8 @@ class ProductBatchDetailView(View):
                 summary[rb.pk]['consumed'] += tx.quantity
 
         reservations = ProductBatchReservation.objects.filter(
-            product_batch=batch
+            product_batch=batch,
+            order_line__isnull=False
         ).select_related('order_line__order__client', 'order_line__material')
 
         total_reserved = sum(r.quantity_reserved for r in reservations)
@@ -1135,7 +1136,7 @@ class ClientOrderDetailView(View):
         from django.db.models import Sum as _Sum
         pb_reserved = {
             r['product_batch_id']: r['total']
-            for r in ProductBatchReservation.objects.values('product_batch_id').annotate(total=_Sum('quantity_reserved'))
+            for r in ProductBatchReservation.objects.filter(order_line__isnull=False).values('product_batch_id').annotate(total=_Sum('quantity_reserved'))
         }
         pb_available = {}
         for pb in ProductBatch.objects.all():
@@ -1388,7 +1389,8 @@ class ClientOrderDetailView(View):
                 else:
                     # Check available on batch
                     batch_reserved = ProductBatchReservation.objects.filter(
-                        product_batch=batch
+                        product_batch=batch,
+                        order_line__isnull=False
                     ).aggregate(
                         total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
                     )['total']
