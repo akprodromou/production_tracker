@@ -589,7 +589,7 @@ class RawMaterialBatchCreateView(View):
         if request.GET.get('material'):
             form.initial['material'] = request.GET['material']
         raw_mats = list(Material.objects.filter(
-            category__in=['RAW', 'PKG']
+            category__in=['RAW', 'PKG', 'FIN', 'CON']
         ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'batches/form.html', {
             'form': form,
@@ -610,7 +610,7 @@ class RawMaterialBatchCreateView(View):
             messages.success(request, f'Batch {batch.lot_number} created.')
             return redirect('batch-detail', pk=batch.pk)
         raw_mats = list(Material.objects.filter(
-            category__in=['RAW', 'PKG']
+            category__in=['RAW', 'PKG', 'FIN', 'CON']
         ).order_by('name').values('id', 'name', 'sku'))
         return render(request, 'batches/form.html', {
             'form': form,
@@ -1184,9 +1184,40 @@ class ClientOrderDetailView(View):
         boq_rows = []
         for entry in boq.values():
             m = entry['material']
-            batches = RawMaterialBatch.objects.filter(material=m)
-            total_available = sum(b.available_quantity for b in batches)
-            total_reserved  = sum(b.reserved_quantity  for b in batches)
+            total_available = Decimal('0')
+            total_reserved  = Decimal('0')
+
+            if m.category == 'FIN':
+                # FIN component (e.g. 50ml bottles used in a gift box run)
+                # — source availability from ProductBatch records
+                fin_batches = ProductBatch.objects.filter(material=m)
+                for pb in fin_batches:
+                    reserved = ProductBatchReservation.objects.filter(
+                        product_batch=pb
+                    ).exclude(
+                        order_line__order=order
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    total_reserved  += reserved
+                    total_available += max(Decimal('0'), pb.quantity_produced - reserved)
+            else:
+                # RAW / PKG component — source from RawMaterialBatch
+                batches = RawMaterialBatch.objects.filter(
+                    material=m, status='IN_WAREHOUSE_RAW'
+                )
+                for b in batches:
+                    # Exclude allocations that belong to the runs driving this BOQ
+                    other_allocated = RawBatchAllocation.objects.filter(
+                        raw_batch=b
+                    ).exclude(
+                        production_run_id__in=run_ids
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    total_reserved  += other_allocated
+                    total_available += max(Decimal('0'), b.total_quantity - other_allocated)
+
             gap = entry['required'] - total_available
             worst = min(
                 entry['statuses'],
@@ -1607,21 +1638,43 @@ class ProductionRunDetailView(View):
                 material=comp.material
             ).select_related('location').order_by('location__name')
             batch_list = []
-            for b in batches:
-                allocated = RawBatchAllocation.objects.filter(
-                    raw_batch=b
-                ).aggregate(
-                    total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
-                )['total']
-                available = b.total_quantity - allocated
-                batch_list.append({
-                    'pk':        b.pk,
-                    'lot':       b.lot_number,
-                    'location':  b.location.name,
-                    'status':    b.get_status_display(),
-                    'available': float(available),
-                    'total':     float(b.total_quantity),
-                })
+            if comp.material.category == 'FIN':
+                fin_batches = ProductBatch.objects.filter(
+                    material=comp.material
+                ).select_related('location').order_by('location__name')
+                for pb in fin_batches:
+                    reserved = ProductBatchReservation.objects.filter(
+                        product_batch=pb
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    available = max(Decimal('0'), pb.quantity_produced - reserved)
+                    batch_list.append({
+                        'pk':        pb.pk,
+                        'lot':       pb.batch_number,
+                        'location':  pb.location.name,
+                        'status':    'In Stock',
+                        'available': float(available),
+                        'total':     float(pb.quantity_produced),
+                        'is_fin':    True,
+                    })
+            else:
+                for b in batches:
+                    allocated = RawBatchAllocation.objects.filter(
+                        raw_batch=b
+                    ).aggregate(
+                        total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                    )['total']
+                    available = b.total_quantity - allocated
+                    batch_list.append({
+                        'pk':        b.pk,
+                        'lot':       b.lot_number,
+                        'location':  b.location.name,
+                        'status':    b.get_status_display(),
+                        'available': float(available),
+                        'total':     float(b.total_quantity),
+                        'is_fin':    False,
+                    })
             comp_batches[str(comp.material.pk)] = batch_list
 
         return render(request, 'production_runs/detail.html', {
@@ -1731,45 +1784,83 @@ class ProductionRunDetailView(View):
                         messages.error(request, e)
 
         elif action == 'reserve_component':
-            batch_id = request.POST.get('raw_batch_id')
-            qty_str  = request.POST.get('quantity', '').strip()
+            batch_id   = request.POST.get('raw_batch_id')
+            qty_str    = request.POST.get('quantity', '').strip()
+            is_fin_str = request.POST.get('is_fin', 'false')
+            is_fin     = is_fin_str.lower() == 'true'
             try:
-                batch = RawMaterialBatch.objects.get(pk=int(batch_id))
-                qty   = Decimal(qty_str)
+                qty = Decimal(qty_str)
                 if qty <= 0:
                     raise ValueError
 
-                # Check batch has enough available
-                total_allocated = RawBatchAllocation.objects.filter(
-                    raw_batch=batch
-                ).aggregate(
-                    total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
-                )['total']
-                available = batch.total_quantity - total_allocated
-
-                if qty > available:
-                    messages.error(request, f'Only {available} units available in that batch.')
-                elif not run.components.filter(material=batch.material).exists():
-                    messages.error(request, f'{batch.material.name} is not a component of this run.')
-                else:
-                    comp = run.components.filter(material=batch.material).first()
-                    already_allocated = RawBatchAllocation.objects.filter(
-                        production_run=run,
-                        raw_batch__material=batch.material
-                    ).aggregate(
-                        total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
-                    )['total']
-                    still_needed = max(Decimal('0'), comp.quantity_required - already_allocated)
-                    if qty > still_needed:
-                        messages.error(request, f'Only {still_needed} more units needed for this component.')
+                if is_fin:
+                    # FIN component — allocate from a ProductBatch
+                    pb = ProductBatch.objects.get(pk=int(batch_id))
+                    comp = run.components.filter(material=pb.material).first()
+                    if not comp:
+                        messages.error(request, f'{pb.material.name} is not a component of this run.')
                     else:
-                        RawBatchAllocation.objects.create(
-                            raw_batch=batch,
-                            production_run=run,
-                            quantity=qty,
-                        )
-                        messages.success(request, f'Allocated {qty} units from {batch.lot_number}.')
-            except (RawMaterialBatch.DoesNotExist, ValueError, InvalidOperation) as e:
+                        reserved = ProductBatchReservation.objects.filter(
+                            product_batch=pb
+                        ).aggregate(
+                            total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DecimalField())
+                        )['total']
+                        available = pb.quantity_produced - reserved
+                        if qty > available:
+                            messages.error(request, f'Only {available} units available in that batch.')
+                        else:
+                            still_needed = max(Decimal('0'), comp.quantity_required - reserved)
+                            if qty > still_needed:
+                                messages.error(
+                                    request,
+                                    f'The {qty} quantity reserved exceeds the {comp.quantity_required} quantity required for {comp.material.name}.'
+                                )
+                            else:
+                                # Link to a placeholder order line — or just track via run
+                                # For now, we track FIN component allocation via a note on the run
+                                ProductBatchReservation.objects.create(
+                                    product_batch=pb,
+                                    production_run=run,
+                                    order_line=None,
+                                    quantity_reserved=qty,
+                                )
+                                messages.success(request, f'Allocated {qty} units from {pb.batch_number}.')
+                else:
+                    # RAW / PKG component — allocate from a RawMaterialBatch
+                    batch = RawMaterialBatch.objects.get(pk=int(batch_id))
+                    comp = run.components.filter(material=batch.material).first()
+                    if not comp:
+                        messages.error(request, f'{batch.material.name} is not a component of this run.')
+                    else:
+                        total_allocated = RawBatchAllocation.objects.filter(
+                            raw_batch=batch
+                        ).aggregate(
+                            total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                        )['total']
+                        available = batch.total_quantity - total_allocated
+                        if qty > available:
+                            messages.error(request, f'Only {available} units available in that batch.')
+                        else:
+                            already_allocated = RawBatchAllocation.objects.filter(
+                                production_run=run,
+                                raw_batch__material=batch.material
+                            ).aggregate(
+                                total=Coalesce(Sum('quantity'), Decimal('0'), output_field=DecimalField())
+                            )['total']
+                            still_needed = max(Decimal('0'), comp.quantity_required - already_allocated)
+                            if qty > still_needed:
+                                messages.error(
+                                    request,
+                                    f'The {qty} quantity reserved exceeds the {comp.quantity_required} quantity required for {comp.material.name}.'
+                                )
+                            else:
+                                RawBatchAllocation.objects.create(
+                                    raw_batch=batch,
+                                    production_run=run,
+                                    quantity=qty,
+                                )
+                                messages.success(request, f'Allocated {qty} units from {batch.lot_number}.')
+            except (RawMaterialBatch.DoesNotExist, ProductBatch.DoesNotExist, ValueError, InvalidOperation) as e:
                 messages.error(request, f'Error: {e}')
 
         elif action == 'link_batch':
@@ -1888,7 +1979,7 @@ class ProductionRunCreateView(View):
         if request.GET.get('material'):
             form.initial['material'] = request.GET['material']
         raw_mats = list(Material.objects.filter(
-            category__in=['RAW', 'PKG']
+            category__in=['RAW', 'PKG', 'FIN', 'CON']
         ).order_by('name').values('id', 'name', 'sku'))
         fin_mats = list(Material.objects.filter(
             category='FIN'
@@ -1912,7 +2003,7 @@ class ProductionRunCreateView(View):
             messages.success(request, f'Production run {run.reference} created.')
             return redirect('production-run-detail', pk=run.pk)
         raw_mats = list(Material.objects.filter(
-            category__in=['RAW', 'PKG']
+            category__in=['RAW', 'PKG', 'FIN', 'CON']
         ).order_by('name').values('id', 'name', 'sku'))
         fin_mats = list(Material.objects.filter(
             category='FIN'
@@ -1929,7 +2020,7 @@ class ProductionRunEditView(View):
     def get(self, request, pk):
         run = get_object_or_404(ProductionRun, pk=pk)
         raw_mats = list(Material.objects.filter(
-            category__in=['RAW', 'PKG']
+            category__in=['RAW', 'PKG', 'FIN', 'CON']
         ).order_by('name').values('id', 'name', 'sku'))
         fin_mats = list(Material.objects.filter(
             category='FIN'
@@ -1962,7 +2053,7 @@ class ProductionRunEditView(View):
                     messages.warning(request, f'Components: {e}')
             return redirect('production-run-detail', pk=pk)
         raw_mats = list(Material.objects.filter(
-            category__in=['RAW', 'PKG']
+            category__in=['RAW', 'PKG', 'FIN', 'CON']
         ).order_by('name').values('id', 'name', 'sku'))
         fin_mats = list(Material.objects.filter(
             category='FIN'

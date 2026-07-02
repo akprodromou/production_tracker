@@ -141,6 +141,31 @@ class ProductBatch(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     location = models.ForeignKey(Location, on_delete=models.PROTECT)
 
+
+    @property
+    def procurement_status(self):
+        """
+        If linked to a ProductionRun, inherit its procurement_status.
+        Otherwise: IN_WAREHOUSE_RAW if qty > 0, else PENDING.
+        """
+        try:
+            run = self.production_run
+            if run:
+                return run.procurement_status
+        except Exception:
+            pass
+        if self.quantity_produced and self.quantity_produced > 0:
+            return 'IN_WAREHOUSE_RAW'
+        return 'PENDING'
+
+    @property
+    def procurement_status_display(self):
+        return {
+            'PENDING':          'Pending',
+            'ORDERED':          'Ordered',
+            'IN_WAREHOUSE_RAW': 'In Warehouse',
+        }.get(self.procurement_status, self.procurement_status)
+
     def __str__(self):
         return f"{self.material.sku} | BATCH: {self.batch_number}"
 
@@ -263,6 +288,57 @@ class ClientOrderLine(models.Model):
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     notes = models.TextField(blank=True)
+
+
+    @property
+    def effective_status(self):
+        """
+        Worst case between fulfilment status and procurement status
+        of whatever is reserved against this line.
+        Fulfilment: PENDING=0, PARTIAL=1, FULFILLED=2
+        Procurement: PENDING=0, ORDERED=1, IN_WAREHOUSE_RAW=2
+        Maps procurement to fulfilment vocabulary for display.
+        """
+        PROC_RANK = {'PENDING': 0, 'ORDERED': 1, 'IN_WAREHOUSE_RAW': 2}
+        PROC_TO_DISPLAY = {
+            'PENDING':          ('PENDING',   'Pending'),
+            'ORDERED':          ('ORDERED',   'Ordered'),
+            'IN_WAREHOUSE_RAW': ('IN_WAREHOUSE_RAW', 'In Warehouse'),
+        }
+        # Start with stored fulfilment status
+        base = self.status  # PENDING / PARTIAL / FULFILLED / CANCELLED
+
+        # Gather procurement statuses from batch reservations
+        proc_statuses = []
+        for res in self.batch_reservations.select_related('product_batch').all():
+            try:
+                proc_statuses.append(res.product_batch.procurement_status)
+            except Exception:
+                proc_statuses.append('PENDING')
+
+        # Gather procurement statuses from run reservations
+        for rr in self.run_reservations.select_related('production_run').all():
+            try:
+                proc_statuses.append(rr.production_run.procurement_status)
+            except Exception:
+                proc_statuses.append('PENDING')
+
+        if not proc_statuses:
+            return base, self.get_status_display()
+
+        worst_proc = min(proc_statuses, key=lambda s: PROC_RANK.get(s, 0))
+
+        # If procurement is not fully in warehouse, cap the displayed status
+        if worst_proc == 'PENDING':
+            if base == 'FULFILLED':
+                return 'PARTIAL', 'Partial (materials pending)'
+            return base, self.get_status_display()
+        elif worst_proc == 'ORDERED':
+            if base == 'FULFILLED':
+                return 'PARTIAL', 'Partial (materials ordered)'
+            return base, self.get_status_display()
+        # IN_WAREHOUSE_RAW — procurement fine, show fulfilment status as-is
+        return base, self.get_status_display()
 
     def __str__(self):
         return f"{self.order.reference} — {self.material.name} × {self.quantity_ordered}"
@@ -407,6 +483,48 @@ class ProductionRun(models.Model):
         return min(statuses, key=lambda s: priority.index(s) if s in priority else 0)
 
     @property
+    def procurement_status(self):
+        """
+        Worst-case procurement status across all components.
+        Per component: worst between batch status of allocated batches
+        AND whether allocated >= required (if short, force PENDING).
+        PENDING < ORDERED < IN_WAREHOUSE_RAW
+        """
+        from django.db.models import Sum
+        from django.db.models.functions import Coalesce
+        from django.db.models import DecimalField
+        RANK = {'PENDING': 0, 'ORDERED': 1, 'IN_WAREHOUSE_RAW': 2}
+        components = list(self.components.all())
+        if not components:
+            return 'PENDING'
+        run_worst = 'IN_WAREHOUSE_RAW'
+        for comp in components:
+            allocations = RawBatchAllocation.objects.filter(
+                production_run=self,
+                raw_batch__material=comp.material
+            ).select_related('raw_batch')
+            allocated_qty = sum(a.quantity for a in allocations)
+            if allocated_qty < comp.quantity_required:
+                comp_status = 'PENDING'
+            else:
+                batch_statuses = [a.raw_batch.status for a in allocations]
+                if not batch_statuses:
+                    comp_status = 'PENDING'
+                else:
+                    comp_status = min(batch_statuses, key=lambda s: RANK.get(s, 0))
+            if RANK.get(comp_status, 0) < RANK.get(run_worst, 0):
+                run_worst = comp_status
+        return run_worst
+
+    @property
+    def procurement_status_display(self):
+        return {
+            'PENDING':          'Pending',
+            'ORDERED':          'Ordered',
+            'IN_WAREHOUSE_RAW': 'In Warehouse',
+        }.get(self.procurement_status, self.procurement_status)
+
+    @property
     def all_components_in_warehouse(self):
         """True when every component has status IN_WAREHOUSE_RAW."""
         components = list(self.components.all())
@@ -458,7 +576,7 @@ class ProductionComponent(models.Model):
     )
     material = models.ForeignKey(
         Material, on_delete=models.PROTECT,
-        limit_choices_to={'category__in': ['RAW', 'PKG']}
+        limit_choices_to={'category__in': ['RAW', 'PKG', 'FIN', 'CON']}
     )
     quantity_required = models.DecimalField(max_digits=15, decimal_places=3)
     quantity_available = models.DecimalField(
@@ -489,6 +607,13 @@ class ProductionComponent(models.Model):
         from django.db.models import Sum
         from django.db.models.functions import Coalesce
         from django.db.models import DecimalField as DField
+        if self.material.category == 'FIN':
+            return ProductBatchReservation.objects.filter(
+                production_run=self.production_run,
+                product_batch__material=self.material
+            ).aggregate(
+                total=Coalesce(Sum('quantity_reserved'), Decimal('0'), output_field=DField())
+            )['total']
         return RawBatchAllocation.objects.filter(
             production_run=self.production_run,
             raw_batch__material=self.material
@@ -563,7 +688,14 @@ class ProductBatchReservation(models.Model):
     order_line = models.ForeignKey(
         ClientOrderLine,
         on_delete=models.CASCADE,
-        related_name='batch_reservations'
+        related_name='batch_reservations',
+        null=True, blank=True
+    )
+    production_run = models.ForeignKey(
+        'ProductionRun',
+        on_delete=models.CASCADE,
+        related_name='fin_component_reservations',
+        null=True, blank=True
     )
     quantity_reserved = models.DecimalField(max_digits=15, decimal_places=3)
     notes = models.TextField(blank=True)

@@ -105,6 +105,18 @@
     <div class="stat-sub">{{ run.unallocated_quantity|smart_qty:run.material.unit.name }} unallocated</div>
   </div>
   <div class="stat-card">
+    <div class="stat-label">Procurement Status</div>
+    <div style="margin-top:4px">
+      {% if run.procurement_status == 'IN_WAREHOUSE_RAW' %}
+        <span class="badge badge-green">In Warehouse</span>
+      {% elif run.procurement_status == 'ORDERED' %}
+        <span class="badge badge-blue">Ordered</span>
+      {% else %}
+        <span class="badge badge-grey">Pending</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="stat-card">
     <div class="stat-label">Planned Window</div>
     <div style="font-size:12px;font-family:var(--mono)">
       {{ run.planned_start|date:"Y-m-d"|default:"—" }}<br>→ {{ run.planned_end|date:"Y-m-d"|default:"—" }}
@@ -165,6 +177,7 @@
             {% csrf_token %}
             <input type="hidden" name="action" value="reserve_component">
             <input type="hidden" name="material_id" value="{{ comp.material.pk }}">
+            <input type="hidden" name="is_fin" value="{% if comp.material.category == 'FIN' %}true{% else %}false{% endif %}">
             <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
               <div class="form-group" style="flex:2;min-width:200px">
                 <label style="font-size:11px">Raw Material Batch</label>
@@ -279,9 +292,11 @@ function toggleCompReserve(id) {
         var opt = document.createElement("option");
         opt.value = b.pk;
         opt.setAttribute("data-available", b.available);
-        var icon = b.status === "In Warehouse as Raw Material" ? "\u{1F7E2}" :
+        opt.setAttribute("data-is-fin", b.is_fin ? "true" : "false");
+        var icon = b.is_fin ? "\u{1F7E1}" :
+                   b.status === "In Warehouse as Raw Material" ? "\u{1F7E2}" :
                    b.status === "Ordered from supplier" ? "\u{1F535}" : "\u26AA";
-        opt.textContent = b.lot + " \u2014 " + b.location +
+        opt.textContent = icon + " " + b.lot + " \u2014 " + b.location +
                           " (" + Math.floor(b.available) + " avail) [" + b.status + "]";
         sel.appendChild(opt);
       });
@@ -292,10 +307,23 @@ function toggleCompReserve(id) {
 function updateMaxQty(compPk, sel) {
   var opt = sel.options[sel.selectedIndex];
   var available = parseFloat(opt.getAttribute("data-available") || 0);
+  var isFin = opt.getAttribute("data-is-fin") || "false";
   var qtyInput = document.getElementById("qty-" + compPk);
   if (qtyInput) {
     qtyInput.max = available;
     qtyInput.placeholder = "max " + Math.floor(available);
+  }
+  // Set hidden is_fin input
+  var form = sel.closest("form");
+  if (form) {
+    var finInput = form.querySelector("input[name='is_fin']");
+    if (!finInput) {
+      finInput = document.createElement("input");
+      finInput.type = "hidden";
+      finInput.name = "is_fin";
+      form.appendChild(finInput);
+    }
+    finInput.value = isFin;
   }
 }
 </script>

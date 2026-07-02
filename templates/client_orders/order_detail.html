@@ -109,7 +109,7 @@
             {% if row.gap > 0 %}
               <span style="color:var(--danger);font-weight:600">-{{ row.gap|smart_qty:row.material.unit.name }}</span>
             {% elif row.gap < 0 %}
-              <span style="color:var(--accent2)">+{{ row.gap|cut:"-" }}</span>
+              <span style="color:var(--accent2)">+{{ row.gap|floatformat:1|cut:"-" }}</span>
             {% else %}
               <span class="text-muted">0</span>
             {% endif %}
@@ -190,12 +190,15 @@
             {{ line.quantity_remaining|smart_qty:line.material.unit.name }}
           </td>
           <td>
-            {% if line.status == 'PENDING' %}<span class="badge badge-grey">Pending</span>
-            {% elif line.status == 'ALLOCATED' %}<span class="badge badge-blue">Allocated</span>
-            {% elif line.status == 'PARTIAL' %}<span class="badge badge-orange">Partial</span>
-            {% elif line.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
-            {% else %}<span class="badge badge-red">Cancelled</span>
+            {% with eff=line.effective_status %}
+            {% if eff.0 == 'PENDING' %}<span class="badge badge-grey">{{ eff.1 }}</span>
+            {% elif eff.0 == 'ORDERED' %}<span class="badge badge-blue">{{ eff.1 }}</span>
+            {% elif eff.0 == 'PARTIAL' %}<span class="badge badge-orange">{{ eff.1 }}</span>
+            {% elif eff.0 == 'FULFILLED' %}<span class="badge badge-green">{{ eff.1 }}</span>
+            {% elif eff.0 == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-green">{{ eff.1 }}</span>
+            {% else %}<span class="badge badge-red">{{ eff.1 }}</span>
             {% endif %}
+            {% endwith %}
           </td>
           <td>
             <div style="display:flex;gap:12px;align-items:flex-start">
@@ -223,7 +226,13 @@
                     {{ rr.production_run.reference }}
                   </a>
                   <span class="text-mono" style="white-space:nowrap">× {{ rr.quantity_reserved|smart_qty:line.material.unit.name }}</span>
-                  <span class="badge badge-grey" style="font-size:10px">planned</span>
+                  {% if rr.production_run.procurement_status == 'IN_WAREHOUSE_RAW' %}
+                  <span class="badge badge-green" style="font-size:10px">In Warehouse</span>
+                  {% elif rr.production_run.procurement_status == 'ORDERED' %}
+                  <span class="badge badge-blue" style="font-size:10px">Ordered</span>
+                  {% else %}
+                  <span class="badge badge-grey" style="font-size:10px">Pending</span>
+                  {% endif %}
                   <form method="post" style="display:inline">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="remove_run_reservation">

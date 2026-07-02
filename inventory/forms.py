@@ -439,7 +439,7 @@ class ProductionComponentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['material'].queryset = Material.objects.filter(category__in=['RAW', 'PKG'])
+        self.fields['material'].queryset = Material.objects.filter(category__in=['RAW', 'PKG', 'FIN', 'CON'])
         self.fields['expected_date'].required = False
 
     def clean_quantity_required(self):

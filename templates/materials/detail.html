@@ -9,80 +9,41 @@
 
 {% block extra_head %}
 <style>
-  /* Component tree */
   .tree { padding: 14px 18px; }
   .tree-run { margin-bottom: 20px; }
   .tree-run:last-child { margin-bottom: 0; }
   .tree-run-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 6px;
-    cursor: pointer;
-    transition: border-color .15s;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 6px; cursor: pointer; transition: border-color .15s;
   }
   .tree-run-header:hover { border-color: var(--accent); }
   .tree-run-ref  { font-family: var(--mono); font-size: 12px; color: var(--accent); }
   .tree-run-name { font-size: 13px; font-weight: 500; flex: 1; }
   .tree-run-qty  { font-family: var(--mono); font-size: 12px; color: var(--muted); }
   .tree-components {
-    padding-left: 24px;
-    border-left: 2px solid var(--border);
-    margin-left: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    padding-left: 24px; border-left: 2px solid var(--border);
+    margin-left: 18px; display: flex; flex-direction: column; gap: 4px;
   }
   .tree-comp {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 12px;
-    background: var(--surface2);
-    border: 1px solid transparent;
-    border-radius: var(--radius);
-    font-size: 13px;
-    position: relative;
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 12px; background: var(--surface2);
+    border: 1px solid transparent; border-radius: var(--radius);
+    font-size: 13px; position: relative;
   }
-  .tree-comp::before {
-    content: '├─';
-    position: absolute;
-    left: -22px;
-    color: var(--border);
-    font-family: monospace;
-    font-size: 12px;
-  }
+  .tree-comp::before { content: '├─'; position: absolute; left: -22px; color: var(--border); font-family: monospace; font-size: 12px; }
   .tree-comp:last-child::before { content: '└─'; }
   .tree-comp-name { flex: 1; }
   .tree-comp-qty  { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-  .tree-comp-status { }
-
-  .status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 2px 8px;
-    border-radius: 99px;
-    font-size: 11px;
-    font-family: var(--mono);
-  }
+  .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--mono); }
   .status-dot { width: 6px; height: 6px; border-radius: 50%; }
-
   .sp-PENDING          { background: rgba(107,114,128,.15); color: var(--muted); }
   .sp-ORDERED          { background: rgba(79,142,247,.15);  color: var(--accent); }
   .sp-IN_WAREHOUSE_RAW { background: rgba(245,166,35,.15);  color: var(--warn); }
-  .sp-IN_PROCESS       { background: rgba(245,158,11,.15);  color: #f59e0b; }
-  .sp-FINAL_PRODUCT    { background: rgba(45,212,160,.15);  color: var(--accent2); }
-
   .sd-PENDING          { background: var(--muted); }
   .sd-ORDERED          { background: var(--accent); }
   .sd-IN_WAREHOUSE_RAW { background: var(--warn); }
-  .sd-IN_PROCESS       { background: #f59e0b; }
-  .sd-FINAL_PRODUCT    { background: var(--accent2); }
 </style>
 {% endblock %}
 
@@ -121,70 +82,6 @@
   </div>
 </div>
 
-{% if material.category == 'FIN' %}
-
-{# ── PRODUCTION RUN HIERARCHY ── #}
-<div class="card mb-3">
-  <div class="card-header">
-    <span class="card-title">Production Orders — Component Breakdown</span>
-    <a href="{% url 'production-run-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Run</a>
-  </div>
-  {% if production_runs %}
-  <div class="tree">
-    {% for run in production_runs %}
-    <div class="tree-run">
-      <a href="{% url 'production-run-detail' run.pk %}" style="text-decoration:none">
-        <div class="tree-run-header">
-          <span class="tree-run-ref">{{ run.reference }}</span>
-          <span class="tree-run-name">{{ run.material.name }}</span>
-          <span>
-            {% if run.status == 'PLANNED' %}<span class="badge badge-grey">Planned</span>
-            {% elif run.status == 'ACTIVE' %}<span class="badge badge-blue">Active</span>
-            {% elif run.status == 'COMPLETED' %}<span class="badge badge-green">Completed</span>
-            {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
-          </span>
-          <span class="tree-run-qty">{{ run.planned_quantity }} units</span>
-          {% if run.planned_end %}
-          <span class="text-muted" style="font-size:12px">due {{ run.planned_end|date:"Y-m-d" }}</span>
-          {% endif %}
-        </div>
-      </a>
-
-      {% if run.components.all %}
-      <div class="tree-components">
-        {% for comp in run.components.all %}
-        <div class="tree-comp">
-          <span class="tree-comp-name">{{ comp.material.name }}</span>
-          <span class="tree-comp-qty">{{ comp.quantity_required }} {{ comp.material.unit.name }}</span>
-          <span class="tree-comp-status">
-            <span class="status-pill sp-{{ comp.status }}">
-              <span class="status-dot sd-{{ comp.status }}"></span>
-              {{ comp.get_status_display }}
-            </span>
-          </span>
-        </div>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div style="padding-left:42px;font-size:12px;color:var(--muted);margin-top:4px">
-        No components defined for this run
-      </div>
-      {% endif %}
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty">
-    <div class="empty-icon">⚙️</div>
-    <h3>No production runs for this product</h3>
-    <p>Create a production run to start tracking component status.</p>
-  </div>
-  {% endif %}
-</div>
-
-{# ── PRODUCT BATCHES ── #}
-<div class="card">
-  
 {# ── STOCK SUMMARY ── #}
 {% if stock_summary %}
 <div class="card mb-3">
@@ -221,7 +118,61 @@
 </div>
 {% endif %}
 
-<div class="card-header">
+{% if material.category == 'FIN' %}
+
+{# ── PRODUCTION RUN HIERARCHY ── #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Production Orders — Component Breakdown</span>
+    <a href="{% url 'production-run-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Run</a>
+  </div>
+  {% if production_runs %}
+  <div class="tree">
+    {% for run in production_runs %}
+    <div class="tree-run">
+      <a href="{% url 'production-run-detail' run.pk %}" style="text-decoration:none">
+        <div class="tree-run-header">
+          <span class="tree-run-ref">{{ run.reference }}</span>
+          <span class="tree-run-name">{{ run.material.name }}</span>
+          <span class="tree-run-qty">{{ run.planned_quantity }} units</span>
+          {% if run.planned_end %}
+          <span class="text-muted" style="font-size:12px">due {{ run.planned_end|date:"Y-m-d" }}</span>
+          {% endif %}
+        </div>
+      </a>
+      {% if run.components.all %}
+      <div class="tree-components">
+        {% for comp in run.components.all %}
+        <div class="tree-comp">
+          <span class="tree-comp-name">{{ comp.material.name }}</span>
+          <span class="tree-comp-qty">{{ comp.quantity_required }} {{ comp.material.unit.name }}</span>
+          <span class="tree-comp-status">
+            <span class="status-pill sp-{{ comp.status }}">
+              <span class="status-dot sd-{{ comp.status }}"></span>
+              {{ comp.get_status_display }}
+            </span>
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding-left:42px;font-size:12px;color:var(--muted);margin-top:4px">No components defined for this run</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">⚙️</div>
+    <h3>No production runs for this product</h3>
+    <p>Create a production run to start tracking component status.</p>
+  </div>
+  {% endif %}
+</div>
+
+{# ── PRODUCT BATCHES ── #}
+<div class="card mb-3">
+  <div class="card-header">
     <span class="card-title">Product Batches</span>
     <a href="{% url 'product-batch-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Batch</a>
   </div>
@@ -251,21 +202,8 @@
 
 {% else %}
 
-
-      <div class="stat-card">
-        <div class="stat-label">Net Available</div>
-        <div class="stat-value" style="{% if stock_summary.net_available > 0 %}color:var(--accent2){% else %}color:var(--danger){% endif %}">
-          {{ stock_summary.net_available|smart_qty:material.unit.name }}
-        </div>
-        <div class="stat-sub">{{ material.unit.name }}</div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-{# ── RAW MATERIAL BATCHES ── #}
-<div class="card">
+{# ── RAW MATERIAL BATCHES (RAW / PKG / CON / FXD) ── #}
+<div class="card mb-3">
   <div class="card-header">
     <span class="card-title">Raw Material Batches</span>
     <a href="{% url 'batch-create' %}?material={{ material.pk }}" class="btn btn-primary btn-sm">+ New Batch</a>
@@ -299,6 +237,7 @@
   </div>
 </div>
 
+{% endif %}
 
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal">
