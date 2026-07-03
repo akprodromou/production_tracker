@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Carriers{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Carriers{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Carriers</h1></div>
+  <div class="page-actions">
+    <a href="{% url 'carrier-create' %}" class="btn btn-primary">+ New Carrier</a>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    {% if carriers %}
+    <table>
+      <thead><tr><th>Name</th><th>Primary Contact</th><th>Phone</th><th>Email</th><th></th></tr></thead>
+      <tbody>
+        {% for c in carriers %}
+        <tr>
+          <td><strong>{{ c.name }}</strong></td>
+          <td>{{ c.contact1_name|default:"—" }}</td>
+          <td class="td-mono">{{ c.contact1_phone|default:"—" }}</td>
+          <td>{{ c.contact1_email|default:"—" }}</td>
+          <td><div class="td-actions">
+            <a href="{% url 'carrier-edit' c.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+            <form method="post" action="{% url 'carrier-delete' c.pk %}" style="display:inline">
+              {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ c.name }}?')">Delete</button>
+            </form>
+          </div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">🚚</div><h3>No carriers yet</h3></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

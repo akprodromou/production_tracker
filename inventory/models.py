@@ -224,12 +224,120 @@ class MaterialTransaction(models.Model):
 # CLIENTS & ORDERS
 # ─────────────────────────────────────────────
 
+
+class Carrier(models.Model):
+    name             = models.CharField(max_length=200)
+    notes            = models.TextField(blank=True)
+    # Contact person 1
+    contact1_name    = models.CharField(max_length=100, blank=True)
+    contact1_phone   = models.CharField(max_length=50,  blank=True)
+    contact1_email   = models.EmailField(blank=True)
+    # Contact person 2
+    contact2_name    = models.CharField(max_length=100, blank=True)
+    contact2_phone   = models.CharField(max_length=50,  blank=True)
+    contact2_email   = models.EmailField(blank=True)
+    # Contact person 3
+    contact3_name    = models.CharField(max_length=100, blank=True)
+    contact3_phone   = models.CharField(max_length=50,  blank=True)
+    contact3_email   = models.EmailField(blank=True)
+    created_at       = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
+
+class Supplier(models.Model):
+    name             = models.CharField(max_length=200)
+    address          = models.TextField(blank=True)
+    contact_name     = models.CharField(max_length=100, blank=True)
+    contact_phone    = models.CharField(max_length=50,  blank=True)
+    contact_email    = models.EmailField(blank=True)
+    contact2_name    = models.CharField(max_length=100, blank=True)
+    contact2_phone   = models.CharField(max_length=50,  blank=True)
+    contact2_email   = models.EmailField(blank=True)
+    contact3_name    = models.CharField(max_length=100, blank=True)
+    contact3_phone   = models.CharField(max_length=50,  blank=True)
+    contact3_email   = models.EmailField(blank=True)
+    payment_terms    = models.TextField(blank=True,
+                           help_text="e.g. 30% advance, balance on delivery")
+    notes            = models.TextField(blank=True)
+    created_at       = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
+
+class SupplyOrder(models.Model):
+    STATUS_CHOICES = [
+        ('ORDER_PLACED', 'Order Placed'),
+        ('DISPATCHED',   'Dispatched'),
+        ('DELIVERED',    'Delivered'),
+        ('CANCELLED',    'Cancelled'),
+    ]
+    reference        = models.CharField(max_length=100, unique=True)
+    supplier         = models.ForeignKey(Supplier, on_delete=models.PROTECT,
+                           related_name='supply_orders')
+    order_date       = models.DateField()
+    expected_delivery = models.DateField(null=True, blank=True)
+    warehouse        = models.ForeignKey('Location', on_delete=models.PROTECT,
+                           related_name='supply_orders')
+    carrier          = models.ForeignKey('Carrier', on_delete=models.SET_NULL,
+                           null=True, blank=True, related_name='supply_orders')
+    tracking_number  = models.CharField(max_length=100, blank=True)
+    status           = models.CharField(max_length=20, choices=STATUS_CHOICES,
+                           default='ORDER_PLACED')
+    notes            = models.TextField(blank=True)
+    created_at       = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.reference
+
+    class Meta:
+        ordering = ['-order_date']
+
+
+class SupplyOrderLine(models.Model):
+    supply_order     = models.ForeignKey(SupplyOrder, on_delete=models.CASCADE,
+                           related_name='lines')
+    material         = models.ForeignKey('Material', on_delete=models.PROTECT)
+    quantity         = models.DecimalField(max_digits=15, decimal_places=3)
+    unit_price       = models.DecimalField(max_digits=15, decimal_places=4,
+                           null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.supply_order.reference} — {self.material.name}"
+
+    @property
+    def line_total(self):
+        if self.unit_price and self.quantity:
+            return self.quantity * self.unit_price
+        return None
+
+    class Meta:
+        ordering = ['material__name']
+
+
 class Client(models.Model):
     code = models.CharField(max_length=50, unique=True, blank=True, null=True)
     name = models.CharField(max_length=255)
     tin = models.CharField(max_length=50, blank=True, verbose_name='TIN')
     country = models.CharField(max_length=100, blank=True)
-    notes = models.TextField(blank=True)
+    notes            = models.TextField(blank=True)
+    contact1_name    = models.CharField(max_length=100, blank=True)
+    contact1_phone   = models.CharField(max_length=50,  blank=True)
+    contact1_email   = models.EmailField(blank=True)
+    contact2_name    = models.CharField(max_length=100, blank=True)
+    contact2_phone   = models.CharField(max_length=50,  blank=True)
+    contact2_email   = models.EmailField(blank=True)
+    contact3_name    = models.CharField(max_length=100, blank=True)
+    contact3_phone   = models.CharField(max_length=50,  blank=True)
+    contact3_email   = models.EmailField(blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -246,6 +354,7 @@ class ClientOrder(models.Model):
         ('PARTIALLY_FULFILLED',  'Partially Fulfilled'),
         ('FULFILLED',            'Fulfilled'),
         ('SHIPPED',              'Shipped'),
+        ('DELIVERED',            'Delivered'),
         ('CANCELLED',            'Cancelled'),
     ]
     reference = models.CharField(max_length=100, unique=True)
@@ -254,8 +363,12 @@ class ClientOrder(models.Model):
     order_date = models.DateField(default=timezone.now)
     required_by = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
-    date_shipped   = models.DateField(null=True, blank=True)
-    transporter    = models.CharField(max_length=200, blank=True)
+    date_shipped      = models.DateField(null=True, blank=True)
+    transporter       = models.CharField(max_length=200, blank=True)
+    tracking_number   = models.CharField(max_length=100, blank=True)
+    delivery_address  = models.TextField(blank=True)
+    recipient_name    = models.CharField(max_length=100, blank=True)
+    recipient_phone   = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

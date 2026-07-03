@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load inventory_extras %}
+{% block title %}{{ order.reference }}{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'supply-order-list' %}">Supply Orders</a><span>/</span>
+  {{ order.reference }}
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ order.reference }}</h1>
+    <p>{{ order.supplier.name }}</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'supply-order-edit' order.pk %}" class="btn btn-secondary">Edit</a>
+    <form method="post" action="{% url 'supply-order-delete' order.pk %}" style="display:inline">
+      {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this order?')">Delete</button>
+    </form>
+  </div>
+</div>
+
+{# Status bar #}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px" class="mb-3">
+  <div class="stat-card">
+    <div class="stat-label">Status</div>
+    <div style="margin-top:4px">
+      {% if order.status == 'ORDER_PLACED' %}<span class="badge badge-grey">Order Placed</span>
+      {% elif order.status == 'DISPATCHED' %}<span class="badge badge-blue">Dispatched</span>
+      {% elif order.status == 'DELIVERED' %}<span class="badge badge-green">Delivered</span>
+      {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Order Date</div>
+    <div class="stat-value" style="font-size:16px">{{ order.order_date|date:"Y-m-d" }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Expected Delivery</div>
+    <div class="stat-value" style="font-size:16px">{{ order.expected_delivery|date:"Y-m-d"|default:"—" }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Destination</div>
+    <div style="font-size:13px;margin-top:4px">{{ order.warehouse.name }}</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  {# Supplier info #}
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Supplier</span></div>
+    <div class="card-body">
+      <div style="font-weight:600;margin-bottom:6px">{{ order.supplier.name }}</div>
+      {% if order.supplier.address %}<div class="text-muted" style="font-size:13px;margin-bottom:6px">{{ order.supplier.address|linebreaksbr }}</div>{% endif %}
+      {% if order.supplier.contact_name %}<div style="font-size:13px">{{ order.supplier.contact_name }}{% if order.supplier.contact_phone %} · {{ order.supplier.contact_phone }}{% endif %}</div>{% endif %}
+      {% if order.supplier.payment_terms %}<div class="text-muted" style="font-size:12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">Payment: {{ order.supplier.payment_terms }}</div>{% endif %}
+    </div>
+  </div>
+
+  {# Logistics #}
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Logistics</span></div>
+    <div class="card-body">
+      {% if order.carrier %}
+      <div style="font-weight:600;margin-bottom:4px">{{ order.carrier.name }}</div>
+      {% if order.carrier.contact1_name %}<div class="text-muted" style="font-size:13px">{{ order.carrier.contact1_name }}{% if order.carrier.contact1_phone %} · {{ order.carrier.contact1_phone }}{% endif %}</div>{% endif %}
+      {% else %}<div class="text-muted">No carrier assigned</div>{% endif %}
+      {% if order.tracking_number %}<div style="margin-top:8px;font-size:13px">Tracking: <span class="td-mono">{{ order.tracking_number }}</span></div>{% endif %}
+    </div>
+  </div>
+</div>
+
+{# Line items #}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Items</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>SKU</th><th>Description</th><th>Unit</th>
+          <th style="text-align:right">Qty</th>
+          <th style="text-align:right">Unit Price</th>
+          <th style="text-align:right">Total</th>
+          <th>Linked Final Products</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in lines_with_finals %}
+        <tr>
+          <td class="td-mono text-muted">{{ item.line.material.sku }}</td>
+          <td><strong>{{ item.line.material.name }}</strong></td>
+          <td class="text-muted">{{ item.line.material.unit.name }}</td>
+          <td class="td-mono" style="text-align:right">{{ item.line.quantity|smart_qty:item.line.material.unit.name }}</td>
+          <td class="td-mono" style="text-align:right">{% if item.line.unit_price %}{{ item.line.unit_price }}{% else %}—{% endif %}</td>
+          <td class="td-mono" style="text-align:right">{% if item.line.line_total %}{{ item.line.line_total|floatformat:2 }}{% else %}—{% endif %}</td>
+          <td>
+            {% if item.finals %}
+            <details>
+              <summary style="cursor:pointer;font-size:12px;color:var(--accent)">{{ item.finals|length }} product{{ item.finals|length|pluralize }}</summary>
+              <ul style="margin:6px 0 0 12px;padding:0;list-style:none">
+                {% for p in item.finals %}
+                <li style="font-size:12px;margin-bottom:2px">
+                  <span class="td-mono text-muted">{{ p.sku }}</span> {{ p.name }}
+                </li>
+                {% endfor %}
+              </ul>
+            </details>
+            {% else %}<span class="text-muted" style="font-size:12px">—</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# Status update #}
+{% if order.status != 'DELIVERED' and order.status != 'CANCELLED' %}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Update Status</span></div>
+  <div class="card-body" style="display:flex;gap:10px">
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="action" value="update_status">
+      {% if order.status == 'ORDER_PLACED' %}
+      <input type="hidden" name="status" value="DISPATCHED">
+      <button type="submit" class="btn btn-secondary">→ Mark Dispatched</button>
+      {% elif order.status == 'DISPATCHED' %}
+      <input type="hidden" name="status" value="DELIVERED">
+      <button type="submit" class="btn btn-primary">✓ Mark Delivered</button>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if order.notes %}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Notes</span></div>
+  <div class="card-body">{{ order.notes|linebreaksbr }}</div>
+</div>
+{% endif %}
+{% endblock %}

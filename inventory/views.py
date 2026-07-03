@@ -20,6 +20,7 @@ from .models import (
     ProductBatchReservation, RawBatchAllocation,
     ProductionTemplate, ProductionTemplateComponent,
     ProductionRunReservation,
+    Carrier, Supplier, SupplyOrder, SupplyOrderLine,
 )
 from .forms import (
     UnitForm, LocationForm, MaterialForm, RawMaterialBatchForm,
@@ -60,47 +61,330 @@ def _deletion_blocked_msg(exc):
 # DASHBOARD
 # ─────────────────────────────────────────────
 
+
+
+# ─────────────────────────────────────────────
+# DASHBOARD (updated)
+# ─────────────────────────────────────────────
+
 class DashboardView(View):
     def get(self, request):
-        all_batches = list(RawMaterialBatch.objects.select_related('material', 'location'))
-        low_stock = sorted(
-            [b for b in all_batches
-             if b.available_quantity < Decimal('1000')],
-            key=lambda b: b.available_quantity
-        )[:8]
-
+        from collections import Counter
+        supply_order_counts = dict(Counter(
+            SupplyOrder.objects.values_list('status', flat=True)
+        ))
+        client_order_counts = dict(Counter(
+            ClientOrder.objects.exclude(
+                status__in=['CANCELLED','PURCHASE_ORDER']
+            ).values_list('status', flat=True)
+        ))
+        # Production board counts by board_status
+        runs = ProductionRun.objects.prefetch_related('components').all()
+        prod_counts = {'PENDING': 0, 'ORDERED': 0, 'READY': 0}
+        for run in runs:
+            bs = run.board_status
+            if bs == 'IN_WAREHOUSE_RAW':
+                prod_counts['READY'] += 1
+            elif bs == 'ORDERED':
+                prod_counts['ORDERED'] += 1
+            else:
+                prod_counts['PENDING'] += 1
         return render(request, 'dashboard.html', {
-            'total_materials':        Material.objects.count(),
-            'raw_materials':          Material.objects.filter(category__in=['RAW', 'PKG']).count(),
-            'finished_materials':     Material.objects.filter(category='FIN').count(),
-            'active_batches':         RawMaterialBatch.objects.count(),
-            'open_orders':            ClientOrder.objects.exclude(
-                                          status__in=['FULFILLED', 'CANCELLED']
-                                      ).count(),
-            'active_production_runs': ProductionRun.objects.filter(
-                                          status__in=['PLANNED', 'ACTIVE']
-                                      ).count(),
-            'low_stock_batches':      low_stock,
-            'recent_transactions':    MaterialTransaction.objects.select_related(
-                                          'raw_material_batch__material', 'product_batch'
-                                      ).order_by('-created_at')[:8],
-            'recent_orders':          ClientOrder.objects.select_related(
-                                          'client'
-                                      ).order_by('-created_at')[:6],
-            'recent_product_batches': ProductBatch.objects.select_related(
-                                          'material', 'location'
-                                      ).order_by('-created_at')[:6],
-            'low_product_batches':    ProductBatch.objects.select_related(
-                                          'material__unit', 'location'
-                                      ).filter(
-                                          quantity_produced__lt=1000
-                                      ).order_by('quantity_produced')[:8],
+            'supply_order_counts':  supply_order_counts,
+            'client_order_counts':  client_order_counts,
+            'production_counts':    prod_counts,
         })
 
 
 # ─────────────────────────────────────────────
-# UNITS
+# CLIENT ORDER BOARD
 # ─────────────────────────────────────────────
+
+class ClientOrderBoardView(View):
+    def get(self, request):
+        confirmed  = ClientOrder.objects.filter(
+            status__in=['CONFIRMED','PARTIALLY_FULFILLED','FULFILLED']
+        ).select_related('client').order_by('-order_date')
+        dispatched = ClientOrder.objects.filter(
+            status='SHIPPED'
+        ).select_related('client').order_by('-date_shipped')
+        delivered  = ClientOrder.objects.filter(
+            status='DELIVERED'
+        ).select_related('client').order_by('-date_shipped')
+        return render(request, 'client_orders/order_board.html', {
+            'confirmed':  confirmed,
+            'dispatched': dispatched,
+            'delivered':  delivered,
+        })
+
+    def post(self, request):
+        order_id = request.POST.get('order_id')
+        action   = request.POST.get('action')
+        order    = get_object_or_404(ClientOrder, pk=order_id)
+        if action == 'mark_delivered':
+            order.status = 'DELIVERED'
+            order.save()
+            messages.success(request, f'{order.reference} marked as Delivered.')
+        return redirect('client-order-board')
+
+
+# ─────────────────────────────────────────────
+# CARRIER REGISTRY
+# ─────────────────────────────────────────────
+
+class CarrierListView(View):
+    def get(self, request):
+        carriers = Carrier.objects.all()
+        return render(request, 'carriers/list.html', {'carriers': carriers})
+
+
+class CarrierCreateView(View):
+    def get(self, request):
+        from .forms import CarrierForm
+        return render(request, 'carriers/form.html', {
+            'form': CarrierForm(), 'form_title': 'New Carrier', 'submit_label': 'Create'
+        })
+    def post(self, request):
+        from .forms import CarrierForm
+        form = CarrierForm(request.POST)
+        if form.is_valid():
+            carrier = form.save()
+            messages.success(request, f'Carrier {carrier.name} created.')
+            return redirect('carrier-list')
+        return render(request, 'carriers/form.html', {
+            'form': form, 'form_title': 'New Carrier', 'submit_label': 'Create'
+        })
+
+
+class CarrierEditView(View):
+    def get(self, request, pk):
+        from .forms import CarrierForm
+        carrier = get_object_or_404(Carrier, pk=pk)
+        return render(request, 'carriers/form.html', {
+            'form': CarrierForm(instance=carrier),
+            'form_title': f'Edit {carrier.name}', 'submit_label': 'Save',
+            'carrier': carrier,
+        })
+    def post(self, request, pk):
+        from .forms import CarrierForm
+        carrier = get_object_or_404(Carrier, pk=pk)
+        form = CarrierForm(request.POST, instance=carrier)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Carrier {carrier.name} updated.')
+            return redirect('carrier-list')
+        return render(request, 'carriers/form.html', {
+            'form': form, 'form_title': f'Edit {carrier.name}',
+            'submit_label': 'Save', 'carrier': carrier,
+        })
+
+
+class CarrierDeleteView(View):
+    def post(self, request, pk):
+        carrier = get_object_or_404(Carrier, pk=pk)
+        try:
+            carrier.delete()
+            messages.success(request, f'Carrier {carrier.name} deleted.')
+        except Exception as e:
+            messages.error(request, _deletion_blocked_msg(e))
+        return redirect('carrier-list')
+
+
+# ─────────────────────────────────────────────
+# SUPPLIER REGISTRY
+# ─────────────────────────────────────────────
+
+class SupplierListView(View):
+    def get(self, request):
+        suppliers = Supplier.objects.all()
+        return render(request, 'suppliers/list.html', {'suppliers': suppliers})
+
+
+class SupplierCreateView(View):
+    def get(self, request):
+        from .forms import SupplierForm
+        return render(request, 'suppliers/form.html', {
+            'form': SupplierForm(), 'form_title': 'New Supplier', 'submit_label': 'Create'
+        })
+    def post(self, request):
+        from .forms import SupplierForm
+        form = SupplierForm(request.POST)
+        if form.is_valid():
+            supplier = form.save()
+            messages.success(request, f'Supplier {supplier.name} created.')
+            return redirect('supplier-list')
+        return render(request, 'suppliers/form.html', {
+            'form': form, 'form_title': 'New Supplier', 'submit_label': 'Create'
+        })
+
+
+class SupplierEditView(View):
+    def get(self, request, pk):
+        from .forms import SupplierForm
+        supplier = get_object_or_404(Supplier, pk=pk)
+        return render(request, 'suppliers/form.html', {
+            'form': SupplierForm(instance=supplier),
+            'form_title': f'Edit {supplier.name}', 'submit_label': 'Save',
+            'supplier': supplier,
+        })
+    def post(self, request, pk):
+        from .forms import SupplierForm
+        supplier = get_object_or_404(Supplier, pk=pk)
+        form = SupplierForm(request.POST, instance=supplier)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Supplier {supplier.name} updated.')
+            return redirect('supplier-list')
+        return render(request, 'suppliers/form.html', {
+            'form': form, 'form_title': f'Edit {supplier.name}',
+            'submit_label': 'Save', 'supplier': supplier,
+        })
+
+
+class SupplierDeleteView(View):
+    def post(self, request, pk):
+        supplier = get_object_or_404(Supplier, pk=pk)
+        try:
+            supplier.delete()
+            messages.success(request, f'Supplier {supplier.name} deleted.')
+        except Exception as e:
+            messages.error(request, _deletion_blocked_msg(e))
+        return redirect('supplier-list')
+
+
+# ─────────────────────────────────────────────
+# SUPPLY ORDERS
+# ─────────────────────────────────────────────
+
+class SupplyOrderBoardView(View):
+    def get(self, request):
+        placed     = SupplyOrder.objects.filter(status='ORDER_PLACED').select_related('supplier','carrier').prefetch_related('lines__material')
+        dispatched = SupplyOrder.objects.filter(status='DISPATCHED').select_related('supplier','carrier').prefetch_related('lines__material')
+        delivered  = SupplyOrder.objects.filter(status='DELIVERED').select_related('supplier','carrier').prefetch_related('lines__material')
+        return render(request, 'supply_orders/board.html', {
+            'placed': placed, 'dispatched': dispatched, 'delivered': delivered,
+        })
+
+    def post(self, request):
+        order_id = request.POST.get('order_id')
+        action   = request.POST.get('action')
+        order    = get_object_or_404(SupplyOrder, pk=order_id)
+        STATUS_MAP = {
+            'mark_dispatched': 'DISPATCHED',
+            'mark_delivered':  'DELIVERED',
+        }
+        if action in STATUS_MAP:
+            order.status = STATUS_MAP[action]
+            order.save()
+            messages.success(request, f'{order.reference} updated.')
+        return redirect('supply-order-board')
+
+
+class SupplyOrderListView(View):
+    def get(self, request):
+        orders = SupplyOrder.objects.select_related('supplier','carrier').order_by('-order_date')
+        return render(request, 'supply_orders/list.html', {'orders': orders})
+
+
+class SupplyOrderDetailView(View):
+    def get(self, request, pk):
+        order = get_object_or_404(
+            SupplyOrder.objects.select_related('supplier','carrier','warehouse'),
+            pk=pk
+        )
+        lines = order.lines.select_related('material__unit').all()
+        # For each line, find linked final products via ProductionTemplateComponent
+        from .models import ProductionTemplateComponent
+        lines_with_finals = []
+        for line in lines:
+            finals = ProductionTemplateComponent.objects.filter(
+                material=line.material
+            ).select_related('template__product')
+            lines_with_finals.append({
+                'line':   line,
+                'finals': [ptc.template.product for ptc in finals],
+            })
+        return render(request, 'supply_orders/detail.html', {
+            'order': order,
+            'lines_with_finals': lines_with_finals,
+        })
+
+    def post(self, request, pk):
+        order  = get_object_or_404(SupplyOrder, pk=pk)
+        action = request.POST.get('action')
+        if action == 'update_status':
+            new_status = request.POST.get('status')
+            if new_status in dict(SupplyOrder.STATUS_CHOICES):
+                order.status = new_status
+                order.save()
+                messages.success(request, f'Status updated to {order.get_status_display()}.')
+        return redirect('supply-order-detail', pk=pk)
+
+
+class SupplyOrderCreateView(View):
+    def get(self, request):
+        from .forms import SupplyOrderForm, SupplyOrderLineFormSet
+        return render(request, 'supply_orders/form.html', {
+            'form':         SupplyOrderForm(),
+            'formset':      SupplyOrderLineFormSet(),
+            'form_title':   'New Supply Order',
+            'submit_label': 'Create Order',
+        })
+    def post(self, request):
+        from .forms import SupplyOrderForm, SupplyOrderLineFormSet
+        form    = SupplyOrderForm(request.POST)
+        formset = SupplyOrderLineFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            order = form.save()
+            formset.instance = order
+            formset.save()
+            messages.success(request, f'Supply order {order.reference} created.')
+            return redirect('supply-order-detail', pk=order.pk)
+        return render(request, 'supply_orders/form.html', {
+            'form': form, 'formset': formset,
+            'form_title': 'New Supply Order', 'submit_label': 'Create Order',
+        })
+
+
+class SupplyOrderEditView(View):
+    def get(self, request, pk):
+        from .forms import SupplyOrderForm, SupplyOrderLineFormSet
+        order = get_object_or_404(SupplyOrder, pk=pk)
+        return render(request, 'supply_orders/form.html', {
+            'form':         SupplyOrderForm(instance=order),
+            'formset':      SupplyOrderLineFormSet(instance=order),
+            'form_title':   f'Edit {order.reference}',
+            'submit_label': 'Save Changes',
+            'order':        order,
+        })
+    def post(self, request, pk):
+        from .forms import SupplyOrderForm, SupplyOrderLineFormSet
+        order   = get_object_or_404(SupplyOrder, pk=pk)
+        form    = SupplyOrderForm(request.POST, instance=order)
+        formset = SupplyOrderLineFormSet(request.POST, instance=order)
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            messages.success(request, f'Supply order {order.reference} updated.')
+            return redirect('supply-order-detail', pk=order.pk)
+        return render(request, 'supply_orders/form.html', {
+            'form': form, 'formset': formset,
+            'form_title': f'Edit {order.reference}',
+            'submit_label': 'Save Changes', 'order': order,
+        })
+
+
+class SupplyOrderDeleteView(View):
+    def post(self, request, pk):
+        order = get_object_or_404(SupplyOrder, pk=pk)
+        ref = order.reference
+        try:
+            order.delete()
+            messages.success(request, f'Supply order {ref} deleted.')
+        except Exception as e:
+            messages.error(request, _deletion_blocked_msg(e))
+        return redirect('supply-order-list')
+
 
 class UnitListView(View):
     def get(self, request):
@@ -1038,7 +1322,7 @@ class ClientDetailView(View):
 
 class ClientCreateView(View):
     def get(self, request):
-        return render(request, 'client_orders/client_form.html', {
+        return render(request, 'clients/form.html', {
             'form': ClientForm(), 'form_title': 'New Client', 'submit_label': 'Create Client'
         })
 
@@ -1048,7 +1332,7 @@ class ClientCreateView(View):
             client = form.save()
             messages.success(request, f'Client "{client.name}" created.')
             return redirect('client-list')
-        return render(request, 'client_orders/client_form.html', {
+        return render(request, 'clients/form.html', {
             'form': form, 'form_title': 'New Client', 'submit_label': 'Create Client'
         })
 
@@ -1056,7 +1340,7 @@ class ClientCreateView(View):
 class ClientEditView(View):
     def get(self, request, pk):
         client = get_object_or_404(Client, pk=pk)
-        return render(request, 'client_orders/client_form.html', {
+        return render(request, 'clients/form.html', {
             'form': ClientForm(instance=client),
             'form_title': f'Edit: {client.name}', 'submit_label': 'Save Changes'
         })
@@ -1068,7 +1352,7 @@ class ClientEditView(View):
             form.save()
             messages.success(request, 'Client updated.')
             return redirect('client-list')
-        return render(request, 'client_orders/client_form.html', {
+        return render(request, 'clients/form.html', {
             'form': form, 'form_title': f'Edit: {client.name}', 'submit_label': 'Save Changes'
         })
 

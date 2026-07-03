@@ -6,6 +6,7 @@ from django.db.models.functions import Coalesce
 from django.db.models import DecimalField
 
 from .models import (
+    Carrier, Supplier, SupplyOrder, SupplyOrderLine,
     Unit, Location, Material, RawMaterialBatch,
     ProductBatch, MaterialTransaction,
     Client, ClientOrder, ClientOrderLine,
@@ -306,7 +307,15 @@ class ReleaseMaterialForm(forms.Form):
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ['code', 'name', 'tin', 'country', 'notes']
+        fields = [
+            'code', 'name', 'tin', 'country', 'notes',
+            'contact1_name', 'contact1_phone', 'contact1_email',
+            'contact2_name', 'contact2_phone', 'contact2_email',
+            'contact3_name', 'contact3_phone', 'contact3_email',
+        ]
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 2}),
+        }
 
     def clean_name(self):
         return self.cleaned_data['name'].strip()
@@ -458,3 +467,74 @@ ProductionComponentFormSet = forms.inlineformset_factory(
 )
 
 
+
+
+class CarrierForm(forms.ModelForm):
+    class Meta:
+        model = Carrier
+        fields = [
+            'name',
+            'contact1_name', 'contact1_phone', 'contact1_email',
+            'contact2_name', 'contact2_phone', 'contact2_email',
+            'contact3_name', 'contact3_phone', 'contact3_email',
+            'notes',
+        ]
+
+
+class SupplierForm(forms.ModelForm):
+    class Meta:
+        model = Supplier
+        fields = [
+            'name', 'address',
+            'contact_name', 'contact_phone', 'contact_email',
+            'contact2_name', 'contact2_phone', 'contact2_email',
+            'contact3_name', 'contact3_phone', 'contact3_email',
+            'payment_terms', 'notes',
+        ]
+        widgets = {
+            'address':       forms.Textarea(attrs={'rows': 3}),
+            'payment_terms': forms.Textarea(attrs={'rows': 2}),
+            'notes':         forms.Textarea(attrs={'rows': 2}),
+        }
+
+
+class SupplyOrderForm(forms.ModelForm):
+    class Meta:
+        model = SupplyOrder
+        fields = [
+            'reference', 'supplier', 'order_date', 'expected_delivery',
+            'warehouse', 'carrier', 'tracking_number', 'status', 'notes',
+        ]
+        widgets = {
+            'order_date':        forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'expected_delivery': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'notes':             forms.Textarea(attrs={'rows': 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['expected_delivery'].required = False
+        self.fields['carrier'].required = False
+        self.fields['tracking_number'].required = False
+
+
+class SupplyOrderLineForm(forms.ModelForm):
+    class Meta:
+        model = SupplyOrderLine
+        fields = ['material', 'quantity', 'unit_price']
+        widgets = {
+            'material':   forms.Select(attrs={'class': 'form-control'}),
+            'quantity':   forms.NumberInput(attrs={'step': '0.001'}),
+            'unit_price': forms.NumberInput(attrs={'step': '0.0001'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['unit_price'].required = False
+
+
+SupplyOrderLineFormSet = forms.inlineformset_factory(
+    SupplyOrder, SupplyOrderLine,
+    form=SupplyOrderLineForm,
+    extra=1, can_delete=True,
+)

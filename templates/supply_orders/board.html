@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Supply Order Board{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Supply Order Board{% endblock %}
+{% block extra_head %}
+<style>
+  .board { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; align-items:start; }
+  .board-col { background:var(--surface2); border-radius:var(--radius); padding:16px; }
+  .board-col-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .board-col-title { font-size:12px; font-family:var(--mono); font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .board-col-count { background:var(--surface); border-radius:99px; padding:2px 10px; font-size:12px; font-family:var(--mono); }
+  .order-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:10px; cursor:pointer; transition:border-color .15s; }
+  .order-card:hover { border-color:var(--accent); }
+  .order-card:last-child { margin-bottom:0; }
+  .order-ref { font-family:var(--mono); font-size:12px; color:var(--accent); }
+  .order-supplier { font-size:13px; font-weight:500; margin:4px 0; }
+  .order-meta { font-size:11px; color:var(--muted); }
+  .board-empty { text-align:center; color:var(--muted); font-size:12px; padding:20px 0; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Supply Order Board</h1></div>
+  <div class="page-actions">
+    <a href="{% url 'supply-order-create' %}" class="btn btn-primary">+ New Supply Order</a>
+  </div>
+</div>
+<div class="board">
+  <div class="board-col">
+    <div class="board-col-header">
+      <span class="board-col-title">Order Placed</span>
+      <span class="board-col-count">{{ placed|length }}</span>
+    </div>
+    {% for order in placed %}
+    <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
+      <div class="order-ref">{{ order.reference }}</div>
+      <div class="order-supplier">{{ order.supplier.name }}</div>
+      <div class="order-meta">
+        Ordered {{ order.order_date|date:"Y-m-d" }}
+        {% if order.expected_delivery %} · Due {{ order.expected_delivery|date:"Y-m-d" }}{% endif %}
+      </div>
+      <div style="margin-top:8px" onclick="event.stopPropagation()">
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="order_id" value="{{ order.pk }}">
+          <input type="hidden" name="action" value="mark_dispatched">
+          <button type="submit" class="btn btn-secondary btn-sm">→ Mark Dispatched</button>
+        </form>
+      </div>
+    </div>
+    {% empty %}<div class="board-empty">No orders</div>{% endfor %}
+  </div>
+  <div class="board-col">
+    <div class="board-col-header">
+      <span class="board-col-title">Dispatched</span>
+      <span class="board-col-count">{{ dispatched|length }}</span>
+    </div>
+    {% for order in dispatched %}
+    <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
+      <div class="order-ref">{{ order.reference }}</div>
+      <div class="order-supplier">{{ order.supplier.name }}</div>
+      <div class="order-meta">
+        {% if order.carrier %}{{ order.carrier.name }}{% endif %}
+        {% if order.tracking_number %} · {{ order.tracking_number }}{% endif %}
+      </div>
+      <div style="margin-top:8px" onclick="event.stopPropagation()">
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="order_id" value="{{ order.pk }}">
+          <input type="hidden" name="action" value="mark_delivered">
+          <button type="submit" class="btn btn-primary btn-sm">✓ Mark Delivered</button>
+        </form>
+      </div>
+    </div>
+    {% empty %}<div class="board-empty">No orders</div>{% endfor %}
+  </div>
+  <div class="board-col">
+    <div class="board-col-header">
+      <span class="board-col-title">Delivered</span>
+      <span class="board-col-count">{{ delivered|length }}</span>
+    </div>
+    {% for order in delivered %}
+    <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
+      <div class="order-ref">{{ order.reference }}</div>
+      <div class="order-supplier">{{ order.supplier.name }}</div>
+      <div class="order-meta">{{ order.expected_delivery|date:"Y-m-d"|default:"—" }}</div>
+    </div>
+    {% empty %}<div class="board-empty">No orders</div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

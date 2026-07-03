@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Supply Orders{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Supply Orders{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Supply Orders</h1></div>
+  <div class="page-actions">
+    <a href="{% url 'supply-order-create' %}" class="btn btn-primary">+ New Supply Order</a>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    {% if orders %}
+    <table>
+      <thead><tr><th>Reference</th><th>Supplier</th><th>Order Date</th><th>Expected</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="td-mono"><a href="{% url 'supply-order-detail' o.pk %}" style="color:var(--accent);text-decoration:none">{{ o.reference }}</a></td>
+          <td>{{ o.supplier.name }}</td>
+          <td class="td-mono text-muted">{{ o.order_date|date:"Y-m-d" }}</td>
+          <td class="td-mono text-muted">{{ o.expected_delivery|date:"Y-m-d"|default:"—" }}</td>
+          <td>
+            {% if o.status == 'ORDER_PLACED' %}<span class="badge badge-grey">Order Placed</span>
+            {% elif o.status == 'DISPATCHED' %}<span class="badge badge-blue">Dispatched</span>
+            {% elif o.status == 'DELIVERED' %}<span class="badge badge-green">Delivered</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
+          </td>
+          <td><div class="td-actions">
+            <a href="{% url 'supply-order-detail' o.pk %}" class="btn btn-ghost btn-sm">View</a>
+            <a href="{% url 'supply-order-edit' o.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+          </div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">📦</div><h3>No supply orders yet</h3></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

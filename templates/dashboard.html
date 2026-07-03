@@ -1,142 +1,55 @@
 {% extends "base.html" %}
-{% load inventory_extras %}
-{% block title %}Dashboard — InventoryOS{% endblock %}
-
+{% block title %}Dashboard — YAF Procurement Tracking{% endblock %}
 {% block breadcrumb %}Dashboard{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div>
     <h1>Dashboard</h1>
-    <p>System overview — stock levels, open orders</p>
+    <p>YAF Procurement Tracking</p>
   </div>
 </div>
 
-{# ── TOP STATS ── #}
-<div class="stat-grid stat-grid-4 mb-4">
-  <div class="stat-card">
-    <div class="stat-label">Total SKUs</div>
-    <div class="stat-value">{{ total_materials }}</div>
-    <div class="stat-sub">{{ raw_materials }} raw · {{ finished_materials }} finished</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Active Batches</div>
-    <div class="stat-value">{{ active_batches }}</div>
-    <div class="stat-sub">Raw material batches in stock</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Open Mfg Orders</div>
-    <div class="stat-value">{{ open_orders }}</div>
-    <div class="stat-sub">{{ cancelled_orders }} cancelled</div>
-  </div>
-</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:8px">
 
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px">
-
-  {# ── LOW STOCK BATCHES ── #}
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">⚠ Low Raw Material Stock</span>
-      <a href="{% url 'batch-list' %}" class="btn btn-ghost btn-sm">View all →</a>
-    </div>
-    <div class="table-wrap">
-      {% if low_stock_batches %}
-      <table>
-        <thead>
-          <tr>
-            <th>Lot</th>
-            <th>Material</th>
-            <th>Available</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for b in low_stock_batches %}
-          <tr>
-            <td class="td-mono">
-              <a href="{% url 'batch-detail' b.pk %}" style="color:var(--accent);text-decoration:none">{{ b.lot_number }}</a>
-            </td>
-            <td>{{ b.material.name }}</td>
-            <td><span class="badge badge-red">{{ b.available_quantity|smart_qty:b.material.unit.name }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="empty">
-        <div class="empty-icon">✅</div>
-        <h3>All batches healthy</h3>
+  <a href="{% url 'supply-order-board' %}" style="text-decoration:none">
+    <div class="card" style="padding:32px 24px;text-align:center;cursor:pointer;transition:border-color .15s;border:1px solid var(--border);border-radius:var(--radius)">
+      <div style="font-size:48px;margin-bottom:12px">🟦</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:6px">Supply Board</div>
+      <div style="font-size:13px;color:var(--muted)">Track incoming supply orders from placement to delivery</div>
+      <div style="margin-top:16px">
+        <span class="badge badge-grey">{{ supply_order_counts.ORDER_PLACED|default:0 }} Placed</span>
+        <span class="badge badge-blue" style="margin-left:6px">{{ supply_order_counts.DISPATCHED|default:0 }} Dispatched</span>
+        <span class="badge badge-green" style="margin-left:6px">{{ supply_order_counts.DELIVERED|default:0 }} Delivered</span>
       </div>
-      {% endif %}
     </div>
-  </div>
+  </a>
 
-  {# ── RECENT TRANSACTIONS ── #}
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Low Product Stock</span>
-      <a href="{% url 'product-batch-list' %}" class="btn btn-ghost btn-sm">View all →</a>
-    </div>
-    <div class="table-wrap">
-      {% if low_product_batches %}
-      <table>
-        <thead>
-          <tr><th>Batch</th><th>Product</th><th>Qty</th><th>Location</th></tr>
-        </thead>
-        <tbody>
-          {% for pb in low_product_batches %}
-          <tr>
-            <td class="td-mono">
-              <a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a>
-            </td>
-            <td>{{ pb.material.name }}</td>
-            <td class="td-mono" style="color:var(--warn)">{{ pb.quantity_produced|smart_qty:pb.material.unit.name }}</td>
-            <td class="text-muted" style="font-size:12px">{{ pb.location.name }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="empty" style="padding:20px">
-        <div class="empty-icon">🏭</div>
-        <h3>No low stock product batches</h3>
+  <a href="{% url 'production-board' %}" style="text-decoration:none">
+    <div class="card" style="padding:32px 24px;text-align:center;cursor:pointer;transition:border-color .15s;border:1px solid var(--border);border-radius:var(--radius)">
+      <div style="font-size:48px;margin-bottom:12px">🟧</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:6px">Production Board</div>
+      <div style="font-size:13px;color:var(--muted)">Monitor production runs and component procurement status</div>
+      <div style="margin-top:16px">
+        <span class="badge badge-grey">{{ production_counts.PENDING|default:0 }} Pending</span>
+        <span class="badge badge-blue" style="margin-left:6px">{{ production_counts.ORDERED|default:0 }} Ordered</span>
+        <span class="badge badge-green" style="margin-left:6px">{{ production_counts.READY|default:0 }} Ready</span>
       </div>
-      {% endif %}
     </div>
-  </div>
+  </a>
 
-
-  {# ── RECENT PRODUCT BATCHES ── #}
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Recent Product Batches</span>
-      <a href="{% url 'product-batch-list' %}" class="btn btn-ghost btn-sm">View all →</a>
-    </div>
-    <div class="table-wrap">
-      {% if recent_product_batches %}
-      <table>
-        <thead>
-          <tr><th>Batch</th><th>Product</th><th>Qty</th></tr>
-        </thead>
-        <tbody>
-          {% for pb in recent_product_batches %}
-          <tr>
-            <td class="td-mono">
-              <a href="{% url 'product-batch-detail' pb.pk %}" style="color:var(--accent);text-decoration:none">{{ pb.batch_number }}</a>
-            </td>
-            <td>{{ pb.material.name }}</td>
-            <td class="td-mono">{{ pb.quantity_produced }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="empty">
-        <div class="empty-icon">🏭</div>
-        <h3>No product batches yet</h3>
+  <a href="{% url 'client-order-board' %}" style="text-decoration:none">
+    <div class="card" style="padding:32px 24px;text-align:center;cursor:pointer;transition:border-color .15s;border:1px solid var(--border);border-radius:var(--radius)">
+      <div style="font-size:48px;margin-bottom:12px">🟩</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:6px">Client Order Board</div>
+      <div style="font-size:13px;color:var(--muted)">Track client orders from confirmation to delivery</div>
+      <div style="margin-top:16px">
+        <span class="badge badge-grey">{{ client_order_counts.CONFIRMED|default:0 }} Confirmed</span>
+        <span class="badge badge-blue" style="margin-left:6px">{{ client_order_counts.SHIPPED|default:0 }} Dispatched</span>
+        <span class="badge badge-green" style="margin-left:6px">{{ client_order_counts.DELIVERED|default:0 }} Delivered</span>
       </div>
-      {% endif %}
     </div>
-  </div>
+  </a>
 
 </div>
 {% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load inventory_extras %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'supply-order-list' %}">Supply Orders</a><span>/</span> {{ form_title }}
+{% endblock %}
+{% block extra_head %}
+<style>
+select, input[type=text], input[type=number], input[type=date], textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .15s;
+}
+select:focus, input:focus, textarea:focus { border-color: var(--accent); }
+select option { background: var(--surface2); color: var(--text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header"><div><h1>{{ form_title }}</h1></div></div>
+<form method="post">{% csrf_token %}
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Order Details</span></div>
+    <div class="card-body">
+      <div class="form-grid form-grid-2">
+        <div class="form-group"><label>Reference</label>{{ form.reference }}</div>
+        <div class="form-group"><label>Supplier</label>{{ form.supplier }}</div>
+        <div class="form-group"><label>Order Date</label>{{ form.order_date }}</div>
+        <div class="form-group"><label>Expected Delivery</label>{{ form.expected_delivery }}</div>
+        <div class="form-group"><label>Destination Warehouse</label>{{ form.warehouse }}</div>
+        <div class="form-group"><label>Status</label>{{ form.status }}</div>
+        <div class="form-group"><label>Carrier</label>{{ form.carrier }}</div>
+        <div class="form-group"><label>Tracking Number</label>{{ form.tracking_number }}</div>
+      </div>
+      <div class="form-group mt-2"><label>Notes</label>{{ form.notes }}</div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Line Items</span></div>
+    <div class="card-body">
+      {{ formset.management_form }}
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:8px">
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase">Material</span>
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase">Quantity</span>
+        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase">Unit Price</span>
+        <span></span>
+      </div>
+      {% for lf in formset %}
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center">
+        <div>{{ lf.material }}{% for h in lf.hidden_fields %}{{ h }}{% endfor %}</div>
+        <div>{{ lf.quantity }}</div>
+        <div>{{ lf.unit_price }}</div>
+        <div>
+          {% if lf.instance.pk %}
+            <div style="display:none">{{ lf.DELETE }}</div>
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.previousElementSibling.querySelector('input').checked=true;this.closest('div').parentElement.style.opacity='0.4'">✕</button>
+          {% else %}
+            <button type="button" class="btn btn-danger btn-sm remove-line">✕</button>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <button type="button" id="add-line-btn" class="btn btn-ghost btn-sm" style="margin-top:8px">+ Add Item</button>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+    <a href="{% url 'supply-order-list' %}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.remove-line').forEach(function(btn) {
+  btn.addEventListener('click', function() { this.closest('[style*="grid"]').remove(); });
+});
+var addBtn = document.getElementById('add-line-btn');
+var total  = document.querySelector('[id$="-TOTAL_FORMS"]');
+if (addBtn && total) {
+  addBtn.addEventListener('click', function() {
+    var rows = document.querySelectorAll('[id$="-TOTAL_FORMS"]')[0].closest('form').querySelectorAll('[style*="grid-template-columns:2fr"]');
+    var idx  = parseInt(total.value);
+    var prefix = total.id.replace('id_','').replace('-TOTAL_FORMS','');
+    var div  = document.createElement('div');
+    div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center';
+    div.innerHTML =
+      '<div><select name="' + prefix + '-' + idx + '-material" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px">' +
+      document.querySelector('[name$="-0-material"] option, [name$="-material"] option') ? '' : '' +
+      '</select></div>' +
+      '<div><input type="number" name="' + prefix + '-' + idx + '-quantity" step="0.001" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px"></div>' +
+      '<div><input type="number" name="' + prefix + '-' + idx + '-unit_price" step="0.0001" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px"></div>' +
+      '<div><button type="button" class="btn btn-danger btn-sm remove-line">✕</button></div>';
+    addBtn.parentElement.insertBefore(div, addBtn);
+    div.querySelector('.remove-line').addEventListener('click', function() { div.remove(); });
+    total.value = idx + 1;
+  });
+}
+</script>
+{% endblock %}

@@ -2,6 +2,29 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Client Order Board
+    path('client-order-board/', views.ClientOrderBoardView.as_view(), name='client-order-board'),
+
+    # Carriers
+    path('carriers/', views.CarrierListView.as_view(), name='carrier-list'),
+    path('carriers/create/', views.CarrierCreateView.as_view(), name='carrier-create'),
+    path('carriers/<int:pk>/edit/', views.CarrierEditView.as_view(), name='carrier-edit'),
+    path('carriers/<int:pk>/delete/', views.CarrierDeleteView.as_view(), name='carrier-delete'),
+
+    # Suppliers
+    path('suppliers/', views.SupplierListView.as_view(), name='supplier-list'),
+    path('suppliers/create/', views.SupplierCreateView.as_view(), name='supplier-create'),
+    path('suppliers/<int:pk>/edit/', views.SupplierEditView.as_view(), name='supplier-edit'),
+    path('suppliers/<int:pk>/delete/', views.SupplierDeleteView.as_view(), name='supplier-delete'),
+
+    # Supply Orders
+    path('supply-orders/', views.SupplyOrderListView.as_view(), name='supply-order-list'),
+    path('supply-order-board/', views.SupplyOrderBoardView.as_view(), name='supply-order-board'),
+    path('supply-orders/create/', views.SupplyOrderCreateView.as_view(), name='supply-order-create'),
+    path('supply-orders/<int:pk>/', views.SupplyOrderDetailView.as_view(), name='supply-order-detail'),
+    path('supply-orders/<int:pk>/edit/', views.SupplyOrderEditView.as_view(), name='supply-order-edit'),
+    path('supply-orders/<int:pk>/delete/', views.SupplyOrderDeleteView.as_view(), name='supply-order-delete'),
+
 
     # Dashboard
     path('', views.DashboardView.as_view(), name='dashboard'),
@@ -46,7 +69,6 @@ urlpatterns = [
     path('product-batches/<int:pk>/delete/',  views.ProductBatchDeleteView.as_view(), name='product-batch-delete'),
 
     # Transactions (read-only ledger)
-    path('transactions/', views.MaterialTransactionListView.as_view(), name='transaction-list'),
 
     # Clients
     path('clients/',                  views.ClientListView.as_view(),   name='client-list'),

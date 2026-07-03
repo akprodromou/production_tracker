@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Suppliers{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Suppliers{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Suppliers</h1></div>
+  <div class="page-actions">
+    <a href="{% url 'supplier-create' %}" class="btn btn-primary">+ New Supplier</a>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    {% if suppliers %}
+    <table>
+      <thead><tr><th>Name</th><th>Contact</th><th>Phone</th><th>Payment Terms</th><th></th></tr></thead>
+      <tbody>
+        {% for s in suppliers %}
+        <tr>
+          <td><strong>{{ s.name }}</strong></td>
+          <td>{{ s.contact_name|default:"—" }}</td>
+          <td class="td-mono">{{ s.contact_phone|default:"—" }}</td>
+          <td class="text-muted" style="font-size:12px">{{ s.payment_terms|default:"—"|truncatechars:40 }}</td>
+          <td><div class="td-actions">
+            <a href="{% url 'supplier-edit' s.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+            <form method="post" action="{% url 'supplier-delete' s.pk %}" style="display:inline">
+              {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ s.name }}?')">Delete</button>
+            </form>
+          </div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-icon">🏢</div><h3>No suppliers yet</h3></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
