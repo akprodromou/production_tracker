@@ -7,6 +7,7 @@ from django.db.models import DecimalField
 
 from .models import (
     Carrier, Supplier, SupplyOrder, SupplyOrderLine,
+    SalesOrder, SalesOrderLine,
     Unit, Location, Material, RawMaterialBatch,
     ProductBatch, MaterialTransaction,
     Client, ClientOrder, ClientOrderLine,
@@ -536,5 +537,44 @@ class SupplyOrderLineForm(forms.ModelForm):
 SupplyOrderLineFormSet = forms.inlineformset_factory(
     SupplyOrder, SupplyOrderLine,
     form=SupplyOrderLineForm,
+    extra=1, can_delete=True,
+)
+
+
+class SalesOrderForm(forms.ModelForm):
+    class Meta:
+        model = SalesOrder
+        fields = [
+            'reference', 'client', 'order_date', 'expected_delivery',
+            'delivery_address', 'carrier', 'tracking_number', 'status', 'notes',
+        ]
+        widgets = {
+            'order_date':        forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'expected_delivery': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'delivery_address':  forms.Textarea(attrs={'rows': 2}),
+            'notes':             forms.Textarea(attrs={'rows': 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['expected_delivery'].required = False
+        self.fields['carrier'].required = False
+        self.fields['tracking_number'].required = False
+        self.fields['delivery_address'].required = False
+
+
+class SalesOrderLineForm(forms.ModelForm):
+    class Meta:
+        model = SalesOrderLine
+        fields = ['material', 'quantity', 'unit_price']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['unit_price'].required = False
+
+
+SalesOrderLineFormSet = forms.inlineformset_factory(
+    SalesOrder, SalesOrderLine,
+    form=SalesOrderLineForm,
     extra=1, can_delete=True,
 )

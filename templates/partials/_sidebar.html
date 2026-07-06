@@ -13,10 +13,10 @@
     <a href="{% url 'client-order-board' %}" class="{% if request.resolver_match.url_name == 'client-order-board' %}active{% endif %}">
       <span class="icon">🟩</span> Client Order Board
     </a>
-    <a href="{% url 'order-list' %}" class="{% if 'order' in request.resolver_match.url_name and 'supply' not in request.resolver_match.url_name and 'board' not in request.resolver_match.url_name and 'client' not in request.resolver_match.url_name %}active{% endif %}">
+    <a href="{% url 'sales-order-list' %}" class="{% if 'sales-order' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">📄</span> Client Orders
     </a>
-    <a href="{% url 'client-list' %}" class="{% if 'client' in request.resolver_match.url_name and 'order' not in request.resolver_match.url_name %}active{% endif %}">
+    <a href="{% url 'client-list' %}" class="{% if request.resolver_match.url_name == 'client-list' or request.resolver_match.url_name == 'client-create' or request.resolver_match.url_name == 'client-edit' %}active{% endif %}">
       <span class="icon">👥</span> Clients
     </a>
 
@@ -35,11 +35,14 @@
     <a href="{% url 'production-board' %}" class="{% if request.resolver_match.url_name == 'production-board' %}active{% endif %}">
       <span class="icon">🟧</span> Production Board
     </a>
-    <a href="{% url 'batch-list' %}" class="{% if 'batch-list' == request.resolver_match.url_name or 'batch-detail' == request.resolver_match.url_name or 'batch-create' == request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">📦</span> Raw Batches
+    <a href="{% url 'order-list' %}" class="{% if 'order' in request.resolver_match.url_name and 'sales' not in request.resolver_match.url_name and 'supply' not in request.resolver_match.url_name and 'board' not in request.resolver_match.url_name and 'client' not in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">📋</span> Production Orders
     </a>
     <a href="{% url 'production-run-list' %}" class="{% if 'production-run' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">⚙️</span> Production Runs
+    </a>
+    <a href="{% url 'batch-list' %}" class="{% if 'batch-list' == request.resolver_match.url_name or 'batch-detail' == request.resolver_match.url_name or 'batch-create' == request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">📦</span> Raw Batches
     </a>
     <a href="{% url 'product-batch-list' %}" class="{% if 'product-batch' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">🏭</span> Product Batches

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load inventory_extras %}
+{% block title %}{{ order.reference }}{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'sales-order-list' %}">Client Orders</a><span>/</span>
+  {{ order.reference }}
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{{ order.reference }}</h1><p>{{ order.client.name }}</p></div>
+  <div class="page-actions">
+    <a href="{% url 'sales-order-edit' order.pk %}" class="btn btn-secondary">Edit</a>
+    <form method="post" action="{% url 'sales-order-delete' order.pk %}" style="display:inline">
+      {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ order.reference }}?')">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px" class="mb-3">
+  <div class="stat-card">
+    <div class="stat-label">Status</div>
+    <div style="margin-top:4px">
+      {% if order.status == 'ORDER_PLACED' %}<span class="badge badge-grey">Order Placed</span>
+      {% elif order.status == 'DISPATCHED' %}<span class="badge badge-blue">Dispatched</span>
+      {% elif order.status == 'DELIVERED' %}<span class="badge badge-green">Delivered</span>
+      {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Order Date</div>
+    <div class="stat-value" style="font-size:16px">{{ order.order_date|date:"Y-m-d" }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Expected Delivery</div>
+    <div class="stat-value" style="font-size:16px">{{ order.expected_delivery|date:"Y-m-d"|default:"—" }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Client</div>
+    <div style="font-size:13px;margin-top:4px">{{ order.client.name }}</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Delivery Details</span></div>
+    <div class="card-body">
+      {% if order.delivery_address %}<div style="font-size:13px;margin-bottom:8px">{{ order.delivery_address|linebreaksbr }}</div>{% endif %}
+      {% if order.client.contact1_name %}<div style="font-size:13px">{{ order.client.contact1_name }}{% if order.client.contact1_phone %} · {{ order.client.contact1_phone }}{% endif %}</div>{% endif %}
+    </div>
+  </div>
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Logistics</span></div>
+    <div class="card-body">
+      {% if order.carrier %}<div style="font-weight:600;margin-bottom:4px">{{ order.carrier.name }}</div>{% else %}<div class="text-muted">No carrier assigned</div>{% endif %}
+      {% if order.tracking_number %}<div style="margin-top:8px;font-size:13px">Tracking: <span class="td-mono">{{ order.tracking_number }}</span></div>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Items</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>SKU</th><th>Description</th><th>Unit</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead>
+      <tbody>
+        {% for line in lines %}
+        <tr>
+          <td class="td-mono text-muted">{{ line.material.sku }}</td>
+          <td><strong>{{ line.material.name }}</strong></td>
+          <td class="text-muted">{{ line.material.unit.name }}</td>
+          <td class="td-mono" style="text-align:right">{{ line.quantity }}</td>
+          <td class="td-mono" style="text-align:right">{% if line.unit_price %}{{ line.unit_price }}{% else %}—{% endif %}</td>
+          <td class="td-mono" style="text-align:right">{% if line.line_total %}{{ line.line_total|floatformat:2 }}{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if order.status != 'DELIVERED' and order.status != 'CANCELLED' %}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Update Status</span></div>
+  <div class="card-body" style="display:flex;gap:10px">
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="action" value="update_status">
+      {% if order.status == 'ORDER_PLACED' %}
+        <input type="hidden" name="status" value="DISPATCHED">
+        <button type="submit" class="btn btn-secondary">&#8594; Mark Dispatched</button>
+      {% elif order.status == 'DISPATCHED' %}
+        <input type="hidden" name="status" value="DELIVERED">
+        <button type="submit" class="btn btn-primary">&#10003; Mark Delivered</button>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if order.notes %}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Notes</span></div>
+  <div class="card-body">{{ order.notes|linebreaksbr }}</div>
+</div>
+{% endif %}
+{% endblock %}

@@ -21,6 +21,7 @@ from .models import (
     ProductionTemplate, ProductionTemplateComponent,
     ProductionRunReservation,
     Carrier, Supplier, SupplyOrder, SupplyOrderLine,
+    SalesOrder, SalesOrderLine,
 )
 from .forms import (
     UnitForm, LocationForm, MaterialForm, RawMaterialBatchForm,
@@ -102,17 +103,17 @@ class DashboardView(View):
 
 class ClientOrderBoardView(View):
     def get(self, request):
-        confirmed  = ClientOrder.objects.filter(
-            status__in=['PURCHASE_ORDER','CONFIRMED','PARTIALLY_FULFILLED','FULFILLED']
+        placed     = SalesOrder.objects.filter(
+            status='ORDER_PLACED'
         ).select_related('client').order_by('-order_date')
-        dispatched = ClientOrder.objects.filter(
-            status='SHIPPED'
-        ).select_related('client').order_by('-date_shipped')
-        delivered  = ClientOrder.objects.filter(
+        dispatched = SalesOrder.objects.filter(
+            status='DISPATCHED'
+        ).select_related('client').order_by('-order_date')
+        delivered  = SalesOrder.objects.filter(
             status='DELIVERED'
-        ).select_related('client').order_by('-date_shipped')
+        ).select_related('client').order_by('-order_date')
         return render(request, 'client_orders/order_board.html', {
-            'confirmed':  confirmed,
+            'placed':     placed,
             'dispatched': dispatched,
             'delivered':  delivered,
         })
@@ -120,12 +121,134 @@ class ClientOrderBoardView(View):
     def post(self, request):
         order_id = request.POST.get('order_id')
         action   = request.POST.get('action')
-        order    = get_object_or_404(ClientOrder, pk=order_id)
-        if action == 'mark_delivered':
-            order.status = 'DELIVERED'
+        order    = get_object_or_404(SalesOrder, pk=order_id)
+        STATUS_MAP = {
+            'mark_dispatched': 'DISPATCHED',
+            'mark_delivered':  'DELIVERED',
+        }
+        if action in STATUS_MAP:
+            order.status = STATUS_MAP[action]
             order.save()
-            messages.success(request, f'{order.reference} marked as Delivered.')
+            messages.success(request, f'{order.reference} updated.')
         return redirect('client-order-board')
+
+
+
+# ─────────────────────────────────────────────
+# SALES ORDERS (simple client shipment tracking)
+# ─────────────────────────────────────────────
+
+class SalesOrderListView(View):
+    def get(self, request):
+        orders = SalesOrder.objects.select_related('client','carrier').order_by('-order_date')
+        return render(request, 'sales_orders/list.html', {'orders': orders})
+
+
+class SalesOrderDetailView(View):
+    def get(self, request, pk):
+        order = get_object_or_404(
+            SalesOrder.objects.select_related('client','carrier'),
+            pk=pk
+        )
+        lines = order.lines.select_related('material__unit').all()
+        return render(request, 'sales_orders/detail.html', {
+            'order': order, 'lines': lines,
+        })
+
+    def post(self, request, pk):
+        order  = get_object_or_404(SalesOrder, pk=pk)
+        action = request.POST.get('action')
+        if action == 'update_status':
+            new_status = request.POST.get('status')
+            if new_status in dict(SalesOrder.STATUS_CHOICES):
+                order.status = new_status
+                order.save()
+                messages.success(request, f'Status updated to {order.get_status_display()}.')
+        return redirect('sales-order-detail', pk=pk)
+
+
+class SalesOrderCreateView(View):
+    def _ctx(self):
+        clients   = list(Client.objects.order_by('name').values('id', 'name', 'code'))
+        materials = list(Material.objects.order_by('name').values('id', 'name', 'sku'))
+        return {
+            'clients_json':   json.dumps(clients),
+            'materials_json': json.dumps(materials),
+        }
+
+    def get(self, request):
+        from .forms import SalesOrderForm, SalesOrderLineFormSet
+        ctx = self._ctx()
+        ctx.update({
+            'form': SalesOrderForm(), 'formset': SalesOrderLineFormSet(),
+            'form_title': 'New Client Order', 'submit_label': 'Create Order',
+        })
+        return render(request, 'sales_orders/form.html', ctx)
+
+    def post(self, request):
+        from .forms import SalesOrderForm, SalesOrderLineFormSet
+        form    = SalesOrderForm(request.POST)
+        formset = SalesOrderLineFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            order = form.save()
+            formset.instance = order
+            formset.save()
+            messages.success(request, f'Client order {order.reference} created.')
+            return redirect('sales-order-detail', pk=order.pk)
+        ctx = self._ctx()
+        ctx.update({'form': form, 'formset': formset,
+            'form_title': 'New Client Order', 'submit_label': 'Create Order'})
+        return render(request, 'sales_orders/form.html', ctx)
+
+
+class SalesOrderEditView(View):
+    def _ctx(self):
+        clients   = list(Client.objects.order_by('name').values('id', 'name', 'code'))
+        materials = list(Material.objects.order_by('name').values('id', 'name', 'sku'))
+        return {
+            'clients_json':   json.dumps(clients),
+            'materials_json': json.dumps(materials),
+        }
+
+    def get(self, request, pk):
+        from .forms import SalesOrderForm, SalesOrderLineFormSet
+        order = get_object_or_404(SalesOrder, pk=pk)
+        ctx = self._ctx()
+        ctx.update({
+            'form': SalesOrderForm(instance=order),
+            'formset': SalesOrderLineFormSet(instance=order),
+            'form_title': f'Edit {order.reference}',
+            'submit_label': 'Save Changes', 'order': order,
+        })
+        return render(request, 'sales_orders/form.html', ctx)
+
+    def post(self, request, pk):
+        from .forms import SalesOrderForm, SalesOrderLineFormSet
+        order   = get_object_or_404(SalesOrder, pk=pk)
+        form    = SalesOrderForm(request.POST, instance=order)
+        formset = SalesOrderLineFormSet(request.POST, instance=order)
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            messages.success(request, f'Client order {order.reference} updated.')
+            return redirect('sales-order-detail', pk=order.pk)
+        ctx = self._ctx()
+        ctx.update({'form': form, 'formset': formset,
+            'form_title': f'Edit {order.reference}',
+            'submit_label': 'Save Changes', 'order': order})
+        return render(request, 'sales_orders/form.html', ctx)
+
+
+class SalesOrderDeleteView(View):
+    def post(self, request, pk):
+        order = get_object_or_404(SalesOrder, pk=pk)
+        ref = order.reference
+        try:
+            order.delete()
+            messages.success(request, f'Client order {ref} deleted.')
+        except Exception as e:
+            messages.error(request, _deletion_blocked_msg(e))
+        return redirect('sales-order-list')
 
 
 # ─────────────────────────────────────────────

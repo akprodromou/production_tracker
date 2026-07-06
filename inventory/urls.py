@@ -2,6 +2,14 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+
+    # Sales Orders (new simple client orders)
+    path('sales-orders/', views.SalesOrderListView.as_view(), name='sales-order-list'),
+    path('sales-orders/create/', views.SalesOrderCreateView.as_view(), name='sales-order-create'),
+    path('sales-orders/<int:pk>/', views.SalesOrderDetailView.as_view(), name='sales-order-detail'),
+    path('sales-orders/<int:pk>/edit/', views.SalesOrderEditView.as_view(), name='sales-order-edit'),
+    path('sales-orders/<int:pk>/delete/', views.SalesOrderDeleteView.as_view(), name='sales-order-delete'),
+
     # Client Order Board
     path('client-order-board/', views.ClientOrderBoardView.as_view(), name='client-order-board'),
 

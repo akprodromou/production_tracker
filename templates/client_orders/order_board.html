@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Client Order Board{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Client Order Board
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Client Order Board{% endblock %}
 {% block extra_head %}
 <style>
   .board { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; align-items:start; }
@@ -22,57 +20,63 @@
 {% block content %}
 <div class="page-header">
   <div><h1>Client Order Board</h1></div>
+  <div class="page-actions">
+    <a href="{% url 'sales-order-create' %}" class="btn btn-primary">+ New Client Order</a>
+  </div>
 </div>
 <div class="board">
   <div class="board-col">
     <div class="board-col-header">
       <span class="board-col-title">Order Placed</span>
-      <span class="board-col-count">{{ confirmed|length }}</span>
+      <span class="board-col-count">{{ placed|length }}</span>
     </div>
-    {% for order in confirmed %}
-    <div class="order-card" onclick="window.location='{% url 'order-detail' order.pk %}'">
+    {% for order in placed %}
+    <div class="order-card" onclick="window.location='{% url 'sales-order-detail' order.pk %}'">
       <div class="order-ref">{{ order.reference }}</div>
       <div class="order-client">{{ order.client.name }}</div>
-      <div class="order-meta">
-        {% if order.required_by %}Due {{ order.required_by|date:"Y-m-d" }}{% endif %}
+      <div class="order-meta">{% if order.expected_delivery %}Due {{ order.expected_delivery|date:"Y-m-d" }}{% endif %}</div>
+      <div style="margin-top:8px" onclick="event.stopPropagation()">
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="order_id" value="{{ order.pk }}">
+          <input type="hidden" name="action" value="mark_dispatched">
+          <button type="submit" class="btn btn-secondary btn-sm">&#8594; Mark Dispatched</button>
+        </form>
       </div>
     </div>
     {% empty %}<div class="board-empty">No orders</div>{% endfor %}
   </div>
+
   <div class="board-col">
     <div class="board-col-header">
       <span class="board-col-title">Dispatched</span>
       <span class="board-col-count">{{ dispatched|length }}</span>
     </div>
     {% for order in dispatched %}
-    <div class="order-card" onclick="window.location='{% url 'order-detail' order.pk %}'">
+    <div class="order-card" onclick="window.location='{% url 'sales-order-detail' order.pk %}'">
       <div class="order-ref">{{ order.reference }}</div>
       <div class="order-client">{{ order.client.name }}</div>
-      <div class="order-meta">
-        Shipped {{ order.date_shipped|date:"Y-m-d"|default:"—" }}
-        {% if order.transporter %} · {{ order.transporter }}{% endif %}
-      </div>
-      <div style="margin-top:8px">
-        <form method="post" style="display:inline" onclick="event.stopPropagation()">
-          {% csrf_token %}
+      <div class="order-meta">{% if order.carrier %}{{ order.carrier.name }}{% endif %}{% if order.tracking_number %} · {{ order.tracking_number }}{% endif %}</div>
+      <div style="margin-top:8px" onclick="event.stopPropagation()">
+        <form method="post">{% csrf_token %}
           <input type="hidden" name="order_id" value="{{ order.pk }}">
           <input type="hidden" name="action" value="mark_delivered">
-          <button type="submit" class="btn btn-primary btn-sm">✓ Mark Delivered</button>
+          <button type="submit" class="btn btn-primary btn-sm">&#10003; Mark Delivered</button>
         </form>
       </div>
     </div>
     {% empty %}<div class="board-empty">No orders</div>{% endfor %}
   </div>
+
   <div class="board-col">
     <div class="board-col-header">
       <span class="board-col-title">Delivered</span>
       <span class="board-col-count">{{ delivered|length }}</span>
     </div>
     {% for order in delivered %}
-    <div class="order-card" onclick="window.location='{% url 'order-detail' order.pk %}'">
+    <div class="order-card" onclick="window.location='{% url 'sales-order-detail' order.pk %}'">
       <div class="order-ref">{{ order.reference }}</div>
       <div class="order-client">{{ order.client.name }}</div>
-      <div class="order-meta">{{ order.date_shipped|date:"Y-m-d"|default:"—" }}</div>
+      <div class="order-meta">{{ order.order_date|date:"Y-m-d" }}</div>
     </div>
     {% empty %}<div class="board-empty">No orders</div>{% endfor %}
   </div>

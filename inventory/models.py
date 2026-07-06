@@ -225,6 +225,56 @@ class MaterialTransaction(models.Model):
 # ─────────────────────────────────────────────
 
 
+
+class SalesOrder(models.Model):
+    STATUS_CHOICES = [
+        ('ORDER_PLACED', 'Order Placed'),
+        ('DISPATCHED',   'Dispatched'),
+        ('DELIVERED',    'Delivered'),
+        ('CANCELLED',    'Cancelled'),
+    ]
+    reference        = models.CharField(max_length=100, unique=True)
+    client           = models.ForeignKey('Client', on_delete=models.PROTECT,
+                           related_name='sales_orders')
+    order_date       = models.DateField()
+    expected_delivery = models.DateField(null=True, blank=True)
+    delivery_address = models.TextField(blank=True)
+    carrier          = models.ForeignKey('Carrier', on_delete=models.SET_NULL,
+                           null=True, blank=True, related_name='sales_orders')
+    tracking_number  = models.CharField(max_length=100, blank=True)
+    status           = models.CharField(max_length=20, choices=STATUS_CHOICES,
+                           default='ORDER_PLACED')
+    notes            = models.TextField(blank=True)
+    created_at       = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.reference
+
+    class Meta:
+        ordering = ['-order_date']
+
+
+class SalesOrderLine(models.Model):
+    sales_order = models.ForeignKey(SalesOrder, on_delete=models.CASCADE,
+                      related_name='lines')
+    material    = models.ForeignKey('Material', on_delete=models.PROTECT)
+    quantity    = models.DecimalField(max_digits=15, decimal_places=3)
+    unit_price  = models.DecimalField(max_digits=15, decimal_places=4,
+                      null=True, blank=True)
+
+    @property
+    def line_total(self):
+        if self.unit_price and self.quantity:
+            return self.quantity * self.unit_price
+        return None
+
+    def __str__(self):
+        return f"{self.sales_order.reference} — {self.material.name}"
+
+    class Meta:
+        ordering = ['material__name']
+
+
 class Carrier(models.Model):
     name             = models.CharField(max_length=200)
     notes            = models.TextField(blank=True)
