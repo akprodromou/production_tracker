@@ -65,7 +65,6 @@ DATABASES = {
         conn_max_age=600,
     )
 }
-}
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
