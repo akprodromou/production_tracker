@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ supplier.name }}{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'supplier-list' %}">Suppliers</a><span>/</span>
+  {{ supplier.name }}
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ supplier.name }}</h1>
+    {% if supplier.code %}<p class="td-mono text-muted">{{ supplier.code }}</p>{% endif %}
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'supplier-edit' supplier.pk %}" class="btn btn-secondary">Edit</a>
+    <form method="post" action="{% url 'supplier-delete' supplier.pk %}" style="display:inline">
+      {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ supplier.name }}?')">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Details</span></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div><div class="stat-label">Code</div><div class="td-mono">{{ supplier.code|default:"—" }}</div></div>
+        <div><div class="stat-label">TIN / ΑΦΜ</div><div class="td-mono">{{ supplier.tin|default:"—" }}</div></div>
+      </div>
+      {% if supplier.address %}
+      <div class="mt-2"><div class="stat-label">Address</div><div style="font-size:13px">{{ supplier.address|linebreaksbr }}</div></div>
+      {% endif %}
+      {% if supplier.payment_terms %}
+      <div class="mt-2"><div class="stat-label">Payment Terms</div><div style="font-size:13px">{{ supplier.payment_terms }}</div></div>
+      {% endif %}
+      {% if supplier.notes %}
+      <div class="mt-2"><div class="stat-label">Notes</div><div style="font-size:13px">{{ supplier.notes }}</div></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Contacts</span></div>
+    <div class="card-body">
+      {% for name, phone, email in contacts %}
+      {% if name or phone or email %}
+      <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+        {% if name %}<div style="font-weight:600;font-size:13px">{{ name }}</div>{% endif %}
+        {% if phone %}<div class="text-muted" style="font-size:12px">📞 {{ phone }}</div>{% endif %}
+        {% if email %}<div class="text-muted" style="font-size:12px">✉ {{ email }}</div>{% endif %}
+      </div>
+      {% endif %}
+      {% endfor %}
+      {% if not supplier.contact_name and not supplier.contact2_name and not supplier.contact3_name %}
+      <div class="text-muted" style="font-size:13px">No contacts added yet — <a href="{% url 'supplier-edit' supplier.pk %}" style="color:var(--accent)">add contacts</a></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if supply_orders %}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Recent Supply Orders</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Reference</th><th>Order Date</th><th>Expected</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for o in supply_orders %}
+        <tr>
+          <td class="td-mono"><a href="{% url 'supply-order-detail' o.pk %}" style="color:var(--accent);text-decoration:none">{{ o.reference }}</a></td>
+          <td class="text-muted">{{ o.order_date|date:"Y-m-d" }}</td>
+          <td class="text-muted">{{ o.expected_delivery|date:"Y-m-d"|default:"—" }}</td>
+          <td>
+            {% if o.status == 'ORDER_PLACED' %}<span class="badge badge-grey">Order Placed</span>
+            {% elif o.status == 'DISPATCHED' %}<span class="badge badge-blue">Dispatched</span>
+            {% elif o.status == 'DELIVERED' %}<span class="badge badge-green">Delivered</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
+          </td>
+          <td><a href="{% url 'supply-order-detail' o.pk %}" class="btn btn-ghost btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

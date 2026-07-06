@@ -250,6 +250,9 @@ class Carrier(models.Model):
 
 
 class Supplier(models.Model):
+    code             = models.CharField(max_length=50, blank=True, unique=True, null=True,
+                           help_text="ERP supplier code e.g. ΠΡΟΜ-00000281")
+    tin              = models.CharField(max_length=50, blank=True, verbose_name='TIN/ΑΦΜ')
     name             = models.CharField(max_length=200)
     address          = models.TextField(blank=True)
     contact_name     = models.CharField(max_length=100, blank=True)

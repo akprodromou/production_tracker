@@ -103,7 +103,7 @@ class DashboardView(View):
 class ClientOrderBoardView(View):
     def get(self, request):
         confirmed  = ClientOrder.objects.filter(
-            status__in=['CONFIRMED','PARTIALLY_FULFILLED','FULFILLED']
+            status__in=['PURCHASE_ORDER','CONFIRMED','PARTIALLY_FULFILLED','FULFILLED']
         ).select_related('client').order_by('-order_date')
         dispatched = ClientOrder.objects.filter(
             status='SHIPPED'
@@ -198,6 +198,25 @@ class SupplierListView(View):
     def get(self, request):
         suppliers = Supplier.objects.all()
         return render(request, 'suppliers/list.html', {'suppliers': suppliers})
+
+
+
+class SupplierDetailView(View):
+    def get(self, request, pk):
+        supplier = get_object_or_404(Supplier, pk=pk)
+        supply_orders = SupplyOrder.objects.filter(
+            supplier=supplier
+        ).order_by('-order_date')[:10]
+        contacts = [
+            (supplier.contact_name,  supplier.contact_phone,  supplier.contact_email),
+            (supplier.contact2_name, supplier.contact2_phone, supplier.contact2_email),
+            (supplier.contact3_name, supplier.contact3_phone, supplier.contact3_email),
+        ]
+        return render(request, 'suppliers/detail.html', {
+            'supplier':      supplier,
+            'supply_orders': supply_orders,
+            'contacts':      contacts,
+        })
 
 
 class SupplierCreateView(View):
@@ -322,14 +341,25 @@ class SupplyOrderDetailView(View):
 
 
 class SupplyOrderCreateView(View):
+    def _ctx(self):
+        suppliers = list(Supplier.objects.order_by('name').values('id', 'name', 'code'))
+        materials = list(Material.objects.order_by('name').values('id', 'name', 'sku'))
+        return {
+            'suppliers_json': json.dumps(suppliers),
+            'materials_json': json.dumps(materials),
+        }
+
     def get(self, request):
         from .forms import SupplyOrderForm, SupplyOrderLineFormSet
-        return render(request, 'supply_orders/form.html', {
+        ctx = self._ctx()
+        ctx.update({
             'form':         SupplyOrderForm(),
             'formset':      SupplyOrderLineFormSet(),
             'form_title':   'New Supply Order',
             'submit_label': 'Create Order',
         })
+        return render(request, 'supply_orders/form.html', ctx)
+
     def post(self, request):
         from .forms import SupplyOrderForm, SupplyOrderLineFormSet
         form    = SupplyOrderForm(request.POST)
@@ -340,23 +370,34 @@ class SupplyOrderCreateView(View):
             formset.save()
             messages.success(request, f'Supply order {order.reference} created.')
             return redirect('supply-order-detail', pk=order.pk)
-        return render(request, 'supply_orders/form.html', {
-            'form': form, 'formset': formset,
-            'form_title': 'New Supply Order', 'submit_label': 'Create Order',
-        })
+        ctx = self._ctx()
+        ctx.update({'form': form, 'formset': formset,
+            'form_title': 'New Supply Order', 'submit_label': 'Create Order'})
+        return render(request, 'supply_orders/form.html', ctx)
 
 
 class SupplyOrderEditView(View):
+    def _ctx(self):
+        suppliers = list(Supplier.objects.order_by('name').values('id', 'name', 'code'))
+        materials = list(Material.objects.order_by('name').values('id', 'name', 'sku'))
+        return {
+            'suppliers_json': json.dumps(suppliers),
+            'materials_json': json.dumps(materials),
+        }
+
     def get(self, request, pk):
         from .forms import SupplyOrderForm, SupplyOrderLineFormSet
         order = get_object_or_404(SupplyOrder, pk=pk)
-        return render(request, 'supply_orders/form.html', {
+        ctx = self._ctx()
+        ctx.update({
             'form':         SupplyOrderForm(instance=order),
             'formset':      SupplyOrderLineFormSet(instance=order),
             'form_title':   f'Edit {order.reference}',
             'submit_label': 'Save Changes',
             'order':        order,
         })
+        return render(request, 'supply_orders/form.html', ctx)
+
     def post(self, request, pk):
         from .forms import SupplyOrderForm, SupplyOrderLineFormSet
         order   = get_object_or_404(SupplyOrder, pk=pk)
@@ -367,11 +408,11 @@ class SupplyOrderEditView(View):
             formset.save()
             messages.success(request, f'Supply order {order.reference} updated.')
             return redirect('supply-order-detail', pk=order.pk)
-        return render(request, 'supply_orders/form.html', {
-            'form': form, 'formset': formset,
+        ctx = self._ctx()
+        ctx.update({'form': form, 'formset': formset,
             'form_title': f'Edit {order.reference}',
-            'submit_label': 'Save Changes', 'order': order,
-        })
+            'submit_label': 'Save Changes', 'order': order})
+        return render(request, 'supply_orders/form.html', ctx)
 
 
 class SupplyOrderDeleteView(View):

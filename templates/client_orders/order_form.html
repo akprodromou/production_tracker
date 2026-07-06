@@ -84,9 +84,17 @@ const CLIENTS       = {{ clients_json|safe }};
 <form method="post" id="orderForm">
   {% csrf_token %}
 
-  {% if form.non_field_errors or formset.non_form_errors %}
+  {% if form.errors or formset.errors %}
   <div class="mb-2">
+    {% for field in form %}
+      {% for e in field.errors %}
+      <div class="msg msg-error"><strong>{{ field.label }}:</strong> {{ e }}</div>
+      {% endfor %}
+    {% endfor %}
     {% for e in form.non_field_errors %}<div class="msg msg-error">{{ e }}</div>{% endfor %}
+    {% for lf in formset %}{% for field, errs in lf.errors.items %}{% for e in errs %}
+    <div class="msg msg-error"><strong>Order line — {{ field }}:</strong> {{ e }}</div>
+    {% endfor %}{% endfor %}{% endfor %}
     {% for e in formset.non_form_errors %}<div class="msg msg-error">{{ e }}</div>{% endfor %}
   </div>
   {% endif %}

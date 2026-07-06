@@ -8,32 +8,74 @@
 {% block extra_head %}
 <style>
 select, input[type=text], input[type=number], input[type=date], textarea {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 13px;
-  padding: 8px 12px;
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color .15s;
+  width:100%; background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--radius); color:var(--text); font-family:var(--sans);
+  font-size:13px; padding:8px 12px; outline:none; box-sizing:border-box; transition:border-color .15s;
 }
-select:focus, input:focus, textarea:focus { border-color: var(--accent); }
-select option { background: var(--surface2); color: var(--text); }
+select:focus, input:focus, textarea:focus { border-color:var(--accent); }
+select option { background:var(--surface2); color:var(--text); }
+.search-wrap { position:relative; }
+.search-input { width:100%; background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--radius); color:var(--text); font-size:13px; padding:8px 12px;
+  outline:none; box-sizing:border-box; transition:border-color .15s; }
+.search-input:focus { border-color:var(--accent); }
+.search-drop { display:none; position:absolute; top:calc(100% + 2px); left:0; right:0;
+  background:var(--surface2); border:1px solid var(--accent); border-radius:var(--radius);
+  z-index:200; max-height:220px; overflow-y:auto; }
+.search-drop.open { display:block; }
+.search-opt { padding:8px 12px; font-size:13px; cursor:pointer; display:flex; gap:10px; align-items:center; }
+.search-opt:hover { background:rgba(79,142,247,.15); }
+.search-opt-sub { font-family:var(--mono); font-size:11px; color:var(--muted); }
 </style>
+<script>
+var SUPPLIERS = {{ suppliers_json|safe }};
+var MATERIALS = {{ materials_json|safe }};
+</script>
 {% endblock %}
 
 {% block content %}
 <div class="page-header"><div><h1>{{ form_title }}</h1></div></div>
-<form method="post">{% csrf_token %}
+
+{% if form.errors or formset.errors %}
+<div class="mb-3">
+  {% for field, errs in form.errors.items %}
+    {% for e in errs %}
+    <div class="msg msg-error">{{ field }}: {{ e }}</div>
+    {% endfor %}
+  {% endfor %}
+  {% for lf in formset %}
+    {% for field, errs in lf.errors.items %}
+      {% for e in errs %}
+      <div class="msg msg-error">Line item — {{ field }}: {{ e }}</div>
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+  {% for e in formset.non_form_errors %}
+  <div class="msg msg-error">{{ e }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" id="supplyForm">{% csrf_token %}
   <div class="card mb-3">
     <div class="card-header"><span class="card-title">Order Details</span></div>
     <div class="card-body">
       <div class="form-grid form-grid-2">
         <div class="form-group"><label>Reference</label>{{ form.reference }}</div>
-        <div class="form-group"><label>Supplier</label>{{ form.supplier }}</div>
+
+        {# Supplier searchable #}
+        <div class="form-group">
+          <label>Supplier</label>
+          <div class="search-wrap" id="supplier-wrap">
+            <input type="text" class="search-input" id="supplier-search"
+              placeholder="Search supplier…" autocomplete="off"
+              value="{% if form.instance.pk and form.instance.supplier_id %}{{ form.instance.supplier.name }}{% endif %}">
+            <div class="search-drop" id="supplier-drop"></div>
+            <div style="display:none">{{ form.supplier }}</div>
+          </div>
+          {% if form.supplier.errors %}<ul class="errorlist">{% for e in form.supplier.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
         <div class="form-group"><label>Order Date</label>{{ form.order_date }}</div>
         <div class="form-group"><label>Expected Delivery</label>{{ form.expected_delivery }}</div>
         <div class="form-group"><label>Destination Warehouse</label>{{ form.warehouse }}</div>
@@ -55,21 +97,30 @@ select option { background: var(--surface2); color: var(--text); }
         <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase">Unit Price</span>
         <span></span>
       </div>
-      {% for lf in formset %}
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center">
-        <div>{{ lf.material }}{% for h in lf.hidden_fields %}{{ h }}{% endfor %}</div>
-        <div>{{ lf.quantity }}</div>
-        <div>{{ lf.unit_price }}</div>
-        <div>
-          {% if lf.instance.pk %}
-            <div style="display:none">{{ lf.DELETE }}</div>
-            <button type="button" class="btn btn-danger btn-sm" onclick="this.previousElementSibling.querySelector('input').checked=true;this.closest('div').parentElement.style.opacity='0.4'">✕</button>
-          {% else %}
-            <button type="button" class="btn btn-danger btn-sm remove-line">✕</button>
-          {% endif %}
+      <div id="lines-container">
+        {% for lf in formset %}
+        <div class="line-row" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center">
+          <div class="search-wrap">
+            <input type="text" class="search-input mat-search" autocomplete="off"
+              placeholder="Search material or SKU…"
+              value="{% if lf.instance.pk and lf.instance.material_id %}{{ lf.instance.material.name }} ({{ lf.instance.material.sku }}){% endif %}">
+            <div class="search-drop"></div>
+            <div style="display:none">{{ lf.material }}{% for h in lf.hidden_fields %}{{ h }}{% endfor %}</div>
+          </div>
+          <div>{{ lf.quantity }}</div>
+          <div>{{ lf.unit_price }}</div>
+          <div>
+            {% if lf.instance.pk %}
+              <div style="display:none">{{ lf.DELETE }}</div>
+              <button type="button" class="btn btn-danger btn-sm"
+                onclick="this.previousElementSibling.querySelector('input').checked=true;this.closest('.line-row').style.opacity='0.4'">✕</button>
+            {% else %}
+              <button type="button" class="btn btn-danger btn-sm remove-line">✕</button>
+            {% endif %}
+          </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
       <button type="button" id="add-line-btn" class="btn btn-ghost btn-sm" style="margin-top:8px">+ Add Item</button>
     </div>
   </div>
@@ -80,30 +131,104 @@ select option { background: var(--surface2); color: var(--text); }
   </div>
 </form>
 {% endblock %}
+
 {% block extra_js %}
 <script>
+function makeSearch(inputEl, dropEl, hiddenSelEl, data, labelFn, subFn, idFn) {
+  function render(q) {
+    var terms = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    var results = terms.length
+      ? data.filter(function(item) {
+          return terms.every(function(t) {
+            return labelFn(item).toLowerCase().includes(t) ||
+                   (subFn(item)||'').toLowerCase().includes(t);
+          });
+        })
+      : data;
+    dropEl.innerHTML = '';
+    results.slice(0,30).forEach(function(item) {
+      var div = document.createElement('div');
+      div.className = 'search-opt';
+      div.innerHTML = '<span style="flex:1">' + labelFn(item) + '</span>' +
+                      '<span class="search-opt-sub">' + (subFn(item)||'') + '</span>';
+      div.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        for (var opt of hiddenSelEl.options) {
+          if (parseInt(opt.value) === idFn(item)) { opt.selected = true; break; }
+        }
+        inputEl.value = labelFn(item) + (subFn(item) ? ' (' + subFn(item) + ')' : '');
+        dropEl.classList.remove('open');
+      });
+      dropEl.appendChild(div);
+    });
+  }
+  inputEl.addEventListener('focus', function() { render(inputEl.value); dropEl.classList.add('open'); });
+  inputEl.addEventListener('input', function() { render(inputEl.value); dropEl.classList.add('open'); });
+  inputEl.addEventListener('blur',  function() { setTimeout(function() { dropEl.classList.remove('open'); }, 150); });
+  if (hiddenSelEl && hiddenSelEl.value && !inputEl.value) {
+    var existing = data.find(function(m) { return m.id === parseInt(hiddenSelEl.value); });
+    if (existing) inputEl.value = labelFn(existing) + (subFn(existing) ? ' (' + subFn(existing) + ')' : '');
+  }
+}
+
+// Supplier search
+(function() {
+  var input  = document.getElementById('supplier-search');
+  var drop   = document.getElementById('supplier-drop');
+  var hidden = document.querySelector('#supplier-wrap select');
+  if (input && drop && hidden)
+    makeSearch(input, drop, hidden, SUPPLIERS,
+      function(s) { return s.name; },
+      function(s) { return s.code || ''; },
+      function(s) { return s.id; });
+})();
+
+// Material search on each line row
+function attachMatSearch(row) {
+  var input  = row.querySelector('.mat-search');
+  var drop   = row.querySelector('.search-drop');
+  var hidden = row.querySelector('select[name$="-material"]');
+  if (!input || !drop || !hidden) return;
+  makeSearch(input, drop, hidden, MATERIALS,
+    function(m) { return m.name; },
+    function(m) { return m.sku; },
+    function(m) { return m.id; });
+}
+
+document.querySelectorAll('.line-row').forEach(attachMatSearch);
+
+// Remove unsaved lines
 document.querySelectorAll('.remove-line').forEach(function(btn) {
-  btn.addEventListener('click', function() { this.closest('[style*="grid"]').remove(); });
+  btn.addEventListener('click', function() { this.closest('.line-row').remove(); });
 });
-var addBtn = document.getElementById('add-line-btn');
-var total  = document.querySelector('[id$="-TOTAL_FORMS"]');
+
+// Add new line
+var addBtn   = document.getElementById('add-line-btn');
+var total    = document.querySelector('[id$="-TOTAL_FORMS"]');
+var container = document.getElementById('lines-container');
 if (addBtn && total) {
   addBtn.addEventListener('click', function() {
-    var rows = document.querySelectorAll('[id$="-TOTAL_FORMS"]')[0].closest('form').querySelectorAll('[style*="grid-template-columns:2fr"]');
-    var idx  = parseInt(total.value);
+    var idx    = container.querySelectorAll('.line-row').length;
     var prefix = total.id.replace('id_','').replace('-TOTAL_FORMS','');
-    var div  = document.createElement('div');
-    div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center';
-    div.innerHTML =
-      '<div><select name="' + prefix + '-' + idx + '-material" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px">' +
-      document.querySelector('[name$="-0-material"] option, [name$="-material"] option') ? '' : '' +
-      '</select></div>' +
+    var row    = document.createElement('div');
+    row.className = 'line-row';
+    row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center';
+    row.innerHTML =
+      '<div class="search-wrap">' +
+        '<input type="text" class="search-input mat-search" autocomplete="off" placeholder="Search material or SKU…">' +
+        '<div class="search-drop"></div>' +
+        '<div style="display:none"><select name="' + prefix + '-' + idx + '-material" id="id_' + prefix + '_' + idx + '_material">' +
+          '<option value="">---------</option>' +
+          MATERIALS.map(function(m) { return '<option value="' + m.id + '">' + m.name + '</option>'; }).join('') +
+        '</select></div>' +
+      '</div>' +
       '<div><input type="number" name="' + prefix + '-' + idx + '-quantity" step="0.001" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px"></div>' +
       '<div><input type="number" name="' + prefix + '-' + idx + '-unit_price" step="0.0001" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px"></div>' +
       '<div><button type="button" class="btn btn-danger btn-sm remove-line">✕</button></div>';
-    addBtn.parentElement.insertBefore(div, addBtn);
-    div.querySelector('.remove-line').addEventListener('click', function() { div.remove(); });
-    total.value = idx + 1;
+    container.appendChild(row);
+    attachMatSearch(row);
+    row.querySelector('.remove-line').addEventListener('click', function() { row.remove(); });
+    total.value = parseInt(total.value) + 1;
   });
 }
 </script>

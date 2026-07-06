@@ -25,14 +25,10 @@
   <div class="card-body" style="display:grid;grid-template-columns:repeat(6,1fr);gap:18px">
     <div>
       <div class="stat-label">Order Status</div>
-      {% if order.status == 'PURCHASE_ORDER' %}<span class="badge badge-grey">Purchase Order</span>
-      {% elif order.status == 'CONFIRMED' %}<span class="badge badge-blue">Confirmed</span>
-      {% elif order.status == 'PARTIALLY_FULFILLED' %}<span class="badge badge-orange">Partial</span>
-      {% elif order.status == 'FULFILLED' %}<span class="badge badge-green">Fulfilled</span>
-      {% elif order.status == 'SHIPPED' %}<span class="badge badge-green" style="background:rgba(45,212,160,.2)">Shipped</span>
-      {% elif order.status == 'CANCELLED' %}<span class="badge badge-red">Cancelled</span>
-      {% else %}<span class="badge badge-grey">{{ order.status }}</span>
-      {% endif %}
+      {% if order.status == 'PURCHASE_ORDER' or order.status == 'CONFIRMED' or order.status == 'PARTIALLY_FULFILLED' or order.status == 'FULFILLED' %}<span class="badge badge-grey">Order Placed</span>
+      {% elif order.status == 'SHIPPED' %}<span class="badge badge-blue">Dispatched</span>
+      {% elif order.status == 'DELIVERED' %}<span class="badge badge-green">Delivered</span>
+      {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
     </div>
     <div>
       <div class="stat-label">Fulfilment Status</div>
