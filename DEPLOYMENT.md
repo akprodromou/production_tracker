@@ -43,7 +43,7 @@ Only use them if Railway's database is blank and you need to seed it from scratc
 
 ## Railway Start Command
 
-Already configured — do not change:
+Already configured, so do not change:
 
 ```
 python manage.py collectstatic --no-input && python manage.py migrate && gunicorn core.wsgi --bind 0.0.0.0:$PORT
