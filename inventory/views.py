@@ -340,8 +340,13 @@ class CarrierDeleteView(View):
 
 class SupplierListView(View):
     def get(self, request):
-        suppliers = Supplier.objects.all()
-        return render(request, 'suppliers/list.html', {'suppliers': suppliers})
+        q = request.GET.get('q', '').strip()
+        suppliers = Supplier.objects.order_by('name')
+        if q:
+            suppliers = suppliers.filter(
+                Q(name__icontains=q) | Q(code__icontains=q) | Q(tin__icontains=q)
+            )
+        return render(request, 'suppliers/list.html', {'suppliers': suppliers, 'q': q})
 
 
 
