@@ -322,7 +322,8 @@ class ClientForm(forms.ModelForm):
         return self.cleaned_data['name'].strip()
 
     def clean_code(self):
-        return self.cleaned_data['code'].strip()
+        val = self.cleaned_data.get('code')
+        return val.strip() if val else val
 
 class ClientOrderForm(forms.ModelForm):
     class Meta:
