@@ -1,4 +1,4 @@
-# Deployment Guide — YAF Procurement Tracking
+# Deployment Guide - YAF Procurement Tracking
 
 ## How it works
 
