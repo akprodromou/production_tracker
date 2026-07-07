@@ -20,18 +20,6 @@ That's it. Railway redeploys within ~2 minutes. Your Railway data is safe.
 
 ---
 
-## Adding new Python packages
-
-```powershell
-pip install <package>
-pip freeze > requirements.txt
-git add requirements.txt
-git commit -m "deps: add <package>"
-git push origin main
-```
-
----
-
 ## Entering data
 
 Enter all real data directly on Railway:
