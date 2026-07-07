@@ -103,15 +103,19 @@ class DashboardView(View):
 
 class ClientOrderBoardView(View):
     def get(self, request):
+        from datetime import date, timedelta
+        cutoff = date.today() - timedelta(days=5)
         placed     = SalesOrder.objects.filter(
             status='ORDER_PLACED'
-        ).select_related('client').order_by('-order_date')
+        ).select_related('client').order_by('expected_delivery')
         dispatched = SalesOrder.objects.filter(
             status='DISPATCHED'
-        ).select_related('client').order_by('-order_date')
+        ).select_related('client').order_by('expected_delivery')
         delivered  = SalesOrder.objects.filter(
             status='DELIVERED'
-        ).select_related('client').order_by('-order_date')
+        ).select_related('client').exclude(
+            date_delivered__lt=cutoff
+        ).order_by('-date_delivered')
         return render(request, 'client_orders/order_board.html', {
             'placed':     placed,
             'dispatched': dispatched,
@@ -128,6 +132,9 @@ class ClientOrderBoardView(View):
         }
         if action in STATUS_MAP:
             order.status = STATUS_MAP[action]
+            if action == 'mark_delivered':
+                from datetime import date as _date
+                order.date_delivered = _date.today()
             order.save()
             messages.success(request, f'{order.reference} updated.')
         return redirect('client-order-board')
@@ -140,8 +147,19 @@ class ClientOrderBoardView(View):
 
 class SalesOrderListView(View):
     def get(self, request):
+        q      = request.GET.get('q', '').strip()
+        status = request.GET.get('status', '').strip()
         orders = SalesOrder.objects.select_related('client','carrier').order_by('-order_date')
-        return render(request, 'sales_orders/list.html', {'orders': orders})
+        if q:
+            orders = orders.filter(
+                Q(reference__icontains=q) | Q(client__name__icontains=q)
+            )
+        if status:
+            orders = orders.filter(status=status)
+        return render(request, 'sales_orders/list.html', {
+            'orders': orders, 'q': q, 'status': status,
+            'status_choices': SalesOrder.STATUS_CHOICES,
+        })
 
 
 class SalesOrderDetailView(View):
@@ -162,6 +180,9 @@ class SalesOrderDetailView(View):
             new_status = request.POST.get('status')
             if new_status in dict(SalesOrder.STATUS_CHOICES):
                 order.status = new_status
+                if new_status == 'DELIVERED':
+                    from datetime import date as _date
+                    order.date_delivered = _date.today()
                 order.save()
                 messages.success(request, f'Status updated to {order.get_status_display()}.')
         return redirect('sales-order-detail', pk=pk)
@@ -400,9 +421,13 @@ class SupplierDeleteView(View):
 
 class SupplyOrderBoardView(View):
     def get(self, request):
-        placed     = SupplyOrder.objects.filter(status='ORDER_PLACED').select_related('supplier','carrier').prefetch_related('lines__material')
-        dispatched = SupplyOrder.objects.filter(status='DISPATCHED').select_related('supplier','carrier').prefetch_related('lines__material')
-        delivered  = SupplyOrder.objects.filter(status='DELIVERED').select_related('supplier','carrier').prefetch_related('lines__material')
+        from datetime import date, timedelta
+        cutoff = date.today() - timedelta(days=5)
+        placed     = SupplyOrder.objects.filter(status='ORDER_PLACED').select_related('supplier','carrier').order_by('expected_delivery')
+        dispatched = SupplyOrder.objects.filter(status='DISPATCHED').select_related('supplier','carrier').order_by('expected_delivery')
+        delivered  = SupplyOrder.objects.filter(status='DELIVERED').select_related('supplier','carrier').exclude(
+            date_delivered__lt=cutoff
+        ).order_by('-date_delivered')
         return render(request, 'supply_orders/board.html', {
             'placed': placed, 'dispatched': dispatched, 'delivered': delivered,
         })
@@ -417,6 +442,9 @@ class SupplyOrderBoardView(View):
         }
         if action in STATUS_MAP:
             order.status = STATUS_MAP[action]
+            if action == 'mark_delivered':
+                from datetime import date as _date
+                order.date_delivered = _date.today()
             order.save()
             messages.success(request, f'{order.reference} updated.')
         return redirect('supply-order-board')
@@ -424,8 +452,19 @@ class SupplyOrderBoardView(View):
 
 class SupplyOrderListView(View):
     def get(self, request):
+        q      = request.GET.get('q', '').strip()
+        status = request.GET.get('status', '').strip()
         orders = SupplyOrder.objects.select_related('supplier','carrier').order_by('-order_date')
-        return render(request, 'supply_orders/list.html', {'orders': orders})
+        if q:
+            orders = orders.filter(
+                Q(reference__icontains=q) | Q(supplier__name__icontains=q)
+            )
+        if status:
+            orders = orders.filter(status=status)
+        return render(request, 'supply_orders/list.html', {
+            'orders': orders, 'q': q, 'status': status,
+            'status_choices': SupplyOrder.STATUS_CHOICES,
+        })
 
 
 class SupplyOrderDetailView(View):
@@ -458,6 +497,9 @@ class SupplyOrderDetailView(View):
             new_status = request.POST.get('status')
             if new_status in dict(SupplyOrder.STATUS_CHOICES):
                 order.status = new_status
+                if new_status == 'DELIVERED':
+                    from datetime import date as _date
+                    order.date_delivered = _date.today()
                 order.save()
                 messages.success(request, f'Status updated to {order.get_status_display()}.')
         return redirect('supply-order-detail', pk=pk)

@@ -244,6 +244,7 @@ class SalesOrder(models.Model):
     tracking_number  = models.CharField(max_length=100, blank=True)
     status           = models.CharField(max_length=20, choices=STATUS_CHOICES,
                            default='ORDER_PLACED')
+    date_delivered   = models.DateField(null=True, blank=True)
     notes            = models.TextField(blank=True)
     created_at       = models.DateTimeField(default=timezone.now)
 
@@ -345,6 +346,7 @@ class SupplyOrder(models.Model):
     tracking_number  = models.CharField(max_length=100, blank=True)
     status           = models.CharField(max_length=20, choices=STATUS_CHOICES,
                            default='ORDER_PLACED')
+    date_delivered   = models.DateField(null=True, blank=True)
     notes            = models.TextField(blank=True)
     created_at       = models.DateTimeField(default=timezone.now)
 

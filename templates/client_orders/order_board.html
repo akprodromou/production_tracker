@@ -76,7 +76,7 @@
     <div class="order-card" onclick="window.location='{% url 'sales-order-detail' order.pk %}'">
       <div class="order-ref">{{ order.reference }}</div>
       <div class="order-client">{{ order.client.name }}</div>
-      <div class="order-meta">{{ order.order_date|date:"Y-m-d" }}</div>
+      <div class="order-meta">Delivered: {{ order.date_delivered|date:"Y-m-d"|default:"—" }}</div>
     </div>
     {% empty %}<div class="board-empty">No orders</div>{% endfor %}
   </div>

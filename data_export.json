@@ -21983,6 +21983,7 @@
     "carrier": 1,
     "tracking_number": "300714000015194",
     "status": "DISPATCHED",
+    "date_delivered": null,
     "notes": "",
     "created_at": "2026-07-06T09:19:15.657Z"
   }
@@ -21999,6 +22000,7 @@
     "carrier": 1,
     "tracking_number": "300714000015195",
     "status": "DISPATCHED",
+    "date_delivered": null,
     "notes": "",
     "created_at": "2026-07-06T09:29:35.750Z"
   }
@@ -31261,6 +31263,7 @@
     "carrier": null,
     "tracking_number": "",
     "status": "ORDER_PLACED",
+    "date_delivered": null,
     "notes": "",
     "created_at": "2026-07-03T13:51:01.935Z"
   }
@@ -31277,6 +31280,7 @@
     "carrier": null,
     "tracking_number": "",
     "status": "DELIVERED",
+    "date_delivered": "2026-07-07",
     "notes": "",
     "created_at": "2026-07-03T13:58:23.192Z"
   }
@@ -31292,7 +31296,8 @@
     "warehouse": 7,
     "carrier": null,
     "tracking_number": "",
-    "status": "DELIVERED",
+    "status": "DISPATCHED",
+    "date_delivered": null,
     "notes": "",
     "created_at": "2026-07-03T14:02:57.180Z"
   }
@@ -31309,6 +31314,7 @@
     "carrier": null,
     "tracking_number": "",
     "status": "ORDER_PLACED",
+    "date_delivered": null,
     "notes": "",
     "created_at": "2026-07-03T14:05:23.467Z"
   }
@@ -31325,6 +31331,7 @@
     "carrier": 2,
     "tracking_number": "",
     "status": "DELIVERED",
+    "date_delivered": "2026-07-07",
     "notes": "Samples",
     "created_at": "2026-07-06T06:28:36.873Z"
   }
@@ -31341,6 +31348,7 @@
     "carrier": 3,
     "tracking_number": "",
     "status": "ORDER_PLACED",
+    "date_delivered": null,
     "notes": "",
     "created_at": "2026-07-06T06:38:08.128Z"
   }
@@ -31357,6 +31365,7 @@
     "carrier": null,
     "tracking_number": "",
     "status": "ORDER_PLACED",
+    "date_delivered": null,
     "notes": "",
     "created_at": "2026-07-06T06:42:43.852Z"
   }
@@ -31373,6 +31382,7 @@
     "carrier": null,
     "tracking_number": "",
     "status": "ORDER_PLACED",
+    "date_delivered": null,
     "notes": "",
     "created_at": "2026-07-06T06:44:28.065Z"
   }
@@ -31388,7 +31398,8 @@
     "warehouse": 10,
     "carrier": 2,
     "tracking_number": "6675333210",
-    "status": "DISPATCHED",
+    "status": "DELIVERED",
+    "date_delivered": "2026-07-07",
     "notes": "",
     "created_at": "2026-07-06T09:34:33.807Z"
   }
@@ -31405,6 +31416,7 @@
     "carrier": 4,
     "tracking_number": "",
     "status": "ORDER_PLACED",
+    "date_delivered": null,
     "notes": "DIA 2328\r\nLBL Aged Balsamic Vinegar US ~ 1800τμχ.\r\nDIA 2329\r\nLBL White Balsamic Vinegar US~ 1030τμχ.",
     "created_at": "2026-07-06T09:37:16.348Z"
   }
@@ -31421,6 +31433,7 @@
     "carrier": null,
     "tracking_number": "",
     "status": "ORDER_PLACED",
+    "date_delivered": null,
     "notes": "T02382 PACK CAPS.TER. 41,5x35 : 100.000 τεμάχια\r\nT02383 PACK CAPS.TER. 36,5x30 : 100.000 τεμάχια. - 5148 sent to Lazaridis",
     "created_at": "2026-07-06T09:40:24.081Z"
   }

@@ -35,8 +35,7 @@
       <div class="order-ref">{{ order.reference }}</div>
       <div class="order-supplier">{{ order.supplier.name }}</div>
       <div class="order-meta">
-        Ordered {{ order.order_date|date:"Y-m-d" }}
-        {% if order.expected_delivery %} · Due {{ order.expected_delivery|date:"Y-m-d" }}{% endif %}
+        {% if order.expected_delivery %}Due {{ order.expected_delivery|date:"Y-m-d" }}{% else %}Ordered {{ order.order_date|date:"Y-m-d" }}{% endif %}
       </div>
       <div style="margin-top:8px" onclick="event.stopPropagation()">
         <form method="post">{% csrf_token %}
@@ -80,7 +79,7 @@
     <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
       <div class="order-ref">{{ order.reference }}</div>
       <div class="order-supplier">{{ order.supplier.name }}</div>
-      <div class="order-meta">{{ order.expected_delivery|date:"Y-m-d"|default:"—" }}</div>
+      <div class="order-meta">Delivered: {{ order.date_delivered|date:"Y-m-d"|default:"—" }}</div>
     </div>
     {% empty %}<div class="board-empty">No orders</div>{% endfor %}
   </div>
