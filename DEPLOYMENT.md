@@ -1,102 +1,97 @@
 # Deployment Guide — YAF Procurement Tracking
 
-## Standard Deployment (every time you make local changes)
+## Setup: Point local machine at Railway's Postgres (one-time)
 
-### Step 1 — Export data and push to GitHub (local machine)
+This makes local and Railway use the **same database** — changes anywhere
+appear everywhere instantly.
+
+### Step 1 — Install python-dotenv
 
 ```powershell
-python export_data.py
+pip install python-dotenv
+pip freeze > requirements.txt
+```
+
+### Step 2 — Get your DATABASE_URL from Railway
+
+Railway dashboard → your **Postgres** service → **Variables** tab →
+copy the value of `DATABASE_URL`. It looks like:
+```
+postgresql://postgres:xxxx@monorail.proxy.rlwy.net:xxxxx/railway
+```
+
+### Step 3 — Create a local .env file
+
+In your project root, create a file called `.env` (no extension):
+```
+DATABASE_URL=postgresql://postgres:xxxx@monorail.proxy.rlwy.net:xxxxx/railway
+```
+
+⚠️ **Never commit `.env` to git.** Check that `.gitignore` contains `.env`.
+
+### Step 4 — Verify .gitignore
+
+```powershell
+python setup_env_database.py
+```
+
+Then check `.gitignore` contains `.env` — if not, add it:
+```powershell
+echo ".env" >> .gitignore
+```
+
+### Step 5 — Test locally
+
+```powershell
+python manage.py runserver
+```
+
+Your local app now reads/writes Railway's Postgres directly.
+
+---
+
+## Daily workflow (once setup is complete)
+
+### Deploy code changes
+
+```powershell
 git add .
-git commit -m "your description of changes"
+git commit -m "description of changes"
 git push origin main
 ```
 
-Railway auto-deploys within ~2 minutes. The start command handles migrations
-and static files automatically — **the database is never touched by a git push**.
+Railway auto-deploys within ~2 minutes. Since both environments share the
+same database, **no data sync is needed** — ever.
+
+### Adding new Python packages
+
+```powershell
+pip install <package>
+pip freeze > requirements.txt
+git add requirements.txt
+git commit -m "deps: add <package>"
+git push origin main
+```
 
 ---
 
 ## ⚠️ WARNING — loaddata overwrites Railway data
 
-**`python manage.py loaddata data_export.json` replaces any Railway record
-that shares a primary key with your local snapshot.**
+**Do NOT run `python manage.py loaddata` on Railway** unless you are
+doing a full reset and don't mind losing all online data.
 
-- Data entered directly on Railway **will be overwritten** if you run `loaddata`
-- Railway's free/hobby tier has **no automatic backups** — overwritten data is gone
-- Only run `loaddata` when you deliberately want Railway to mirror your local database
-
-**When NOT to run loaddata:**
-- You have entered data directly on Railway that you want to keep
-- You are only deploying code changes (git push handles this automatically)
-
-**When it IS safe to run loaddata:**
-- First-time setup / initial data seed
-- You have entered all data locally and Railway has nothing you want to keep
-- You have explicitly decided to overwrite Railway with your local snapshot
-
----
-
-## Syncing local data to Railway (use with caution)
-
-Open the Railway console:
-https://railway.com/project/d8f1fdab-6dcf-447e-9aac-aaf59943e31b/service/af0bab84-f5dc-4d18-ab0f-928fb4f008ad/console
-
-**Option A — Merge (safer):**
-```bash
-python manage.py loaddata data_export.json
-```
-- Records with the same primary key → **overwritten** with local values
-- Records that exist locally but not online → inserted
-- Records that exist online but not locally → left untouched
-- Still overwrites matching records — see warning above
-
-**Option B — Full replace (destructive):**
-```bash
-python manage.py flush --no-input
-python manage.py loaddata data_export.json
-```
-- Wipes **ALL** Railway data first, then loads local snapshot
-- Use only when Railway should be an exact mirror of local with no exceptions
-
----
-
-## Recommended workflow going forward
-
-**Code changes only (most common case):**
-```powershell
-git add .
-git commit -m "description"
-git push origin main
-```
-→ Railway redeploys, database untouched. ✅
-
-**Data entry:** do it directly on Railway to avoid sync conflicts.
-
-**Local development:** use local SQLite freely. Only sync to Railway when needed.
-
----
-
-## If you added new Python packages
-
-```powershell
-pip freeze > requirements.txt
-git add requirements.txt
-git commit -m "deps: update requirements"
-git push origin main
-```
+Once you are using the shared Postgres setup above, `data_export.json`
+and `loaddata` are no longer part of your workflow.
 
 ---
 
 ## Railway Start Command
 
-Already configured — do not change unless instructed:
+Already configured — do not change:
 
 ```
 python manage.py collectstatic --no-input && python manage.py migrate && gunicorn core.wsgi --bind 0.0.0.0:$PORT
 ```
-
-Runs on every deploy: static files, schema migrations, web server start.
-Never wipes data.
 
 ---
 
@@ -104,3 +99,4 @@ Never wipes data.
 
 - **App:** https://productiontracker-production-bc0e.up.railway.app
 - **Console:** https://railway.com/project/d8f1fdab-6dcf-447e-9aac-aaf59943e31b/service/af0bab84-f5dc-4d18-ab0f-928fb4f008ad/console
+- **Postgres Variables:** Railway dashboard → Postgres service → Variables tab
