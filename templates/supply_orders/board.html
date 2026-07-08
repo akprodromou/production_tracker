@@ -33,7 +33,7 @@
     </div>
     {% for order in placed %}
     <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
-      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:40 }}{% else %}{{ order.reference|truncatechars:40 }}{% endif %}{% endwith %}</div>
+      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:80 }}{% else %}{{ order.reference|truncatechars:80 }}{% endif %}{% endwith %}</div>
       <div class="order-supplier">{{ order.supplier.name }}</div>
       <div class="order-meta">{% if order.expected_delivery %}Due {{ order.expected_delivery|date:"Y-m-d" }}{% else %}Ordered {{ order.order_date|date:"Y-m-d" }}{% endif %}</div>
       <div style="margin-top:8px" onclick="event.stopPropagation()">
@@ -54,7 +54,7 @@
     </div>
     {% for order in dispatched %}
     <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
-      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:40 }}{% else %}{{ order.reference|truncatechars:40 }}{% endif %}{% endwith %}</div>
+      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:80 }}{% else %}{{ order.reference|truncatechars:80 }}{% endif %}{% endwith %}</div>
       <div class="order-supplier">{{ order.supplier.name }}</div>
       <div class="order-meta">{% if order.expected_delivery %}Due {{ order.expected_delivery|date:"Y-m-d" }}{% else %}Ordered {{ order.order_date|date:"Y-m-d" }}{% endif %}</div>
       <div style="margin-top:8px" onclick="event.stopPropagation()">
@@ -75,7 +75,7 @@
     </div>
     {% for order in delivered %}
     <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
-      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:40 }}{% else %}{{ order.reference|truncatechars:40 }}{% endif %}{% endwith %}</div>
+      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:80 }}{% else %}{{ order.reference|truncatechars:80 }}{% endif %}{% endwith %}</div>
       <div class="order-supplier">{{ order.supplier.name }}</div>
       <div class="order-meta">Delivered: {{ order.date_delivered|date:"Y-m-d"|default:"&mdash;" }}</div>
     </div>
