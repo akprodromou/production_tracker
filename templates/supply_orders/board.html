@@ -25,6 +25,7 @@
   </div>
 </div>
 <div class="board">
+
   <div class="board-col">
     <div class="board-col-header">
       <span class="board-col-title">Order Placed</span>
@@ -32,21 +33,20 @@
     </div>
     {% for order in placed %}
     <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
-      <div class="order-ref">{{ order.reference }}</div>
+      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:25 }}{% else %}{{ order.reference|truncatechars:25 }}{% endif %}{% endwith %}</div>
       <div class="order-supplier">{{ order.supplier.name }}</div>
-      <div class="order-meta">
-        {% if order.expected_delivery %}Due {{ order.expected_delivery|date:"Y-m-d" }}{% else %}Ordered {{ order.order_date|date:"Y-m-d" }}{% endif %}
-      </div>
+      <div class="order-meta">{% if order.expected_delivery %}Due {{ order.expected_delivery|date:"Y-m-d" }}{% else %}Ordered {{ order.order_date|date:"Y-m-d" }}{% endif %}</div>
       <div style="margin-top:8px" onclick="event.stopPropagation()">
         <form method="post">{% csrf_token %}
           <input type="hidden" name="order_id" value="{{ order.pk }}">
           <input type="hidden" name="action" value="mark_dispatched">
-          <button type="submit" class="btn btn-secondary btn-sm">→ Mark Dispatched</button>
+          <button type="submit" class="btn btn-secondary btn-sm">Mark Dispatched</button>
         </form>
       </div>
     </div>
     {% empty %}<div class="board-empty">No orders</div>{% endfor %}
   </div>
+
   <div class="board-col">
     <div class="board-col-header">
       <span class="board-col-title">Dispatched</span>
@@ -54,22 +54,20 @@
     </div>
     {% for order in dispatched %}
     <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
-      <div class="order-ref">{{ order.reference }}</div>
+      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:25 }}{% else %}{{ order.reference|truncatechars:25 }}{% endif %}{% endwith %}</div>
       <div class="order-supplier">{{ order.supplier.name }}</div>
-      <div class="order-meta">
-        {% if order.carrier %}{{ order.carrier.name }}{% endif %}
-        {% if order.tracking_number %} · {{ order.tracking_number }}{% endif %}
-      </div>
+      <div class="order-meta">{% if order.expected_delivery %}Due {{ order.expected_delivery|date:"Y-m-d" }}{% else %}Ordered {{ order.order_date|date:"Y-m-d" }}{% endif %}</div>
       <div style="margin-top:8px" onclick="event.stopPropagation()">
         <form method="post">{% csrf_token %}
           <input type="hidden" name="order_id" value="{{ order.pk }}">
           <input type="hidden" name="action" value="mark_delivered">
-          <button type="submit" class="btn btn-primary btn-sm">✓ Mark Delivered</button>
+          <button type="submit" class="btn btn-primary btn-sm">Mark Delivered</button>
         </form>
       </div>
     </div>
     {% empty %}<div class="board-empty">No orders</div>{% endfor %}
   </div>
+
   <div class="board-col">
     <div class="board-col-header">
       <span class="board-col-title">Delivered</span>
@@ -77,11 +75,12 @@
     </div>
     {% for order in delivered %}
     <div class="order-card" onclick="window.location='{% url 'supply-order-detail' order.pk %}'">
-      <div class="order-ref">{{ order.reference }}</div>
+      <div class="order-ref">{% with fl=order.lines.all.0 %}{% if fl %}{{ fl.material.name|truncatechars:25 }}{% else %}{{ order.reference|truncatechars:25 }}{% endif %}{% endwith %}</div>
       <div class="order-supplier">{{ order.supplier.name }}</div>
-      <div class="order-meta">Delivered: {{ order.date_delivered|date:"Y-m-d"|default:"—" }}</div>
+      <div class="order-meta">Delivered: {{ order.date_delivered|date:"Y-m-d"|default:"&mdash;" }}</div>
     </div>
     {% empty %}<div class="board-empty">No orders</div>{% endfor %}
   </div>
+
 </div>
 {% endblock %}
