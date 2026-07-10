@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 import csv
 from django.core.management.base import BaseCommand
 from inventory.models import Client
-
 
 class Command(BaseCommand):
     help = 'Import clients from a semicolon-delimited CSV'
@@ -17,16 +17,13 @@ class Command(BaseCommand):
 
         with open(filepath, newline='', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
-            self.stdout.write(f'Columns detected: {reader.fieldnames}\n')
+            self.stdout.write(f'Columns: {reader.fieldnames}\n')
 
             for i, row in enumerate(reader, start=2):
-                row = {k.strip(): v.strip() if v else '' for k, v in row.items() if k}
-
-                code    = row.get('Code', '').strip()
-                name    = row.get('Name', '').strip()
-                tin     = row.get('TIN', '').strip()
-                country = row.get('Country', '').strip()
-                notes   = row.get('Notes', '').strip()
+                code    = (row.get('\u039a\u03c9\u03b4\u03b9\u03ba\u03cc\u03c2') or '').strip()
+                name    = (row.get('\u038c\u03bd\u03bf\u03bc\u03b1') or '').strip()
+                tin     = (row.get('\u0391\u03a6\u039c') or '').strip()
+                country = (row.get('\u03a7\u03ce\u03c1\u03b1') or '').strip()
 
                 if not name:
                     self.stdout.write(self.style.WARNING(f'  Row {i}: missing Name — skipped'))
@@ -34,12 +31,12 @@ class Command(BaseCommand):
                     continue
 
                 if dry_run:
-                    self.stdout.write(f'  DRY RUN | {code:<25} | {tin:<15} | {country:<30} | {name}')
+                    self.stdout.write(f'  DRY RUN | {code:<20} | {tin:<15} | {country:<30} | {name}')
                     continue
 
                 obj, was_created = Client.objects.update_or_create(
                     code=code,
-                    defaults={'name': name, 'tin': tin, 'country': country, 'notes': notes}
+                    defaults={'name': name, 'tin': tin, 'country': country}
                 )
                 if was_created:
                     created += 1

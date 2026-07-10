@@ -2,6 +2,11 @@ import csv
 from django.core.management.base import BaseCommand
 from inventory.models import Client
 
+'''
+python manage.py import_clients clients-inventory-2026-07-10.csv --dry-run
+python manage.py import_clients clients-inventory-2026-07-10.csv
+'''
+
 
 class Command(BaseCommand):
     help = 'Import clients from a semicolon-delimited CSV'
@@ -20,20 +25,15 @@ class Command(BaseCommand):
             self.stdout.write(f'Columns detected: {reader.fieldnames}\n')
 
             for i, row in enumerate(reader, start=2):
-                row = {
-                    k.strip(): v.strip() if v else ''
-                    for k, v in row.items() if k
-                }
-
-                code    = row.get('Code', '').strip()
-                name    = row.get('Name', '').strip()
-                tin     = row.get('TIN', '').strip()
-                country = row.get('Country', '').strip()
-                notes   = row.get('Notes', '').strip()
+                # Read directly from row without rebuilding the dict
+                code    = (row.get('Κωδικός') or '').strip()
+                name    = (row.get('Όνομα') or '').strip()
+                tin     = (row.get('ΑΦΜ') or '').strip()
+                country = (row.get('Χώρα') or '').strip()
 
                 if not name:
                     self.stdout.write(
-                        self.style.WARNING(f'  Row {i}: missing Name — skipped: {row}')
+                        self.style.WARNING(f'  Row {i}: missing Name — skipped')
                     )
                     skipped += 1
                     continue
@@ -46,12 +46,7 @@ class Command(BaseCommand):
 
                 obj, was_created = Client.objects.update_or_create(
                     code=code,
-                    defaults={
-                        'name':    name,
-                        'tin':     tin,
-                        'country': country,
-                        'notes':   notes,
-                    }
+                    defaults={'name': name, 'tin': tin, 'country': country}
                 )
 
                 if was_created:
