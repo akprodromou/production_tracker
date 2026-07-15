@@ -1,4 +1,4 @@
-"""
+r"""
 sync_erp_inventory.py
 ---------------------
 Run from project root:
