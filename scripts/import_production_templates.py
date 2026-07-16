@@ -3,6 +3,7 @@ import_production_templates.py
 -------------------------------
 Run from project root:
     python scripts/import_production_templates.py production_run_templates_database.xlsx [--dry-run]
+    python scripts/import_production_templates.py production_run_templates_database.xlsx
 
 use file from Pylon as exported in xlsx:
 Αποθήκη / Αναφορές / Εκτυπώσεις / Σύνθεση / Προδιαγραφές Σετ Κιτ
