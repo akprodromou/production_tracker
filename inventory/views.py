@@ -1666,13 +1666,44 @@ class ClientOrderDetailView(View):
             'required': Decimal('0'),
             'statuses': set(),
         })
+        # Build a map of run_id -> proportion reserved for this order
+        # (reservation qty / planned qty), so we scale component requirements
+        # to only reflect the portion of the run allocated to this order.
+        run_proportions = {}
+
+        # From ProductBatchReservation (completed runs)
+        for res in ProductBatchReservation.objects.filter(
+            order_line__order=order
+        ).select_related('product_batch__production_run'):
+            try:
+                run = res.product_batch.production_run
+                if run and run.planned_quantity:
+                    run_proportions[run.pk] = (
+                        run_proportions.get(run.pk, Decimal('0'))
+                        + res.quantity_reserved / run.planned_quantity
+                    )
+            except Exception:
+                pass
+
+        # From ProductionRunReservation (pre-reserved runs)
+        for res in ProductionRunReservation.objects.filter(
+            order_line__order=order
+        ).select_related('production_run'):
+            run = res.production_run
+            if run.planned_quantity:
+                run_proportions[run.pk] = (
+                    run_proportions.get(run.pk, Decimal('0'))
+                    + res.quantity_reserved / run.planned_quantity
+                )
+
         components = ProductionComponent.objects.filter(
             production_run_id__in=run_ids
         ).select_related('material__unit')
         for comp in components:
             m = comp.material
+            proportion = run_proportions.get(comp.production_run_id, Decimal('1'))
             boq[m.pk]['material']  = m
-            boq[m.pk]['required'] += comp.quantity_required
+            boq[m.pk]['required'] += (comp.quantity_required * proportion).quantize(Decimal('0.001'))
             boq[m.pk]['statuses'].add(comp.status)
         STATUS_PRIORITY = [
             'PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW', 'IN_PROCESS', 'FINAL_PRODUCT'
