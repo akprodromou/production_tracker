@@ -1903,7 +1903,7 @@ class ClientOrderDetailView(View):
         elif action == 'reserve_batch':
             line_id    = request.POST.get('line_id')
             batch_id   = request.POST.get('product_batch_id')
-            qty_str    = request.POST.get('quantity_reserved', '').strip()
+            qty_str    = request.POST.get('quantity_reserved', '').strip().replace(',', '')
             try:
                 line  = ClientOrderLine.objects.get(pk=line_id, order=order)
                 batch = ProductBatch.objects.get(pk=batch_id)
