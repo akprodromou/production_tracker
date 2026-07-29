@@ -1,3 +1,4 @@
+{% endif %}
 {% extends "base.html" %}
 {% block title %}Production Board — InventoryOS{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Board{% endblock %}
@@ -97,7 +98,6 @@
       </select>
       {% if selected_order %}
       <a href="{% url 'production-board' %}" class="btn btn-ghost btn-sm">Clear</a>
-      {% endif %}
     </form>
     <a href="{% url 'production-run-create' %}" class="btn btn-primary">+ New Run</a>
   </div>
@@ -106,7 +106,6 @@
 <div style="padding:8px 14px;background:rgba(79,142,247,.1);border:1px solid var(--accent);border-radius:var(--radius);margin-bottom:16px;font-size:13px">
   Showing runs for order <strong>{{ selected_order.reference }}</strong> — {{ selected_order.client.name }}
 </div>
-{% endif %}
 
   {% if not selected_order %}
   <div style="text-align:center;padding:60px 20px;color:var(--muted)">
@@ -207,5 +206,4 @@ document.getElementById('shipModal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
 </script>
-  {% endif %}
 {% endblock %}
