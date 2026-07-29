@@ -79,40 +79,37 @@
 
 {% block content %}
 <div class="page-header">
-  <div>
-    <h1>Production Board</h1>
-    <p>Runs grouped by their most-blocking component. Shipped runs move to history.</p>
-  </div>
-  <div class="page-actions" style="gap:8px">
+  <div><h1>Production Board</h1></div>
+  <div class="page-actions" style="display:flex;gap:10px;align-items:center">
     <form method="get" style="display:flex;gap:8px;align-items:center">
-      <select name="order"
-        style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:6px 10px;outline:none;min-width:220px"
-        onchange="this.form.submit()">
-        <option value="" disabled selected>Choose an order…</option>
+      <select name="order" onchange="this.form.submit()"
+        style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px;outline:none;min-width:260px">
+        <option value="">— Select a Production Order —</option>
         {% for o in orders %}
-        <option value="{{ o.pk }}" {% if selected_order.pk == o.pk %}selected{% endif %}>
+        <option value="{{ o.pk }}" {% if selected_order and selected_order.pk == o.pk %}selected{% endif %}>
           {{ o.reference }} — {{ o.client.name }}
         </option>
         {% endfor %}
       </select>
       {% if selected_order %}
       <a href="{% url 'production-board' %}" class="btn btn-ghost btn-sm">Clear</a>
+      {% endif %}
     </form>
     <a href="{% url 'production-run-create' %}" class="btn btn-primary">+ New Run</a>
   </div>
 </div>
-{% if selected_order %}
+
+{% if not selected_order %}
+<div style="text-align:center;padding:60px 20px;color:var(--muted)">
+  <div style="font-size:48px;margin-bottom:16px">&#x1F7E7;</div>
+  <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">Select a Production Order</div>
+  <div style="font-size:13px">Choose an order from the dropdown above to view its production runs.</div>
+</div>
+{% else %}
 <div style="padding:8px 14px;background:rgba(79,142,247,.1);border:1px solid var(--accent);border-radius:var(--radius);margin-bottom:16px;font-size:13px">
   Showing runs for order <strong>{{ selected_order.reference }}</strong> — {{ selected_order.client.name }}
 </div>
 
-  {% if not selected_order %}
-  <div style="text-align:center;padding:60px 20px;color:var(--muted)">
-    <div style="font-size:48px;margin-bottom:16px">🟧</div>
-    <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">Select a Production Order</div>
-    <div style="font-size:13px">Choose an order from the dropdown above to view its production runs.</div>
-  </div>
-  {% else %}
 <div class="board">
 
   {# PENDING #}
@@ -165,10 +162,10 @@
 
 </div>
 
-{# ── SHIP MODAL ── #}
+{# SHIP MODAL #}
 <div class="modal-backdrop" id="shipModal">
   <div class="modal">
-    <h3>🚚 Ship Production Run</h3>
+    <h3>&#x1F69A; Ship Production Run</h3>
     <p id="shipDesc" style="margin-bottom:12px;font-size:13px;color:var(--muted)"></p>
     <form method="post" action="{% url 'production-board' %}">
       {% csrf_token %}
@@ -180,7 +177,7 @@
         </div>
         <div class="form-group">
           <label>Notes <span style="color:var(--muted);font-weight:400">(optional)</span></label>
-          <input type="text" name="ship_notes" placeholder="Carrier, tracking, destination…">
+          <input type="text" name="ship_notes" placeholder="Carrier, tracking, destination...">
         </div>
       </div>
       <div class="modal-actions">
@@ -192,6 +189,7 @@
 </div>
 {% endif %}
 {% endblock %}
+
 
 {% block extra_js %}
 <script>
