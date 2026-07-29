@@ -1,4 +1,3 @@
-{% endif %}
 {% extends "base.html" %}
 {% block title %}Production Board — InventoryOS{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Board{% endblock %}
@@ -191,6 +190,7 @@
     </form>
   </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
