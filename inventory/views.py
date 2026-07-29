@@ -2753,17 +2753,14 @@ class ProductionBoardView(View):
         if order_id:
             try:
                 selected_order = ClientOrder.objects.get(pk=int(order_id))
-                # Runs linked via ProductBatchReservation (completed batches)
                 material_ids = ProductBatchReservation.objects.filter(
                     order_line__order=selected_order
                 ).values_list(
                     'product_batch__material_id', flat=True
                 ).distinct()
-                # Runs linked via ProductionRunReservation (pre-reserved)
                 run_ids_from_reservations = ProductionRunReservation.objects.filter(
                     order_line__order=selected_order
                 ).values_list('production_run_id', flat=True).distinct()
-                from django.db.models import Q
                 runs = ProductionRun.objects.exclude(
                     status__in=['COMPLETED', 'CANCELLED']
                 ).select_related('material', 'location').prefetch_related(

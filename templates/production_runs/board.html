@@ -108,6 +108,13 @@
 </div>
 {% endif %}
 
+  {% if not selected_order %}
+  <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+    <div style="font-size:48px;margin-bottom:16px">🟧</div>
+    <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">Select a Production Order</div>
+    <div style="font-size:13px">Choose an order from the dropdown above to view its production runs.</div>
+  </div>
+  {% else %}
 <div class="board">
 
   {# PENDING #}
@@ -200,4 +207,5 @@ document.getElementById('shipModal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
 </script>
+  {% endif %}
 {% endblock %}
