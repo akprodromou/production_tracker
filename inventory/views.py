@@ -72,6 +72,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from django.http import HttpResponseForbidden
 
+from django.contrib.auth import logout as _auth_logout
+
+class LogoutView(View):
+    def get(self, request):
+        _auth_logout(request)
+        return redirect('dashboard')
+
+    def post(self, request):
+        _auth_logout(request)
+        return redirect('dashboard')
+
+
 def _require_auth(request):
     """Return 403 response if user is not authenticated, else None."""
     if not request.user.is_authenticated:
