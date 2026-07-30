@@ -62,5 +62,12 @@
       <span class="icon">📏</span> Units
     </a>
   </nav>
-  <div class="sidebar-footer">v4.0.0</div>
+  <div class="sidebar-footer">
+    {% if request.user.is_authenticated %}
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">{{ request.user.username }}</div>
+    <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm" style="width:100%;text-align:center">Sign Out</a>
+    {% else %}
+    <a href="{% url 'login' %}" class="btn btn-primary btn-sm" style="width:100%;text-align:center">Sign In</a>
+    {% endif %}
+  </div>
 </aside>

@@ -86,3 +86,6 @@ USE_L10N = False  # disable locale-based formatting
 
 DATE_INPUT_FORMATS = ['%Y-%m-%d']
 DATE_FORMAT = 'Y-m-d'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

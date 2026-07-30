@@ -68,6 +68,18 @@ def _deletion_blocked_msg(exc):
 # DASHBOARD (updated)
 # ─────────────────────────────────────────────
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout as auth_logout
+from django.http import HttpResponseForbidden
+
+def _require_auth(request):
+    """Return 403 response if user is not authenticated, else None."""
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect(f'/login/?next={request.path}')
+    return None
+
+
 class DashboardView(View):
     def get(self, request):
         from collections import Counter
@@ -123,6 +135,8 @@ class ClientOrderBoardView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order_id = request.POST.get('order_id')
         action   = request.POST.get('action')
         order    = get_object_or_404(SalesOrder, pk=order_id)
@@ -174,6 +188,8 @@ class SalesOrderDetailView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order  = get_object_or_404(SalesOrder, pk=pk)
         action = request.POST.get('action')
         if action == 'update_status':
@@ -207,6 +223,8 @@ class SalesOrderCreateView(View):
         return render(request, 'sales_orders/form.html', ctx)
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         from .forms import SalesOrderForm, SalesOrderLineFormSet
         form    = SalesOrderForm(request.POST)
         formset = SalesOrderLineFormSet(request.POST)
@@ -244,6 +262,8 @@ class SalesOrderEditView(View):
         return render(request, 'sales_orders/form.html', ctx)
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         from .forms import SalesOrderForm, SalesOrderLineFormSet
         order   = get_object_or_404(SalesOrder, pk=pk)
         form    = SalesOrderForm(request.POST, instance=order)
@@ -262,6 +282,8 @@ class SalesOrderEditView(View):
 
 class SalesOrderDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order = get_object_or_404(SalesOrder, pk=pk)
         ref = order.reference
         try:
@@ -289,6 +311,8 @@ class CarrierCreateView(View):
             'form': CarrierForm(), 'form_title': 'New Carrier', 'submit_label': 'Create'
         })
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         from .forms import CarrierForm
         form = CarrierForm(request.POST)
         if form.is_valid():
@@ -310,6 +334,8 @@ class CarrierEditView(View):
             'carrier': carrier,
         })
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         from .forms import CarrierForm
         carrier = get_object_or_404(Carrier, pk=pk)
         form = CarrierForm(request.POST, instance=carrier)
@@ -325,6 +351,8 @@ class CarrierEditView(View):
 
 class CarrierDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         carrier = get_object_or_404(Carrier, pk=pk)
         try:
             carrier.delete()
@@ -375,6 +403,8 @@ class SupplierCreateView(View):
             'form': SupplierForm(), 'form_title': 'New Supplier', 'submit_label': 'Create'
         })
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         from .forms import SupplierForm
         form = SupplierForm(request.POST)
         if form.is_valid():
@@ -396,6 +426,8 @@ class SupplierEditView(View):
             'supplier': supplier,
         })
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         from .forms import SupplierForm
         supplier = get_object_or_404(Supplier, pk=pk)
         form = SupplierForm(request.POST, instance=supplier)
@@ -411,6 +443,8 @@ class SupplierEditView(View):
 
 class SupplierDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         supplier = get_object_or_404(Supplier, pk=pk)
         try:
             supplier.delete()
@@ -438,6 +472,8 @@ class SupplyOrderBoardView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order_id = request.POST.get('order_id')
         action   = request.POST.get('action')
         order    = get_object_or_404(SupplyOrder, pk=order_id)
@@ -496,6 +532,8 @@ class SupplyOrderDetailView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order  = get_object_or_404(SupplyOrder, pk=pk)
         action = request.POST.get('action')
         if action == 'update_status':
@@ -531,6 +569,8 @@ class SupplyOrderCreateView(View):
         return render(request, 'supply_orders/form.html', ctx)
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         from .forms import SupplyOrderForm, SupplyOrderLineFormSet
         form    = SupplyOrderForm(request.POST)
         formset = SupplyOrderLineFormSet(request.POST)
@@ -569,6 +609,8 @@ class SupplyOrderEditView(View):
         return render(request, 'supply_orders/form.html', ctx)
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         from .forms import SupplyOrderForm, SupplyOrderLineFormSet
         order   = get_object_or_404(SupplyOrder, pk=pk)
         form    = SupplyOrderForm(request.POST, instance=order)
@@ -587,6 +629,8 @@ class SupplyOrderEditView(View):
 
 class SupplyOrderDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order = get_object_or_404(SupplyOrder, pk=pk)
         ref = order.reference
         try:
@@ -611,6 +655,8 @@ class UnitCreateView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = UnitForm(request.POST)
         if form.is_valid():
             form.save()
@@ -630,6 +676,8 @@ class UnitEditView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         unit = get_object_or_404(Unit, pk=pk)
         form = UnitForm(request.POST, instance=unit)
         if form.is_valid():
@@ -643,6 +691,8 @@ class UnitEditView(View):
 
 class UnitDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         unit = get_object_or_404(Unit, pk=pk)
         try:
             unit.delete()
@@ -691,6 +741,8 @@ class LocationCreateView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = LocationForm(request.POST)
         if form.is_valid():
             form.save()
@@ -710,6 +762,8 @@ class LocationEditView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         loc = get_object_or_404(Location, pk=pk)
         form = LocationForm(request.POST, instance=loc)
         if form.is_valid():
@@ -723,6 +777,8 @@ class LocationEditView(View):
 
 class LocationDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         loc = get_object_or_404(Location, pk=pk)
         try:
             loc.delete()
@@ -812,6 +868,8 @@ class MaterialCreateView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = MaterialForm(request.POST)
         if form.is_valid():
             form.save()
@@ -831,6 +889,8 @@ class MaterialEditView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         m = get_object_or_404(Material, pk=pk)
         form = MaterialForm(request.POST, instance=m)
         if form.is_valid():
@@ -844,6 +904,8 @@ class MaterialEditView(View):
 
 class MaterialDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         m = get_object_or_404(Material, pk=pk)
         name = m.name
         try:
@@ -977,6 +1039,8 @@ class RawMaterialBatchDetailView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         batch  = get_object_or_404(RawMaterialBatch, pk=pk)
         action = request.POST.get('action')
 
@@ -1094,6 +1158,8 @@ class RawMaterialBatchCreateView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = RawMaterialBatchForm(request.POST)
         if form.is_valid():
             batch = form.save()
@@ -1128,6 +1194,8 @@ class RawMaterialBatchEditView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         batch = get_object_or_404(RawMaterialBatch, pk=pk)
         form  = RawMaterialBatchForm(request.POST, instance=batch)
         if form.is_valid():
@@ -1144,6 +1212,8 @@ class RawMaterialBatchEditView(View):
 
 class RawMaterialBatchDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         batch = get_object_or_404(RawMaterialBatch, pk=pk)
         lot = batch.lot_number
         try:
@@ -1254,6 +1324,8 @@ class ProductBatchDetailView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         batch  = get_object_or_404(ProductBatch, pk=pk)
         action = request.POST.get('action')
 
@@ -1329,6 +1401,8 @@ class ProductBatchCreateView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = ProductBatchForm(request.POST)
         if form.is_valid():
             pb = form.save()
@@ -1362,6 +1436,8 @@ class ProductBatchEditView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         batch = get_object_or_404(ProductBatch.objects.select_related('material__unit', 'location', 'production_run__material__unit'), pk=pk)
         fin_mats = list(Material.objects.filter(
             category='FIN'
@@ -1382,6 +1458,8 @@ class ProductBatchEditView(View):
 
 class ProductBatchDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         pb = get_object_or_404(ProductBatch, pk=pk)
         bn = pb.batch_number
         try:
@@ -1435,6 +1513,8 @@ class MaterialTransactionListView(View):
 
 class ReserveMaterialView(View):
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = ReserveMaterialForm(request.POST)
         if form.is_valid():
             try:
@@ -1459,6 +1539,8 @@ class ReserveMaterialView(View):
 
 class ConsumeMaterialView(View):
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = ConsumeMaterialForm(request.POST)
         if form.is_valid():
             try:
@@ -1483,6 +1565,8 @@ class ConsumeMaterialView(View):
 
 class ReleaseMaterialView(View):
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = ReleaseMaterialForm(request.POST)
         if form.is_valid():
             try:
@@ -1538,6 +1622,8 @@ class ClientCreateView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form = ClientForm(request.POST)
         if form.is_valid():
             client = form.save()
@@ -1557,6 +1643,8 @@ class ClientEditView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         client = get_object_or_404(Client, pk=pk)
         form = ClientForm(request.POST, instance=client)
         if form.is_valid():
@@ -1570,6 +1658,8 @@ class ClientEditView(View):
 
 class ClientDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         client = get_object_or_404(Client, pk=pk)
         name = client.name
         try:
@@ -1807,6 +1897,8 @@ class ClientOrderDetailView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order  = get_object_or_404(ClientOrder, pk=pk)
         action = request.POST.get('action', 'status')
 
@@ -1990,6 +2082,8 @@ class ClientOrderCreateView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form    = ClientOrderForm(request.POST)
         formset = ClientOrderLineFormSet(request.POST)
         if form.is_valid() and formset.is_valid():
@@ -2030,6 +2124,8 @@ class ClientOrderEditView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order = get_object_or_404(ClientOrder, pk=pk)
         form  = ClientOrderForm(request.POST, instance=order)
 
@@ -2098,6 +2194,8 @@ class ClientOrderEditView(View):
 
 class ClientOrderDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         order = get_object_or_404(ClientOrder, pk=pk)
         ref = order.reference
         try:
@@ -2214,6 +2312,8 @@ class ProductionRunDetailView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         run    = get_object_or_404(ProductionRun, pk=pk)
         action = request.POST.get('action')
 
@@ -2520,6 +2620,8 @@ class ProductionRunCreateView(View):
         })
 
     def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         form    = ProductionRunForm(request.POST)
         formset = ProductionComponentFormSet(request.POST, prefix='comp')
         if form.is_valid():
@@ -2563,6 +2665,8 @@ class ProductionRunEditView(View):
         })
 
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         run     = get_object_or_404(ProductionRun, pk=pk)
         form    = ProductionRunForm(request.POST, instance=run)
         formset = ProductionComponentFormSet(request.POST, instance=run, prefix='comp')
@@ -2599,6 +2703,8 @@ class ProductionRunEditView(View):
 class ProductionRunCopyView(View):
     """Creates a copy of an existing production run with all its components."""
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         original = get_object_or_404(ProductionRun, pk=pk)
 
         # Generate a new reference based on the original
@@ -2641,6 +2747,8 @@ class ProductionRunCopyView(View):
 
 class ProductionRunDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         run = get_object_or_404(ProductionRun, pk=pk)
         ref = run.reference
         try:
@@ -2653,6 +2761,8 @@ class ProductionRunDeleteView(View):
 
 class ProductionComponentDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         component = get_object_or_404(ProductionComponent, pk=pk)
         run_pk    = component.production_run.pk
         name      = component.material.name
@@ -2666,6 +2776,8 @@ class ProductionComponentDeleteView(View):
 
 class ProductionRunAllocationDeleteView(View):
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         alloc  = get_object_or_404(ProductionRunAllocation, pk=pk)
         run_pk = alloc.production_run.pk
         alloc.delete()
@@ -2676,6 +2788,8 @@ class ProductionRunAllocationDeleteView(View):
 class ProductionComponentUpdateView(View):
     """Quick status update for a single component."""
     def post(self, request, pk):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
         component  = get_object_or_404(ProductionComponent, pk=pk)
         new_status = request.POST.get('status')
         if new_status in dict(ProductionComponent.STATUS_CHOICES):
