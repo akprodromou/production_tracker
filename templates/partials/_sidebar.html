@@ -64,8 +64,10 @@
   </nav>
   <div class="sidebar-footer">
     {% if request.user.is_authenticated %}
-    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">{{ request.user.username }}</div>
-    <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm" style="width:100%;text-align:center">Sign Out</a>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">{{ request.user.username }}</span>
+      <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 10px">Sign Out</a>
+    </div>
     {% else %}
     <a href="{% url 'login' %}" class="btn btn-primary btn-sm" style="width:100%;text-align:center">Sign In</a>
     {% endif %}
