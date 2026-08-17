@@ -212,7 +212,8 @@ class SalesOrderDetailView(View):
                     from datetime import date as _date
                     order.date_delivered = _date.today()
                 order.save()
-                messages.success(request, f'Status updated to {order.get_status_display()}.')
+                messages.success(request, f'{order.reference} updated to {order.get_status_display()}.')
+                return redirect('client-order-board')
         return redirect('sales-order-detail', pk=pk)
 
 
@@ -556,7 +557,8 @@ class SupplyOrderDetailView(View):
                     from datetime import date as _date
                     order.date_delivered = _date.today()
                 order.save()
-                messages.success(request, f'Status updated to {order.get_status_display()}.')
+                messages.success(request, f'{order.reference} updated to {order.get_status_display()}.')
+                return redirect('supply-order-board')
         return redirect('supply-order-detail', pk=pk)
 
 

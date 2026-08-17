@@ -3,6 +3,7 @@
 {% block title %}{{ order.reference }}{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'client-order-board' %}">Client Order Board</a><span>/</span>
   <a href="{% url 'sales-order-list' %}">Client Orders</a><span>/</span>
   {{ order.reference }}
 {% endblock %}
