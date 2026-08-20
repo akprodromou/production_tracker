@@ -58,7 +58,7 @@ input:focus, select:focus { border-color:var(--accent); }
 {% else %}
 
 {# Settings panels #}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:20px;max-width:900px">
 
   {# Calculation Settings #}
   <div class="settings-panel">
@@ -66,7 +66,7 @@ input:focus, select:focus { border-color:var(--accent); }
     {% if request.user.is_authenticated %}
     <form method="post" id="settings-form">{% csrf_token %}
       <input type="hidden" name="action" value="save_settings">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:12px">
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Service Level</label>
           {{ settings_form.service_level }}
