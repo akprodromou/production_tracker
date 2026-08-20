@@ -124,16 +124,13 @@ input:focus, select:focus { border-color:var(--accent); }
     {# Read-only view #}
     <div id="lt-readonly">
       {% for prefix, label in prefix_labels.items %}
-      {% with lt=lead_time_map|dictsort:prefix %}
       <div class="lt-row">
         <span class="lt-prefix">{{ prefix }}-</span>
         <span class="lt-label">{{ label }}</span>
-        <span class="lt-value">
+        <span class="lt-value" style="color:{% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}var(--text){% endif %}{% endfor %}">
           {% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}{{ lc.lead_time_months }}mo{% endif %}{% endfor %}
-          {% if not lead_configs %}&mdash;{% endif %}
         </span>
       </div>
-      {% endwith %}
       {% endfor %}
     </div>
 
@@ -147,6 +144,7 @@ input:focus, select:focus { border-color:var(--accent); }
         <span class="lt-label" style="font-size:12px">{{ label }}</span>
         <input type="number" name="lt_{{ prefix }}" step="0.5" min="0.5"
           value="{% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}{{ lc.lead_time_months }}{% endif %}{% endfor %}"
+          placeholder="default"
           style="width:60px;padding:4px 6px;font-size:12px">
       </div>
       {% endfor %}

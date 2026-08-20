@@ -2955,6 +2955,19 @@ class ReorderAlertsView(View):
         from .forms import ReorderSettingsForm
 
         settings     = get_settings()
+
+        # Seed default lead times if not yet configured
+        DEFAULT_LEAD_TIMES = {
+            '02': '2.0', '03': '3.0', '04': '1.5',
+            '05': '2.0', '06': '3.0', '08': '4.0',
+            '10': '3.0', '11': '3.0',
+        }
+        for prefix, lt in DEFAULT_LEAD_TIMES.items():
+            LeadTimeConfig.objects.get_or_create(
+                sku_prefix=prefix,
+                defaults={'lead_time_months': lt}
+            )
+
         files        = get_sales_files(n=settings.months_window)
         rows, labels = calculate_rop()
 
