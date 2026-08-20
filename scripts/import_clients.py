@@ -3,6 +3,9 @@ from django.core.management.base import BaseCommand
 from inventory.models import Client
 
 '''
+use file from Pylon as exported:
+    Ενέργειες / Εξαγόμενα Grid / Εξαγωγή σε CSV
+
 python manage.py import_clients clients-inventory-2026-07-10.csv --dry-run
 python manage.py import_clients clients-inventory-2026-07-10.csv
 '''

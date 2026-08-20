@@ -38,57 +38,52 @@ Behaviour:
     reported at the end, nothing is silently dropped.
 """
 
-import os
-import sys
-
+import os, sys, re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
-import pandas as pd
-import re
-from decimal import Decimal, InvalidOperation
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
+import openpyxl
+from decimal import Decimal, InvalidOperation
 from inventory.models import Material, ProductionTemplate, ProductionTemplateComponent
 
 DRY_RUN = '--dry-run' in sys.argv
-SKU_RE = re.compile(r'^\d{2}-\d+$')
+SKU_RE  = re.compile(r'^\d{2}-\d+$')
 
 
 def clean(v):
-    s = str(v).strip()
-    return '' if s == 'nan' else s
+    if v is None:
+        return ''
+    return str(v).strip()
 
 
 def parse_file(filepath):
-    """
-    Returns a list of blocks:
-        {'sku': str, 'product_name': str, 'components': [{'name': str, 'ratio': Decimal}]}
-    """
-    df = pd.read_excel(filepath, header=None, dtype=str)
+    wb = openpyxl.load_workbook(filepath, read_only=True, data_only=True)
+    ws = wb.active
 
-    blocks = []
+    blocks  = []
     current = None
 
-    for i, row in df.iterrows():
+    for row in ws.iter_rows(values_only=True):
+        # pad row to at least 17 columns
+        row = list(row) + [None] * 17
         c0  = clean(row[0])
-        c2  = clean(row[2]) if len(row) > 2 else ''
-        c5  = clean(row[5]) if len(row) > 5 else ''
-        c16 = clean(row[16]) if len(row) > 16 else ''
+        c2  = clean(row[2])
+        c5  = clean(row[5])
+        c16 = clean(row[16])
 
-        # New product block starts whenever column 0 looks like a SKU
+        # New product block: col0 matches SKU pattern
         if SKU_RE.match(c0):
             if current:
                 blocks.append(current)
-            product_name = clean(row[3]) if len(row) > 3 else ''
+            product_name = clean(row[3])
             current = {'sku': c0, 'product_name': product_name, 'components': []}
             continue
 
-        # Component row: col2 = material name, col5 = product name (confirms scope),
-        # col16 = ratio. Skip the literal header row "Είδος - Όνομα".
-        if current and c2 and c2 != 'Είδος - Όνομα' and c5 and c16:
+        # Component row: col2 = material name, col5 non-empty, col16 = ratio
+        if current and c2 and c2 != '\u0395\u03af\u03b4\u03bf\u03c2 - \u038c\u03bd\u03bf\u03bc\u03b1' and c5 and c16:
             try:
                 ratio = Decimal(c16.replace(',', '.'))
             except InvalidOperation:
@@ -98,6 +93,7 @@ def parse_file(filepath):
     if current:
         blocks.append(current)
 
+    wb.close()
     return blocks
 
 
@@ -115,8 +111,8 @@ def main():
     blocks = parse_file(filepath)
     print(f"Found {len(blocks)} product templates in file\n")
 
-    templates_created = 0
-    templates_updated = 0
+    templates_created  = 0
+    templates_updated  = 0
     components_written = 0
     unmatched_products  = []
     unmatched_materials = set()
@@ -129,8 +125,7 @@ def main():
             unmatched_products.append((sku, block['product_name']))
             continue
 
-        # Resolve each component name to a Material
-        resolved_components = []
+        resolved = []
         for comp in block['components']:
             name = comp['name']
             try:
@@ -140,15 +135,14 @@ def main():
                 continue
             except Material.MultipleObjectsReturned:
                 material = Material.objects.filter(name__iexact=name).first()
-            resolved_components.append({'material': material, 'ratio': comp['ratio']})
+            resolved.append({'material': material, 'ratio': comp['ratio']})
 
-        if not resolved_components:
+        if not resolved:
             continue
 
         if DRY_RUN:
             exists = ProductionTemplate.objects.filter(product=product).exists()
-            print(f"  [DRY RUN] {'Would update' if exists else 'Would create'} template: "
-                  f"{sku} | {product.name} | {len(resolved_components)} components")
+            print(f"  {'Would update' if exists else 'Would create'}: {sku} | {product.name} | {len(resolved)} components")
             continue
 
         template, created = ProductionTemplate.objects.get_or_create(product=product)
@@ -156,10 +150,9 @@ def main():
             templates_created += 1
         else:
             templates_updated += 1
-            # Replace existing components with what's in the file
             template.components.all().delete()
 
-        for rc in resolved_components:
+        for rc in resolved:
             ProductionTemplateComponent.objects.create(
                 template=template,
                 material=rc['material'],
@@ -167,23 +160,22 @@ def main():
             )
             components_written += 1
 
-        print(f"  {'Created' if created else 'Updated'}: {sku} | {product.name} "
-              f"| {len(resolved_components)} components")
+        print(f"  {'Created' if created else 'Updated'}: {sku} | {product.name} | {len(resolved)} components")
 
     print(f"\n{'='*60}")
     print(f"{'[DRY RUN] ' if DRY_RUN else ''}IMPORT COMPLETE")
     print(f"{'='*60}")
-    print(f"  Templates created       : {templates_created}")
-    print(f"  Templates updated       : {templates_updated}")
-    print(f"  Components written      : {components_written}")
+    print(f"  Templates created  : {templates_created}")
+    print(f"  Templates updated  : {templates_updated}")
+    print(f"  Components written : {components_written}")
 
     if unmatched_products:
-        print(f"\n⚠ Finished products not found in Material table ({len(unmatched_products)}):")
+        print(f"\n  Finished products not found ({len(unmatched_products)}):")
         for sku, name in unmatched_products:
             print(f"    {sku}  {name}")
 
     if unmatched_materials:
-        print(f"\n⚠ Component material names not found in Material table ({len(unmatched_materials)}):")
+        print(f"\n  Component materials not found ({len(unmatched_materials)}):")
         for name in sorted(unmatched_materials):
             print(f"    {name}")
 

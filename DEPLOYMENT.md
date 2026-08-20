@@ -8,7 +8,7 @@
 
 ---
 
-## Deploying code changes (the only thing you need to do regularly)
+## Deploying code changes (to be done weekly)
 
 ```powershell
 git add .
@@ -16,14 +16,12 @@ git commit -m "description of changes"
 git push origin main
 ```
 
-That's it. Railway redeploys within ~2 minutes. Your Railway data is safe.
-
 ---
 
 ## Syncing ERP data to Railway
 
 ERP sync scripts (`sync_erp_inventory.py`, `import_suppliers.py`, `import_clients.py`,
-`import_production_templates.py`) use `update_or_create` — they never delete existing
+`import_production_templates.py`) use `update_or_create` - they never delete existing
 records, only create new ones or update matching ones.
 
 Run them locally but pointed at Railway's Postgres using the public connection string:

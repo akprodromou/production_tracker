@@ -14,20 +14,16 @@ Weekly ERP inventory sync:
   - Reports conflicts where reduction was not possible
 """
 
-import os
-import sys
-
-# Ensure project root (parent of this scripts/ folder) is on sys.path
+import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
-import pandas as pd
-from decimal import Decimal, InvalidOperation
-from datetime import date
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
+import openpyxl
+from decimal import Decimal, InvalidOperation
+from datetime import date
 from django.db.models import Sum
 from inventory.models import (
     Material, Location, Unit,
@@ -62,14 +58,17 @@ def sku_to_category(sku):
     if sku.startswith('01-'):
         return 'FXD'
     s = sku.upper()
-    if s.startswith('ΕΙΔΗ-') or s.startswith('\u0395\u0399\u0394\u0397-'):
+    if s.startswith('\u0395\u0399\u0394\u0397-'):
         return 'CON'
     return 'FIN'
 
 
 def get_or_create_unit(erp_unit_name):
     unit_name = UNIT_MAP.get(erp_unit_name, erp_unit_name)
-    unit, created = Unit.objects.get_or_create(name=unit_name)
+    unit, created = Unit.objects.get_or_create(
+        name=unit_name,
+        defaults={'abbreviation': unit_name[:10]}
+    )
     if created:
         print(f"    Created unit: {unit_name}")
     return unit
@@ -91,21 +90,25 @@ def get_or_create_material(sku, name, erp_unit_name):
 
 
 def parse_erp(filepath):
-    df = pd.read_excel(filepath, header=None, dtype=str)
+    wb = openpyxl.load_workbook(filepath, read_only=True, data_only=True)
+    ws = wb.active
     records = []
     current_location_code = None
-    for _, row in df.iterrows():
-        values = [str(v).strip() if str(v) != 'nan' else '' for v in row]
+
+    for row in ws.iter_rows(values_only=True):
+        values = [str(v).strip() if v is not None else '' for v in row]
         non_empty = [v for v in values if v]
         if not non_empty:
             continue
         first = non_empty[0]
+
         if len(first) == 6 and first.isdigit():
             current_location_code = first
             continue
+
         if current_location_code and '-' in first and len(first) >= 10:
             sku = first
-            raw = [str(v).strip() for v in row if str(v) not in ('nan', '') and str(v).strip() != '']
+            raw = [v for v in values if v]
             try:
                 if len(raw) < 5:
                     continue
@@ -121,6 +124,8 @@ def parse_erp(filepath):
                 'qty': qty, 'location_code': current_location_code,
                 'location_id': LOCATION_MAP[current_location_code],
             })
+
+    wb.close()
     return records
 
 
@@ -183,7 +188,7 @@ def reduce_fin_batches(material, location_id, amount_to_reduce):
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1].startswith('--'):
-        print("Usage: python sync_erp_inventory.py <erp_export.xlsx> [--dry-run]")
+        print("Usage: python scripts/sync_erp_inventory.py <erp_export.xlsx> [--dry-run]")
         sys.exit(1)
     filepath = sys.argv[1]
     if not os.path.exists(filepath):
@@ -256,10 +261,9 @@ def main():
                 print(f"  + FIN: {label} | {name[:40]} | +{diff} @ {location.name}")
             else:
                 print(f"  SKIP non-stock category '{category}': {sku}")
-
         else:
             reduce_by = abs(diff)
-            print(f"  ↓ {sku} @ {location.name}: DB={db_qty}, ERP={erp_qty}, reducing by {reduce_by}")
+            print(f"  down {sku} @ {location.name}: DB={db_qty}, ERP={erp_qty}, reducing by {reduce_by}")
             if category in ('RAW', 'PKG'):
                 reduced, conflicts = reduce_raw_batches(material, location_id, reduce_by)
                 reduced_raw += 1
@@ -285,7 +289,7 @@ def main():
     print(f"  FIN batches reduced : {reduced_fin}")
     print(f"  Unchanged           : {skipped_same}")
     if all_conflicts:
-        print(f"\n⚠  CONFLICTS ({len(all_conflicts)} notices) — some batches could not be reduced:")
+        print(f"\n  CONFLICTS ({len(all_conflicts)} notices):")
         for c in all_conflicts:
             print(c)
     else:
