@@ -11,8 +11,11 @@
 .badge-ok { background:rgba(40,200,100,.15); color:#28c864; border:1px solid #28c864; border-radius:4px; padding:2px 8px; font-size:11px; }
 .settings-panel { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; }
 @media (max-width: 900px) {
-  .settings-grid-3 { grid-template-columns: 1fr !important; }
+  .settings-grid-top { grid-template-columns: 1fr !important; }
+  .settings-context-wrap { width: 100% !important; }
 }
+.settings-grid-top > :nth-child(3) { display: none; } /* hide empty 3rd col placeholder */
+.settings-context-wrap { width: 50%; }
 .rop-gap-neg { color:var(--success,#28c864); }
 .rop-gap-pos { color:#ff5050; font-weight:600; }
 .lt-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px; }
@@ -62,7 +65,7 @@ input:focus, select:focus { border-color:var(--accent); }
 
 {# Settings panels #}
 {# Settings panels — two panels side by side, then full-width context below #}
-<div class="settings-grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
+<div class="settings-grid-top" style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:16px;margin-bottom:0">
 
   {# Calculation Settings #}
   <div class="settings-panel">
@@ -155,10 +158,11 @@ input:focus, select:focus { border-color:var(--accent); }
     {% endif %}
   </div>
 
-</div>{# end settings grid #}
+</div>{# end top settings grid #}
 
-{# Context / explanation panel #}
-<div class="settings-panel" style="margin-bottom:20px">
+{# Context / explanation panel — half width on desktop #}
+<div class="settings-context-wrap" style="margin-bottom:20px">
+<div class="settings-panel" style="margin-bottom:0">
   <div style="font-size:13px;font-weight:600;margin-bottom:14px">&#128214; How the Calculation Works</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
     <div>
@@ -191,6 +195,7 @@ input:focus, select:focus { border-color:var(--accent); }
     </div>
   </div>
 </div>
+</div>{# end context wrap #}
 
 {# Filters #}
 <form method="get" style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
