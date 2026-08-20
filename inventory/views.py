@@ -1235,6 +1235,9 @@ class RawMaterialBatchDeleteView(View):
             messages.success(request, f'Batch "{lot}" deleted.')
         except Exception as e:
             messages.error(request, _deletion_blocked_msg(e))
+        next_url = request.POST.get('next', '')
+        if next_url and next_url.startswith('/'):
+            return redirect(next_url)
         return redirect('batch-list')
 
 
@@ -1476,11 +1479,14 @@ class ProductBatchDeleteView(View):
         if auth_err: return auth_err
         pb = get_object_or_404(ProductBatch, pk=pk)
         bn = pb.batch_number
+        next_url = request.POST.get('next', '')
         try:
             pb.delete()
             messages.success(request, f'Product batch "{bn}" deleted.')
         except Exception as e:
             messages.error(request, _deletion_blocked_msg(e))
+        if next_url and next_url.startswith('/'):
+            return redirect(next_url)
         return redirect('product-batch-list')
 
 
