@@ -110,7 +110,7 @@
     <p>Delete batch <strong id="deleteTarget" style="color:var(--text)"></strong>?</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
-      <form method="post" id="deleteForm">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button></form>
+      <form method="post" id="deleteForm">{% csrf_token %}<input type="hidden" name="next" id="deleteNext" value=""><button type="submit" class="btn btn-danger">Delete</button></form>
     </div>
   </div>
 </div>
@@ -119,6 +119,7 @@
 {% block extra_js %}
 <script>
 function openDeleteModal(name, url) {
+  document.getElementById('deleteNext').value = window.location.href;
   document.getElementById('deleteTarget').textContent = name;
   document.getElementById('deleteForm').action = url;
   document.getElementById('deleteModal').classList.add('open');
