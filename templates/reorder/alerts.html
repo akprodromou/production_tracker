@@ -10,6 +10,9 @@
 .badge-reorder { background:rgba(255,80,80,.2); color:#ff5050; border:1px solid #ff5050; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:600; }
 .badge-ok { background:rgba(40,200,100,.15); color:#28c864; border:1px solid #28c864; border-radius:4px; padding:2px 8px; font-size:11px; }
 .settings-panel { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; }
+@media (max-width: 900px) {
+  .settings-grid-3 { grid-template-columns: 1fr !important; }
+}
 .rop-gap-neg { color:var(--success,#28c864); }
 .rop-gap-pos { color:#ff5050; font-weight:600; }
 .lt-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px; }
@@ -58,7 +61,8 @@ input:focus, select:focus { border-color:var(--accent); }
 {% else %}
 
 {# Settings panels #}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:20px">
+{# Settings panels — two panels side by side, then full-width context below #}
+<div class="settings-grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
 
   {# Calculation Settings #}
   <div class="settings-panel">
@@ -75,13 +79,11 @@ input:focus, select:focus { border-color:var(--accent); }
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Months Window</label>
           {{ settings_form.months_window }}
         </div>
-      </div>
-      <div style="margin-bottom:12px">
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Z-Score <span style="color:var(--muted);font-weight:400">(auto-calculated from service level)</span></label>
-        <input type="text" value="{{ settings.z_score }}" disabled
-          style="background:var(--surface);color:var(--muted);cursor:not-allowed;border:1px solid var(--border)">
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">
-          95% &rarr; 1.645 &nbsp;|&nbsp; 99% &rarr; 2.326 &nbsp;|&nbsp; 90% &rarr; 1.282
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Z-Score <span style="font-weight:400">(auto-derived from service level)</span></label>
+          <input type="text" value="{{ settings.z_score }}" disabled style="background:var(--surface);color:var(--muted);cursor:not-allowed">
+          {{ settings_form.z_score }}
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">90%&rarr;1.282 &nbsp; 95%&rarr;1.645 &nbsp; 99%&rarr;2.326</div>
         </div>
       </div>
       <button type="submit" class="btn btn-primary btn-sm">Save</button>
@@ -89,20 +91,17 @@ input:focus, select:focus { border-color:var(--accent); }
     <script>
     document.getElementById('settings-form').querySelector('[name=service_level]').addEventListener('input', function() {
       var sl = parseFloat(this.value);
-      if (sl > 0 && sl < 1) {
-        // Approximate z-score using lookup table
-        var lookup = [[0.80,0.842],[0.85,1.036],[0.90,1.282],[0.92,1.405],[0.95,1.645],[0.97,1.881],[0.99,2.326],[0.999,3.090]];
-        var z = 1.645;
-        for (var i = 0; i < lookup.length - 1; i++) {
-          if (sl >= lookup[i][0] && sl <= lookup[i+1][0]) {
-            var t = (sl - lookup[i][0]) / (lookup[i+1][0] - lookup[i][0]);
-            z = lookup[i][1] + t * (lookup[i+1][1] - lookup[i][1]);
-            break;
-          }
+      var lookup = [[0.80,0.842],[0.85,1.036],[0.90,1.282],[0.92,1.405],[0.95,1.645],[0.97,1.881],[0.99,2.326],[0.999,3.090]];
+      var z = 1.645;
+      for (var i = 0; i < lookup.length-1; i++) {
+        if (sl >= lookup[i][0] && sl <= lookup[i+1][0]) {
+          var t = (sl-lookup[i][0])/(lookup[i+1][0]-lookup[i][0]);
+          z = lookup[i][1] + t*(lookup[i+1][1]-lookup[i][1]);
+          break;
         }
-        document.querySelector('[name=z_score]') && (document.querySelector('[name=z_score]').value = z.toFixed(3));
-        document.querySelector('input[disabled]').value = z.toFixed(6);
       }
+      document.querySelector('[name=z_score]').value = z.toFixed(6);
+      document.querySelector('input[disabled]').value = z.toFixed(6);
     });
     </script>
     {% else %}
@@ -120,21 +119,15 @@ input:focus, select:focus { border-color:var(--accent); }
       <button type="button" class="btn btn-ghost btn-sm" id="lt-edit-btn" onclick="toggleLtEdit()">Edit</button>
       {% endif %}
     </div>
-
-    {# Read-only view #}
     <div id="lt-readonly">
       {% for prefix, label in prefix_labels.items %}
       <div class="lt-row">
         <span class="lt-prefix">{{ prefix }}-</span>
         <span class="lt-label">{{ label }}</span>
-        <span class="lt-value" style="color:{% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}var(--text){% endif %}{% endfor %}">
-          {% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}{{ lc.lead_time_months }} mo{% endif %}{% endfor %}
-        </span>
+        <span class="lt-value">{% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}{{ lc.lead_time_months }} mo{% endif %}{% endfor %}</span>
       </div>
       {% endfor %}
     </div>
-
-    {# Edit form (hidden by default) #}
     {% if request.user.is_authenticated %}
     <form method="post" id="lt-form" style="display:none">{% csrf_token %}
       <input type="hidden" name="action" value="save_lead_times">
@@ -144,7 +137,6 @@ input:focus, select:focus { border-color:var(--accent); }
         <span class="lt-label" style="font-size:12px">{{ label }}</span>
         <input type="number" name="lt_{{ prefix }}" step="0.5" min="0.5"
           value="{% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}{{ lc.lead_time_months }}{% endif %}{% endfor %}"
-          placeholder="default"
           style="width:60px;padding:4px 6px;font-size:12px">
       </div>
       {% endfor %}
@@ -155,26 +147,15 @@ input:focus, select:focus { border-color:var(--accent); }
     </form>
     <script>
     function toggleLtEdit() {
-      var ro = document.getElementById('lt-readonly');
-      var form = document.getElementById('lt-form');
-      var btn = document.getElementById('lt-edit-btn');
-      if (form.style.display === 'none') {
-        ro.style.display = 'none';
-        form.style.display = 'block';
-        btn.textContent = 'Cancel';
-      } else {
-        ro.style.display = 'block';
-        form.style.display = 'none';
-        btn.textContent = 'Edit';
-      }
+      var ro=document.getElementById('lt-readonly'), form=document.getElementById('lt-form'), btn=document.getElementById('lt-edit-btn');
+      if(form.style.display==='none'){ro.style.display='none';form.style.display='block';btn.textContent='Cancel';}
+      else{ro.style.display='block';form.style.display='none';btn.textContent='Edit';}
     }
     </script>
     {% endif %}
   </div>
-</div>
 
-</div>{# close settings grid #}
-</div>{# close settings grid #}
+</div>{# end settings grid #}
 
 {# Context / explanation panel #}
 <div class="settings-panel" style="margin-bottom:20px">
@@ -185,28 +166,27 @@ input:focus, select:focus { border-color:var(--accent); }
         <tbody>
           <tr style="border-bottom:1px solid var(--border)">
             <td style="padding:6px 0;color:var(--muted)">Target Service Level</td>
-            <td style="padding:6px 0;font-family:var(--mono);text-align:right;font-weight:600">{{ settings.service_level|floatformat:0 }}%</td>
-            <td style="padding:6px 12px;font-size:11px;color:var(--muted);font-style:italic">"I want to avoid stockouts in {{ settings.service_level|floatformat:0 }}% of demand cycles"</td>
+            <td style="padding:6px 0;font-family:var(--mono);text-align:right;font-weight:600">{{ settings.service_level }}</td>
+            <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--muted);font-style:italic">"I want to avoid stockouts in {{ settings.service_level }} of demand cycles (e.g. 0.95 = 95%)"</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border)">
             <td style="padding:6px 0;color:var(--muted)">Z-Score</td>
             <td style="padding:6px 0;font-family:var(--mono);text-align:right;font-weight:600">{{ settings.z_score|floatformat:2 }}</td>
-            <td style="padding:6px 12px;font-size:11px;color:var(--muted);font-style:italic">"How many standard deviations of demand variability to buffer against"</td>
+            <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--muted);font-style:italic">"How many standard deviations of demand variability to buffer against"</td>
           </tr>
           <tr>
-            <td style="padding:6px 0;color:var(--muted)">Safety Stock formula</td>
-            <td colspan="2" style="padding:6px 0;font-family:var(--mono);font-size:11px;color:var(--accent)">Z &times; StdDev(monthly demand) &times; &radic;Lead Time</td>
+            <td style="padding:6px 0;color:var(--muted)">Safety Stock</td>
+            <td colspan="2" style="padding:6px 0;font-family:var(--mono);font-size:11px;color:var(--accent)">Z &times; StdDev &times; &radic;Lead Time</td>
           </tr>
         </tbody>
       </table>
       <div style="margin-top:14px;font-size:11px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:10px">
-        <strong style="color:var(--text)">To update the calculation:</strong> export monthly sales data from Pylon ERP,
-        save as <code>sales-sheet-YYYY-MM.xlsx</code> (e.g. <code>sales-sheet-2026-05.xlsx</code>),
-        place in the <code>sales_data/</code> folder, then push to GitHub to update Railway too.
+        <strong style="color:var(--text)">To update:</strong> export monthly sales from Pylon ERP as
+        <code>sales-sheet-YYYY-MM.xlsx</code>, place in <code>sales_data/</code>, push to GitHub.
       </div>
     </div>
     <div style="font-size:11px;color:var(--muted);line-height:1.7;background:var(--surface);border-radius:var(--radius);padding:14px;border-left:3px solid var(--accent)">
-      <p style="margin:0 0 10px 0">If demand were perfectly predictable (zero variability), we wouldn't need any Z-score or safety stock at all — we would order exactly when stock hits <em>average demand &times; lead time</em>.</p>
+      <p style="margin:0 0 10px 0">If demand were perfectly predictable, we would order exactly when stock hits <em>average demand &times; lead time</em> — no safety stock needed.</p>
       <p style="margin:0">But demand fluctuates month to month, so we add a buffer sized to the standard deviation, scaled by Z, so that even in a worse-than-average month we're unlikely to run out before the next delivery arrives.</p>
     </div>
   </div>
