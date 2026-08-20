@@ -35,7 +35,7 @@
     <a href="{% url 'production-board' %}" class="{% if request.resolver_match.url_name == 'production-board' %}active{% endif %}">
       <span class="icon">🟧</span> Production Board
     </a>
-    <a href="{% url 'order-list' %}" class="{% if 'order' in request.resolver_match.url_name and 'sales' not in request.resolver_match.url_name and 'supply' not in request.resolver_match.url_name and 'board' not in request.resolver_match.url_name and 'client' not in request.resolver_match.url_name %}active{% endif %}">
+    <a href="{% url 'order-list' %}" class="{% if 'order' in request.resolver_match.url_name and 'sales' not in request.resolver_match.url_name and 'supply' not in request.resolver_match.url_name and 'board' not in request.resolver_match.url_name and 'client' not in request.resolver_match.url_name and 'reorder' not in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">📋</span> Production Orders
     </a>
     <a href="{% url 'production-run-list' %}" class="{% if 'production-run' in request.resolver_match.url_name %}active{% endif %}">
@@ -46,6 +46,11 @@
     </a>
     <a href="{% url 'product-batch-list' %}" class="{% if 'product-batch' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">🏭</span> Product Batches
+    </a>
+
+    <div class="nav-section">Analytics</div>
+    <a href="{% url 'reorder-alerts' %}" class="{% if request.resolver_match.url_name == 'reorder-alerts' %}active{% endif %}">
+      <span class="icon">&#128202;</span> Reorder Alerts
     </a>
 
     <div class="nav-section">Reference</div>
@@ -69,7 +74,7 @@
       <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 10px">Sign Out</a>
     </div>
     {% else %}
-    <a href="{% url 'login' %}" class="btn btn-primary btn-sm" style="width:100%;text-align:center">Sign In</a>
+    <a href="{% url 'login' %}" class="btn btn-primary btn-sm" style="width:100%;text-align:center;color:#fff">Sign In</a>
     {% endif %}
   </div>
 </aside>

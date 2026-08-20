@@ -276,6 +276,48 @@ class SalesOrderLine(models.Model):
         ordering = ['material__name']
 
 
+
+class ReorderSettings(models.Model):
+    """Global settings for reorder point calculation."""
+    service_level   = models.DecimalField(max_digits=5, decimal_places=4, default='0.9500',
+                          help_text="Target service level, e.g. 0.95 for 95%")
+    z_score         = models.DecimalField(max_digits=8, decimal_places=6, default='1.644854',
+                          help_text="Z-score corresponding to service level (auto-hint: 0.95→1.645, 0.99→2.326)")
+    months_window   = models.PositiveIntegerField(default=6,
+                          help_text="Number of monthly sales files to use for calculations")
+    updated_at      = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Reorder Settings"
+
+    def __str__(self):
+        return f"Reorder Settings (SL={self.service_level})"
+
+
+class LeadTimeConfig(models.Model):
+    """Lead time in months per SKU prefix (first 2 digits)."""
+    SKU_PREFIX_CHOICES = [
+        ('02', '02 — Olive oil products'),
+        ('03', '03 — Bakery / rusks'),
+        ('04', '04 — Vinegars'),
+        ('05', '05 — Lifestyle / gifts'),
+        ('06', '06 — Food products'),
+        ('08', '08 — Tea'),
+        ('10', '10 — Marmalade'),
+        ('11', '11 — Tea cans'),
+    ]
+    sku_prefix      = models.CharField(max_length=2, unique=True, choices=SKU_PREFIX_CHOICES)
+    lead_time_months = models.DecimalField(max_digits=4, decimal_places=1, default=2)
+    notes           = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ['sku_prefix']
+        verbose_name = "Lead Time Config"
+
+    def __str__(self):
+        return f"{self.sku_prefix}- → {self.lead_time_months} months"
+
+
 class Carrier(models.Model):
     name             = models.CharField(max_length=200)
     notes            = models.TextField(blank=True)

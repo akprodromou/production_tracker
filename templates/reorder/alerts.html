@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}Reorder Alerts{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Reorder Alerts{% endblock %}
+
+{% block extra_head %}
+<style>
+.rop-table th { white-space:nowrap; }
+.rop-table th a { color:inherit; text-decoration:none; }
+.rop-table th a:hover { color:var(--accent); }
+.badge-reorder { background:rgba(255,80,80,.2); color:#ff5050; border:1px solid #ff5050; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:600; }
+.badge-ok { background:rgba(40,200,100,.15); color:#28c864; border:1px solid #28c864; border-radius:4px; padding:2px 8px; font-size:11px; }
+.settings-panel { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; }
+.rop-gap-neg { color:var(--success,#28c864); }
+.rop-gap-pos { color:#ff5050; font-weight:600; }
+.lt-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.lt-row:last-child { border-bottom:none; }
+.lt-prefix { font-family:var(--mono); font-size:12px; color:var(--accent); width:32px; }
+.lt-label { flex:1; color:var(--text); }
+.lt-value { font-family:var(--mono); font-size:12px; color:var(--muted); width:50px; text-align:right; }
+input[type=number], input[type=text], select, textarea {
+  background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius);
+  color:var(--text); font-size:13px; padding:8px 12px; outline:none; width:100%; box-sizing:border-box;
+}
+input:focus, select:focus { border-color:var(--accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Reorder Alerts</h1>
+    <p class="text-muted" style="font-size:13px">
+      {% if month_labels %}
+        Based on {{ month_labels|length }} month{{ month_labels|length|pluralize }} of sales:
+        <strong>{{ month_labels|first }}</strong> &rarr; <strong>{{ month_labels|last }}</strong>
+      {% else %}
+        No sales data loaded yet
+      {% endif %}
+    </p>
+  </div>
+  <div class="page-actions">
+    {% if rows %}<a href="{% url 'reorder-alerts-export' %}" class="btn btn-secondary">&#8659; Export xlsx</a>{% endif %}
+  </div>
+</div>
+
+{% if not files %}
+<div class="card mb-3">
+  <div class="card-body" style="text-align:center;padding:40px;color:var(--muted)">
+    <div style="font-size:40px;margin-bottom:12px">&#128202;</div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px">No sales data files found</div>
+    <div style="font-size:13px">
+      Place monthly ERP sales exports in the <code>sales_data/</code> folder in the project root.<br>
+      File naming convention: <code>sales-sheet-YYYY-MM.xlsx</code><br>
+      Example: <code>sales-sheet-2026-02.xlsx</code>, <code>sales-sheet-2026-03.xlsx</code>
+    </div>
+  </div>
+</div>
+{% else %}
+
+{# Settings panels #}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+  {# Calculation Settings #}
+  <div class="settings-panel">
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px">&#9881; Calculation Settings</div>
+    {% if request.user.is_authenticated %}
+    <form method="post" id="settings-form">{% csrf_token %}
+      <input type="hidden" name="action" value="save_settings">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Service Level</label>
+          {{ settings_form.service_level }}
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Months Window</label>
+          {{ settings_form.months_window }}
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Z-Score <span style="color:var(--muted);font-weight:400">(auto-calculated from service level)</span></label>
+        <input type="text" value="{{ settings.z_score }}" disabled
+          style="background:var(--surface);color:var(--muted);cursor:not-allowed;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          95% &rarr; 1.645 &nbsp;|&nbsp; 99% &rarr; 2.326 &nbsp;|&nbsp; 90% &rarr; 1.282
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Save</button>
+    </form>
+    <script>
+    document.getElementById('settings-form').querySelector('[name=service_level]').addEventListener('input', function() {
+      var sl = parseFloat(this.value);
+      if (sl > 0 && sl < 1) {
+        // Approximate z-score using lookup table
+        var lookup = [[0.80,0.842],[0.85,1.036],[0.90,1.282],[0.92,1.405],[0.95,1.645],[0.97,1.881],[0.99,2.326],[0.999,3.090]];
+        var z = 1.645;
+        for (var i = 0; i < lookup.length - 1; i++) {
+          if (sl >= lookup[i][0] && sl <= lookup[i+1][0]) {
+            var t = (sl - lookup[i][0]) / (lookup[i+1][0] - lookup[i][0]);
+            z = lookup[i][1] + t * (lookup[i+1][1] - lookup[i][1]);
+            break;
+          }
+        }
+        document.querySelector('[name=z_score]') && (document.querySelector('[name=z_score]').value = z.toFixed(3));
+        document.querySelector('input[disabled]').value = z.toFixed(6);
+      }
+    });
+    </script>
+    {% else %}
+    <div class="lt-row"><span class="lt-label">Service Level</span><span class="lt-value">{{ settings.service_level }}</span></div>
+    <div class="lt-row"><span class="lt-label">Z-Score</span><span class="lt-value">{{ settings.z_score }}</span></div>
+    <div class="lt-row"><span class="lt-label">Months Window</span><span class="lt-value">{{ settings.months_window }}</span></div>
+    {% endif %}
+  </div>
+
+  {# Lead Times #}
+  <div class="settings-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600">&#128345; Lead Times (months)</div>
+      {% if request.user.is_authenticated %}
+      <button type="button" class="btn btn-ghost btn-sm" id="lt-edit-btn" onclick="toggleLtEdit()">Edit</button>
+      {% endif %}
+    </div>
+
+    {# Read-only view #}
+    <div id="lt-readonly">
+      {% for prefix, label in prefix_labels.items %}
+      {% with lt=lead_time_map|dictsort:prefix %}
+      <div class="lt-row">
+        <span class="lt-prefix">{{ prefix }}-</span>
+        <span class="lt-label">{{ label }}</span>
+        <span class="lt-value">
+          {% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}{{ lc.lead_time_months }}mo{% endif %}{% endfor %}
+          {% if not lead_configs %}&mdash;{% endif %}
+        </span>
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+
+    {# Edit form (hidden by default) #}
+    {% if request.user.is_authenticated %}
+    <form method="post" id="lt-form" style="display:none">{% csrf_token %}
+      <input type="hidden" name="action" value="save_lead_times">
+      {% for prefix, label in prefix_labels.items %}
+      <div class="lt-row" style="gap:10px">
+        <span class="lt-prefix">{{ prefix }}-</span>
+        <span class="lt-label" style="font-size:12px">{{ label }}</span>
+        <input type="number" name="lt_{{ prefix }}" step="0.5" min="0.5"
+          value="{% for lc in lead_configs %}{% if lc.sku_prefix == prefix %}{{ lc.lead_time_months }}{% endif %}{% endfor %}"
+          style="width:60px;padding:4px 6px;font-size:12px">
+      </div>
+      {% endfor %}
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="toggleLtEdit()">Cancel</button>
+      </div>
+    </form>
+    <script>
+    function toggleLtEdit() {
+      var ro = document.getElementById('lt-readonly');
+      var form = document.getElementById('lt-form');
+      var btn = document.getElementById('lt-edit-btn');
+      if (form.style.display === 'none') {
+        ro.style.display = 'none';
+        form.style.display = 'block';
+        btn.textContent = 'Cancel';
+      } else {
+        ro.style.display = 'block';
+        form.style.display = 'none';
+        btn.textContent = 'Edit';
+      }
+    }
+    </script>
+    {% endif %}
+  </div>
+</div>
+
+{# Filters #}
+<form method="get" style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+  <select name="prefix" onchange="this.form.submit()" style="width:auto">
+    <option value="">All categories</option>
+    {% for p in fin_prefixes %}
+    <option value="{{ p }}" {% if filter_prefix == p %}selected{% endif %}>{{ p }}- {% for k,v in prefix_labels.items %}{% if k == p %}{{ v }}{% endif %}{% endfor %}</option>
+    {% endfor %}
+  </select>
+  <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+    <input type="checkbox" name="reorder" value="1" {% if filter_reorder == '1' %}checked{% endif %} onchange="this.form.submit()">
+    Re-order needed only
+  </label>
+  <input type="hidden" name="sort" value="{{ sort }}">
+  <input type="hidden" name="dir" value="{{ dir }}">
+  {% if filter_prefix or filter_reorder %}
+  <a href="{% url 'reorder-alerts' %}" class="btn btn-ghost btn-sm">Clear</a>
+  {% endif %}
+  <span class="text-muted" style="font-size:12px;margin-left:auto">{{ rows|length }} SKU{{ rows|length|pluralize }}</span>
+</form>
+
+{# Table #}
+<div class="card">
+  <div class="table-wrap" style="overflow-x:auto">
+    <table class="rop-table">
+      <thead>
+        <tr>
+          <th><a href="?sort=sku&dir={% if sort == 'sku' and dir == 'asc' %}desc{% else %}asc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">SKU</a></th>
+          <th>Name</th>
+          {% for lbl in month_labels %}<th style="text-align:right;font-size:11px">{{ lbl }}</th>{% endfor %}
+          <th style="text-align:right"><a href="?sort=avg&dir={% if sort == 'avg' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Avg/mo</a></th>
+          <th style="text-align:right">StdDev</th>
+          <th style="text-align:right">CV</th>
+          <th style="text-align:right">LT</th>
+          <th style="text-align:right">Safety</th>
+          <th style="text-align:right"><a href="?sort=rop&dir={% if sort == 'rop' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">ROP</a></th>
+          <th style="text-align:right"><a href="?sort=current_stock&dir={% if sort == 'current_stock' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Stock</a></th>
+          <th style="text-align:right"><a href="?sort=gap&dir={% if sort == 'gap' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Gap</a></th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td class="td-mono" style="font-size:11px">{{ row.sku }}</td>
+          <td style="font-size:12px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ row.name }}">{{ row.name }}</td>
+          {% for qty in row.monthly_sales %}<td class="td-mono" style="text-align:right;font-size:11px;color:var(--muted)">{% if qty > 0 %}{{ qty|floatformat:0 }}{% else %}&mdash;{% endif %}</td>{% endfor %}
+          <td class="td-mono" style="text-align:right">{{ row.avg|floatformat:0 }}</td>
+          <td class="td-mono" style="text-align:right;color:var(--muted);font-size:11px">{{ row.std|floatformat:0 }}</td>
+          <td class="td-mono" style="text-align:right;color:var(--muted);font-size:11px">{{ row.cv|floatformat:2 }}</td>
+          <td class="td-mono" style="text-align:right;font-size:11px">{{ row.lead_time }}</td>
+          <td class="td-mono" style="text-align:right;font-size:11px">{{ row.safety_stock|floatformat:0 }}</td>
+          <td class="td-mono" style="text-align:right;font-weight:600">{{ row.rop|floatformat:0 }}</td>
+          <td class="td-mono" style="text-align:right">{{ row.current_stock|floatformat:0 }}</td>
+          <td class="td-mono {% if row.gap > 0 %}rop-gap-pos{% else %}rop-gap-neg{% endif %}" style="text-align:right">{% if row.gap > 0 %}+{% endif %}{{ row.gap|floatformat:0 }}</td>
+          <td>{% if row.reorder %}<span class="badge-reorder">RE-ORDER</span>{% else %}<span class="badge-ok">OK</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="20" style="text-align:center;color:var(--muted);padding:30px">No data</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}

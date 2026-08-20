@@ -2942,3 +2942,153 @@ class ShipmentHistoryView(View):
         return render(request, 'production_runs/shipment_history.html', {
             'shipments': paginator.get_page(request.GET.get('page')),
         })
+
+
+# ─────────────────────────────────────────────
+# REORDER ALERTS
+# ─────────────────────────────────────────────
+
+class ReorderAlertsView(View):
+    def get(self, request):
+        from .rop_engine import calculate_rop, get_settings, get_sales_files
+        from .models import ReorderSettings, LeadTimeConfig
+        from .forms import ReorderSettingsForm
+
+        settings     = get_settings()
+        files        = get_sales_files(n=settings.months_window)
+        rows, labels = calculate_rop()
+
+        # Filter options
+        filter_reorder = request.GET.get('reorder', '')
+        filter_prefix  = request.GET.get('prefix', '')
+        if filter_reorder == '1':
+            rows = [r for r in rows if r['reorder']]
+        if filter_prefix:
+            rows = [r for r in rows if r['sku'].startswith(filter_prefix + '-')]
+
+        # Sort
+        sort = request.GET.get('sort', 'gap')
+        reverse = request.GET.get('dir', 'desc') == 'desc'
+        if sort in ('sku', 'name', 'avg', 'rop', 'current_stock', 'gap', 'cv', 'lead_time'):
+            rows = sorted(rows, key=lambda r: (r[sort] or 0) if sort != 'sku' and sort != 'name' else r[sort], reverse=reverse)
+
+        lead_configs = LeadTimeConfig.objects.all()
+        settings_form = ReorderSettingsForm(instance=settings)
+
+        prefix_labels = {
+            '02': 'Olive Oils',
+            '03': 'Rusks & Breadsticks',
+            '04': 'Vinegars',
+            '05': 'Merchandise',
+            '06': 'Sauces, Salt, Pasta',
+            '08': 'Tea',
+            '10': 'Jams',
+            '11': 'Symbeeosis',
+        }
+        lead_time_map = {lc.sku_prefix: lc.lead_time_months for lc in lead_configs}
+
+        return render(request, 'reorder/alerts.html', {
+            'rows':           rows,
+            'month_labels':   labels,
+            'files':          files,
+            'settings':       settings,
+            'settings_form':  settings_form,
+            'lead_configs':   lead_configs,
+            'lead_time_map':  lead_time_map,
+            'prefix_labels':  prefix_labels,
+            'filter_reorder': filter_reorder,
+            'filter_prefix':  filter_prefix,
+            'sort':           sort,
+            'dir':            'desc' if reverse else 'asc',
+            'fin_prefixes':   ['02','03','04','05','06','08','10','11'],
+        })
+
+    def post(self, request):
+        auth_err = _require_auth(request)
+        if auth_err: return auth_err
+        from .rop_engine import get_settings
+        from .models import ReorderSettings, LeadTimeConfig
+        from .forms import ReorderSettingsForm
+
+        action = request.POST.get('action')
+
+        if action == 'save_settings':
+            settings = get_settings()
+            form = ReorderSettingsForm(request.POST, instance=settings)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Settings saved.')
+            else:
+                messages.error(request, 'Invalid settings.')
+
+        elif action == 'save_lead_times':
+            for prefix in ['02','03','04','05','06','08','10','11']:
+                val = request.POST.get(f'lt_{prefix}', '').strip()
+                if val:
+                    try:
+                        from decimal import Decimal
+                        LeadTimeConfig.objects.update_or_create(
+                            sku_prefix=prefix,
+                            defaults={'lead_time_months': Decimal(val)}
+                        )
+                    except Exception:
+                        pass
+            messages.success(request, 'Lead times saved.')
+
+        return redirect('reorder-alerts')
+
+
+class ReorderAlertsExportView(View):
+    def get(self, request):
+        from .rop_engine import calculate_rop, get_settings, get_sales_files
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from django.http import HttpResponse
+        from datetime import date
+
+        settings     = get_settings()
+        rows, labels = calculate_rop()
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'Reorder Alerts'
+
+        # Header
+        headers = ['SKU', 'Name'] + labels + [
+            'Total', 'Avg Monthly', 'StdDev', 'CV',
+            'Lead Time', 'Safety Stock', 'ROP',
+            'Current Stock', 'Gap', 'Re-order?'
+        ]
+        ws.append(headers)
+        for cell in ws[1]:
+            cell.font = Font(bold=True)
+            cell.fill = PatternFill('solid', fgColor='1F3864')
+            cell.font = Font(bold=True, color='FFFFFF')
+
+        # Data rows
+        red_fill   = PatternFill('solid', fgColor='FFCCCC')
+        green_fill = PatternFill('solid', fgColor='CCFFCC')
+
+        for row in rows:
+            data = [row['sku'], row['name']] + row['monthly_sales'] + [
+                row['total'], row['avg'], row['std'], row['cv'],
+                row['lead_time'], row['safety_stock'], row['rop'],
+                row['current_stock'], row['gap'],
+                'YES' if row['reorder'] else 'no'
+            ]
+            ws.append(data)
+            last = ws.max_row
+            fill = red_fill if row['reorder'] else green_fill
+            ws.cell(last, len(headers)).fill = fill
+
+        # Column widths
+        ws.column_dimensions['A'].width = 14
+        ws.column_dimensions['B'].width = 45
+
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="reorder-alerts-{date.today()}.xlsx"'
+        wb.save(response)
+        return response
+
