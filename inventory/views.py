@@ -1236,8 +1236,12 @@ class RawMaterialBatchDeleteView(View):
         except Exception as e:
             messages.error(request, _deletion_blocked_msg(e))
         next_url = request.POST.get('next', '')
-        if next_url and next_url.startswith('/'):
-            return redirect(next_url)
+        if next_url:
+            from urllib.parse import urlparse
+            parsed = urlparse(next_url)
+            path = parsed.path + ('?' + parsed.query if parsed.query else '')
+            if path.startswith('/'):
+                return redirect(path)
         return redirect('batch-list')
 
 
