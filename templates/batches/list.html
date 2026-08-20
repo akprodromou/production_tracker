@@ -95,6 +95,12 @@
           <td>
             <div class="td-actions" style="justify-content:flex-end">
               <a href="{% url 'batch-detail' b.pk %}" class="btn btn-ghost btn-sm">View</a>
+              <a href="{% url 'batch-edit' b.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+              <form method="post" action="{% url 'batch-delete' b.pk %}" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ b.lot_number }}?')">Delete</button>
+              </form>
             </div>
           </td>
         </tr>
