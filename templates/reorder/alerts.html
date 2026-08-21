@@ -14,8 +14,8 @@
   .settings-grid-top { grid-template-columns: 1fr !important; }
   .settings-context-wrap { width: 100% !important; }
 }
-.settings-grid-top > :nth-child(3) { display: none; } /* hide empty 3rd col placeholder */
-.settings-context-wrap { width: 50%; }
+
+
 .rop-gap-neg { color:var(--success,#28c864); }
 .rop-gap-pos { color:#ff5050; font-weight:600; }
 .lt-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px; }
@@ -65,7 +65,8 @@ input:focus, select:focus { border-color:var(--accent); }
 
 {# Settings panels #}
 {# Settings panels — two panels side by side, then full-width context below #}
-<div class="settings-grid-top" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:0">
+<div class="settings-grid-top" style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:16px;margin-bottom:20px">
+
 
   {# Calculation Settings #}
   <div class="settings-panel">
@@ -158,44 +159,39 @@ input:focus, select:focus { border-color:var(--accent); }
     {% endif %}
   </div>
 
-</div>{# end top settings grid #}
-
-{# Context / explanation panel — half width on desktop #}
-<div class="settings-context-wrap" style="margin-bottom:20px">
-<div class="settings-panel" style="margin-bottom:0">
-  <div style="font-size:13px;font-weight:600;margin-bottom:14px">&#128214; How the Calculation Works</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-    <div>
-      <table style="width:100%;font-size:12px;border-collapse:collapse">
-        <tbody>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:6px 0;color:var(--muted)">Target Service Level</td>
-            <td style="padding:6px 0;font-family:var(--mono);text-align:right;font-weight:600">{{ settings.service_level|floatformat:2 }}</td>
-            <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--muted);font-style:italic">"I want to avoid stockouts in {{ settings.service_level|floatformat:2 }} of demand cycles (e.g. 0.95 = 95%)"</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:6px 0;color:var(--muted)">Z-Score</td>
-            <td style="padding:6px 0;font-family:var(--mono);text-align:right;font-weight:600">{{ settings.z_score|floatformat:2 }}</td>
-            <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--muted);font-style:italic">"How many standard deviations of demand variability to buffer against"</td>
-          </tr>
-          <tr>
-            <td style="padding:6px 0;color:var(--muted)">Safety Stock</td>
-            <td colspan="2" style="padding:6px 0;font-family:var(--mono);font-size:11px;color:var(--accent)">Z &times; StdDev &times; &radic;Lead Time</td>
-          </tr>
-        </tbody>
-      </table>
-      <div style="margin-top:14px;font-size:11px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:10px">
-        <strong style="color:var(--text)">To update:</strong> export monthly sales from Pylon ERP as
-        <code>sales-sheet-YYYY-MM.xlsx</code>, place in <code>sales_data/</code>, push to GitHub.
-      </div>
+  <div class="settings-panel" style="overflow-y:auto">
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px">&#128214; Reorder Point Explained</div>
+    <div style="font-size:12px;color:var(--text);font-family:var(--mono);margin-bottom:12px;padding:8px;background:var(--surface);border-radius:var(--radius)">
+      ROP = Avg &times; LT + Z &times; StdDev &times; &radic;LT
     </div>
-    <div style="font-size:11px;color:var(--muted);line-height:1.7;background:var(--surface);border-radius:var(--radius);padding:14px;border-left:3px solid var(--accent)">
-      <p style="margin:0 0 10px 0">If demand was perfectly predictable, we would order exactly when stock drops to <em>average demand &times; lead time</em>, i.e. no safety stock would be needed.</p>
-      <p style="margin:0">However, since demand fluctuates month to month, we add a buffer equivalent to the standard deviation, scaled by Z, so that even in a worse-than-average month we're unlikely to run out before the next delivery arrives.</p>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px">
+      <p style="margin:0 0 8px">For example: we sell <strong style="color:var(--text)">100 units/month</strong>, supplier takes <strong style="color:var(--text)">2 months</strong>. During lead time we expect to sell 100&times;2 = <strong style="color:var(--text)">200 units</strong> — so we reorder when stock hits 200. But 100 is only the average, so we add Safety Stock as a buffer against demand variability.</p>
+      <p style="margin:0"><strong style="color:var(--text)">Safety Stock = Z &times; StdDev &times; &radic;Lead Time</strong><br>
+      Z controls how conservative the buffer is; StdDev measures demand unpredictability; &radic;LT scales the buffer to the duration of exposure.</p>
+    </div>
+    <table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:12px">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="padding:4px 8px 4px 0;color:var(--muted);font-weight:500;text-align:left">Service Level</th>
+          <th style="padding:4px;color:var(--muted);font-weight:500;text-align:center">Z</th>
+          <th style="padding:4px 0 4px 8px;color:var(--muted);font-weight:500;text-align:left">Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px 4px 0">50%</td><td style="padding:4px;font-family:var(--mono);text-align:center">0.00</td><td style="padding:4px 0 4px 8px;color:var(--muted)">No safety stock</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px 4px 0">70%</td><td style="padding:4px;font-family:var(--mono);text-align:center">0.52</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Relatively small buffer</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px 4px 0">90%</td><td style="padding:4px;font-family:var(--mono);text-align:center">1.28</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Larger buffer</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:rgba(79,142,247,.05)"><td style="padding:4px 8px 4px 0;color:var(--accent)">95%</td><td style="padding:4px;font-family:var(--mono);text-align:center;color:var(--accent)">1.645</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Recommended</td></tr>
+        <tr><td style="padding:4px 8px 4px 0">99%</td><td style="padding:4px;font-family:var(--mono);text-align:center">2.326</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Very large buffer</td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px">
+      <strong style="color:var(--text)">To update:</strong> export monthly sales from Pylon ERP as <code>sales-sheet-YYYY-MM.xlsx</code>, place in <code>sales_data/</code>, push to GitHub.
     </div>
   </div>
-</div>
-</div>{# end context wrap #}
+
+</div>{# end settings grid #}
+
 
 {# Filters #}
 <form method="get" style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
@@ -234,12 +230,12 @@ input:focus, select:focus { border-color:var(--accent); }
           <th><a href="?sort=sku&dir={% if sort == 'sku' and dir == 'asc' %}desc{% else %}asc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">SKU</a></th>
           <th>Name</th>
           {% for lbl in month_labels %}<th style="text-align:right;font-size:11px">{{ lbl }}</th>{% endfor %}
-          <th style="text-align:right"><a href="?sort=avg&dir={% if sort == 'avg' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}" title="(1) Average monthly sales">Avg/mo <span style="color:var(--muted);font-weight:400">(1)</span></a></th>
-          <th style="text-align:right" title="(2) Standard deviation of monthly sales">StdDev <span style="color:var(--muted);font-weight:400">(2)</span></th>
+          <th style="text-align:right"><a href="?sort=avg&dir={% if sort == 'avg' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}" title="(1) Average monthly sales">Avg/mo</a></th>
+          <th style="text-align:right" title="(2) Standard deviation of monthly sales">StdDev</th>
           <th style="text-align:right">CV</th>
-          <th style="text-align:right" title="(4) Lead time in months">LT <span style="color:var(--muted);font-weight:400">(4)</span></th>
+          <th style="text-align:right" title="(4) Lead time in months">LT</th>
           <th style="text-align:right" title="Safety Stock = Z(3) × StdDev(2) × √LT(4)">Safety</th>
-          <th style="text-align:right"><a href="?sort=rop&dir={% if sort == 'rop' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}" title="(5) ROP = Avg(1) × LT(4) + Z(3) × StdDev(2) × √LT(4)">ROP <span style="color:var(--muted);font-weight:400">(5)</span></a></th>
+          <th style="text-align:right"><a href="?sort=rop&dir={% if sort == 'rop' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}" title="(5) ROP = Avg(1) × LT(4) + Z(3) × StdDev(2) × √LT(4)">ROP</a></th>
           <th style="text-align:right"><a href="?sort=current_stock&dir={% if sort == 'current_stock' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Stock</a></th>
           <th style="text-align:right"><a href="?sort=gap&dir={% if sort == 'gap' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Gap</a></th>
           <th>Status</th>
