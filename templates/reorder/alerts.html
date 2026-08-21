@@ -249,7 +249,7 @@ input:focus, select:focus { border-color:var(--accent); }
         {% for row in rows %}
         <tr>
           <td><input type="checkbox" name="sel_{{ row.sku }}" class="row-check" value="1"></td>
-          <td><input type="number" name="qty_{{ row.sku }}" value="{{ row.gap|floatformat:0 }}" min="0" step="1"
+          <td><input type="number" name="qty_{{ row.sku }}" value="{% if row.gap > 0 %}{{ row.gap|floatformat:0 }}{% else %}0{% endif %}" min="0" step="1"
             style="width:80px;padding:4px 6px;font-size:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text)"></td>
           <td class="td-mono" style="font-size:11px">{{ row.sku }}</td>
           <td style="font-size:12px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ row.name }}">{{ row.name }}</td>
