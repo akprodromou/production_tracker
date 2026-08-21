@@ -3129,13 +3129,14 @@ class ReorderComponentsView(View):
         from decimal import Decimal
         from collections import defaultdict
 
-        # Collect selected SKUs and quantities
+        # Collect selected SKUs and quantities — only where checkbox is checked
         selected = {}
         for key, val in request.POST.items():
-            if key.startswith('qty_'):
+            if key.startswith('sel_'):
                 sku = key[4:]
+                qty_val = request.POST.get(f'qty_{sku}', '0').replace(',', '')
                 try:
-                    qty = Decimal(val.replace(',', ''))
+                    qty = Decimal(qty_val)
                     if qty > 0:
                         selected[sku] = qty
                 except Exception:

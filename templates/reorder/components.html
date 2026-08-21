@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Component Requirements{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
-  <a href="{% url 'reorder-alerts' %}">Reorder Alerts</a><span>/</span>
-  Component Requirements
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'reorder-alerts' %}">Reorder Alerts</a><span>/</span> Component Requirements{% endblock %}
 {% block content %}
 <div class="page-header">
   <div>
