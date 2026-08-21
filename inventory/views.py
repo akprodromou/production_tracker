@@ -3253,7 +3253,14 @@ class ReorderComponentsView(View):
                 'gap': round(gap, 1),
             })
 
+        # Sort
+        sort = request.GET.get('sort', 'gap')
+        reverse = request.GET.get('dir', 'asc') == 'desc'
+        if sort in ('sku', 'name', 'in_stock', 'required_qty', 'gap'):
+            rows = sorted(rows, key=lambda r: r[sort] if sort not in ('sku','name') else r[sort].lower(), reverse=reverse)
+
         return render(request, 'reorder/components.html', {
             'rows': rows, 'sku_breakdown': sku_breakdown, 'selected': selected,
+            'sort': sort, 'dir': 'desc' if reverse else 'asc',
         })
 
