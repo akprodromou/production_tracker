@@ -89,7 +89,7 @@ input:focus, select:focus { border-color:var(--accent); }
           <div style="font-size:11px;color:var(--muted);margin-top:4px">90%&rarr;1.282 &nbsp; 95%&rarr;1.645 &nbsp; 99%&rarr;2.326</div>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      <button type="submit" class="btn btn-primary btn-sm">Update</button>
     </form>
     <script>
     document.getElementById('settings-form').querySelector('[name=service_level]').addEventListener('input', function() {
@@ -108,7 +108,7 @@ input:focus, select:focus { border-color:var(--accent); }
     });
     </script>
     {% else %}
-    <div class="lt-row"><span class="lt-label">Service Level</span><span class="lt-value">{{ settings.service_level }}</span></div>
+    <div class="lt-row"><span class="lt-label">Service Level</span><span class="lt-value">{{ settings.service_level|floatformat:2 }}</span></div>
     <div class="lt-row"><span class="lt-label">Z-Score</span><span class="lt-value">{{ settings.z_score }}</span></div>
     <div class="lt-row"><span class="lt-label">Months Window</span><span class="lt-value">{{ settings.months_window }}</span></div>
     {% endif %}
@@ -144,7 +144,7 @@ input:focus, select:focus { border-color:var(--accent); }
       </div>
       {% endfor %}
       <div style="margin-top:12px;display:flex;gap:8px">
-        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+        <button type="submit" class="btn btn-primary btn-sm">Update</button>
         <button type="button" class="btn btn-ghost btn-sm" onclick="toggleLtEdit()">Cancel</button>
       </div>
     </form>
@@ -170,8 +170,8 @@ input:focus, select:focus { border-color:var(--accent); }
         <tbody>
           <tr style="border-bottom:1px solid var(--border)">
             <td style="padding:6px 0;color:var(--muted)">Target Service Level</td>
-            <td style="padding:6px 0;font-family:var(--mono);text-align:right;font-weight:600">{{ settings.service_level }}</td>
-            <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--muted);font-style:italic">"I want to avoid stockouts in {{ settings.service_level }} of demand cycles (e.g. 0.95 = 95%)"</td>
+            <td style="padding:6px 0;font-family:var(--mono);text-align:right;font-weight:600">{{ settings.service_level|floatformat:2 }}</td>
+            <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--muted);font-style:italic">"I want to avoid stockouts in {{ settings.service_level|floatformat:2 }} of demand cycles (e.g. 0.95 = 95%)"</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border)">
             <td style="padding:6px 0;color:var(--muted)">Z-Score</td>
@@ -190,8 +190,8 @@ input:focus, select:focus { border-color:var(--accent); }
       </div>
     </div>
     <div style="font-size:11px;color:var(--muted);line-height:1.7;background:var(--surface);border-radius:var(--radius);padding:14px;border-left:3px solid var(--accent)">
-      <p style="margin:0 0 10px 0">If demand were perfectly predictable, we would order exactly when stock hits <em>average demand &times; lead time</em> — no safety stock needed.</p>
-      <p style="margin:0">But demand fluctuates month to month, so we add a buffer sized to the standard deviation, scaled by Z, so that even in a worse-than-average month we're unlikely to run out before the next delivery arrives.</p>
+      <p style="margin:0 0 10px 0">If demand was perfectly predictable, we would order exactly when stock drops to <em>average demand &times; lead time</em>, i.e. no safety stock would be needed.</p>
+      <p style="margin:0">However, since demand fluctuates month to month, we add a buffer equivalent to the standard deviation, scaled by Z, so that even in a worse-than-average month we're unlikely to run out before the next delivery arrives.</p>
     </div>
   </div>
 </div>

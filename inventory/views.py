@@ -3029,8 +3029,24 @@ class ReorderAlertsView(View):
             settings = get_settings()
             form = ReorderSettingsForm(request.POST, instance=settings)
             if form.is_valid():
-                form.save()
-                messages.success(request, 'Settings saved.')
+                obj = form.save(commit=False)
+                # Auto-calculate z-score from service level
+                import math
+                sl = float(obj.service_level)
+                # Rational approximation of inverse normal CDF (Abramowitz & Stegun)
+                def inv_norm(p):
+                    c = [2.515517, 0.802853, 0.010328]
+                    d = [1.432788, 0.189269, 0.001308]
+                    if p < 0.5:
+                        t = math.sqrt(-2 * math.log(p))
+                        return -(t - (c[0]+c[1]*t+c[2]*t**2)/(1+d[0]*t+d[1]*t**2+d[2]*t**3))
+                    else:
+                        t = math.sqrt(-2 * math.log(1-p))
+                        return t - (c[0]+c[1]*t+c[2]*t**2)/(1+d[0]*t+d[1]*t**2+d[2]*t**3)
+                from decimal import Decimal
+                obj.z_score = Decimal(str(round(inv_norm(sl), 6)))
+                obj.save()
+                messages.success(request, 'Settings updated.')
             else:
                 messages.error(request, 'Invalid settings.')
 
