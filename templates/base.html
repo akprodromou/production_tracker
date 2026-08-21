@@ -476,11 +476,7 @@
 
 <div class="main">
   <div class="topbar">
-    <div class="topbar-breadcrumb">
-      {% block breadcrumb %}
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-      {% endblock %}
-    </div>
+    <div class="topbar-breadcrumb">{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a>{% endblock %}</div>
     <div style="flex:1"></div>
     <span class="text-mono text-muted">{% now "Y-m-d" %}</span>
   </div>
