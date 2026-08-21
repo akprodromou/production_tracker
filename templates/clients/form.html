@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ form_title }}{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
-  <a href="{% url 'client-list' %}">Clients</a><span>/</span> {{ form_title }}
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'client-list' %}">Clients</a><span>/</span> {{ form_title }}{% endblock %}
 {% block extra_head %}
 <style>
 select, input, textarea {

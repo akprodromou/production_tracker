@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ form_title }}{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
-  <a href="{% url 'carrier-list' %}">Carriers</a><span>/</span> {{ form_title }}
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'carrier-list' %}">Carriers</a><span>/</span> {{ form_title }}{% endblock %}
 {% block content %}
 <div class="page-header"><div><h1>{{ form_title }}</h1></div></div>
 <form method="post">{% csrf_token %}

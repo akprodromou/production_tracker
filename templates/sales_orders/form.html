@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 {% load inventory_extras %}
 {% block title %}{{ form_title }}{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
-  <a href="{% url 'client-order-board' %}">Client Order Board</a><span>/</span>
-  <a href="{% url 'sales-order-list' %}">Client Orders</a><span>/</span> {{ form_title }}
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'client-order-board' %}">Client Order Board</a><span>/</span> <a href="{% url 'sales-order-list' %}">Client Orders</a><span>/</span> {{ form_title }}{% endblock %}
 {% block extra_head %}
 <style>
 select, input[type=text], input[type=number], input[type=date], textarea {

@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 {% load inventory_extras %}
 {% block title %}{{ order.reference }} — Order Detail{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
-  <a href="{% url 'order-list' %}">Orders</a><span>/</span>
-  {{ order.reference }}
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'order-list' %}">Orders</a><span>/</span> {{ order.reference }}{% endblock %}
 
 {% block content %}
 <div class="page-header">

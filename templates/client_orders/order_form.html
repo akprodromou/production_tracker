@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ form_title }} — Orders{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
-  <a href="{% url 'order-list' %}">Orders</a><span>/</span>
-  {{ form_title }}
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'order-list' %}">Orders</a><span>/</span> {{ form_title }}{% endblock %}
 
 {% block extra_head %}
 <style>

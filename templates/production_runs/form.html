@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ form_title }} — Production Runs{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
-  <a href="{% url 'production-run-list' %}">Production Runs</a><span>/</span>
-  {{ form_title }}
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'production-run-list' %}">Production Runs</a><span>/</span> {{ form_title }}{% endblock %}
 
 {% block extra_head %}
 <style>

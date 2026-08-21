@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ form_title }} — Materials{% endblock %}
-{% block breadcrumb %}
-  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
-  <a href="{% url 'material-list' %}">Materials</a><span>/</span>
-  {{ form_title }}
-{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'material-list' %}">Materials</a><span>/</span> {{ form_title }}{% endblock %}
 
 {% block content %}
 <div class="page-header">
