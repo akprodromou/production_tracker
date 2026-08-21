@@ -65,7 +65,7 @@ input:focus, select:focus { border-color:var(--accent); }
 
 {# Settings panels #}
 {# Settings panels — two panels side by side, then full-width context below #}
-<div class="settings-grid-top" style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:16px;margin-bottom:0">
+<div class="settings-grid-top" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:0">
 
   {# Calculation Settings #}
   <div class="settings-panel">
@@ -234,12 +234,12 @@ input:focus, select:focus { border-color:var(--accent); }
           <th><a href="?sort=sku&dir={% if sort == 'sku' and dir == 'asc' %}desc{% else %}asc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">SKU</a></th>
           <th>Name</th>
           {% for lbl in month_labels %}<th style="text-align:right;font-size:11px">{{ lbl }}</th>{% endfor %}
-          <th style="text-align:right"><a href="?sort=avg&dir={% if sort == 'avg' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Avg/mo</a></th>
-          <th style="text-align:right">StdDev</th>
+          <th style="text-align:right"><a href="?sort=avg&dir={% if sort == 'avg' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}" title="(1) Average monthly sales">Avg/mo <span style="color:var(--muted);font-weight:400">(1)</span></a></th>
+          <th style="text-align:right" title="(2) Standard deviation of monthly sales">StdDev <span style="color:var(--muted);font-weight:400">(2)</span></th>
           <th style="text-align:right">CV</th>
-          <th style="text-align:right">LT</th>
-          <th style="text-align:right">Safety</th>
-          <th style="text-align:right"><a href="?sort=rop&dir={% if sort == 'rop' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">ROP</a></th>
+          <th style="text-align:right" title="(4) Lead time in months">LT <span style="color:var(--muted);font-weight:400">(4)</span></th>
+          <th style="text-align:right" title="Safety Stock = Z(3) × StdDev(2) × √LT(4)">Safety</th>
+          <th style="text-align:right"><a href="?sort=rop&dir={% if sort == 'rop' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}" title="(5) ROP = Avg(1) × LT(4) + Z(3) × StdDev(2) × √LT(4)">ROP <span style="color:var(--muted);font-weight:400">(5)</span></a></th>
           <th style="text-align:right"><a href="?sort=current_stock&dir={% if sort == 'current_stock' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Stock</a></th>
           <th style="text-align:right"><a href="?sort=gap&dir={% if sort == 'gap' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Gap</a></th>
           <th>Status</th>
