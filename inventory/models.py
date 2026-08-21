@@ -279,7 +279,7 @@ class SalesOrderLine(models.Model):
 
 class ReorderSettings(models.Model):
     """Global settings for reorder point calculation."""
-    service_level   = models.DecimalField(max_digits=3, decimal_places=24, default='0.95',
+    service_level   = models.DecimalField(max_digits=6, decimal_places=4, default='0.9500',
                           help_text="Target service level, e.g. 0.95 for 95%")
     z_score         = models.DecimalField(max_digits=8, decimal_places=6, default='1.644854',
                           help_text="Z-score corresponding to service level (auto-hint: 0.95→1.645, 0.99→2.326)")
