@@ -3121,3 +3121,86 @@ class ReorderAlertsExportView(View):
         wb.save(response)
         return response
 
+
+
+class ReorderComponentsView(View):
+    def post(self, request):
+        from .models import ProductionTemplate, ProductionTemplateComponent, Material, ProductBatch, ProductBatchReservation
+        from decimal import Decimal
+        from collections import defaultdict
+
+        # Collect selected SKUs and quantities
+        selected = {}
+        for key, val in request.POST.items():
+            if key.startswith('qty_'):
+                sku = key[4:]
+                try:
+                    qty = Decimal(val.replace(',', ''))
+                    if qty > 0:
+                        selected[sku] = qty
+                except Exception:
+                    pass
+
+        if not selected:
+            messages.warning(request, 'No SKUs selected.')
+            return redirect('reorder-alerts')
+
+        # Aggregate components across all selected SKUs
+        component_totals = defaultdict(Decimal)  # material_id -> required qty
+        component_materials = {}  # material_id -> material obj
+        sku_breakdown = []  # for display
+
+        for sku, restock_qty in selected.items():
+            try:
+                material = Material.objects.get(sku=sku)
+                template = ProductionTemplate.objects.get(product=material)
+            except (Material.DoesNotExist, ProductionTemplate.DoesNotExist):
+                sku_breakdown.append({'sku': sku, 'name': sku, 'qty': restock_qty, 'found': False})
+                continue
+
+            sku_breakdown.append({'sku': sku, 'name': material.name, 'qty': restock_qty, 'found': True})
+            for comp in template.components.select_related('material__unit').all():
+                required = comp.ratio * restock_qty
+                component_totals[comp.material.pk] += required
+                component_materials[comp.material.pk] = comp.material
+
+        # Get current stock for each component material
+        rows = []
+        for mat_id, required_qty in sorted(component_totals.items(), key=lambda x: component_materials[x[0]].sku):
+            mat = component_materials[mat_id]
+            # Current stock from raw batches
+            from inventory.models import RawMaterialBatch, RawBatchAllocation
+            from django.db.models import Sum as DSum
+            raw_stock = RawMaterialBatch.objects.filter(
+                material=mat
+            ).aggregate(t=DSum('total_quantity'))['t'] or Decimal('0')
+            allocated = RawBatchAllocation.objects.filter(
+                raw_batch__material=mat
+            ).aggregate(t=DSum('quantity'))['t'] or Decimal('0')
+            in_stock = raw_stock - allocated
+
+            # Also check FIN product batches
+            if mat.category == 'FIN':
+                fin_stock = ProductBatch.objects.filter(material=mat).aggregate(
+                    t=DSum('quantity_produced'))['t'] or Decimal('0')
+                res_stock = ProductBatchReservation.objects.filter(
+                    product_batch__material=mat, order_line__isnull=False
+                ).aggregate(t=DSum('quantity_reserved'))['t'] or Decimal('0')
+                in_stock = fin_stock - res_stock
+
+            to_order = max(Decimal('0'), required_qty - in_stock)
+            rows.append({
+                'sku':          mat.sku,
+                'name':         mat.name,
+                'unit':         mat.unit.name if mat.unit else '',
+                'required_qty': round(required_qty, 1),
+                'in_stock':     round(in_stock, 1),
+                'to_order':     round(to_order, 1),
+            })
+
+        return render(request, 'reorder/components.html', {
+            'rows':          rows,
+            'sku_breakdown': sku_breakdown,
+            'selected':      selected,
+        })
+

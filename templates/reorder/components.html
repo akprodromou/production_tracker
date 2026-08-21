@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Component Requirements{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Dashboard</a><span>/</span>
+  <a href="{% url 'reorder-alerts' %}">Reorder Alerts</a><span>/</span>
+  Component Requirements
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Component Requirements</h1>
+    <p class="text-muted" style="font-size:13px">Aggregated raw material requirements for selected re-stock quantities</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'reorder-alerts' %}" class="btn btn-secondary">&#8592; Back to Reorder Alerts</a>
+  </div>
+</div>
+
+{# Selected products summary #}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Selected Products</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>SKU</th><th>Product</th><th style="text-align:right">Restock Qty</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for item in sku_breakdown %}
+        <tr>
+          <td class="td-mono" style="font-size:11px">{{ item.sku }}</td>
+          <td style="font-size:13px">{{ item.name }}</td>
+          <td class="td-mono" style="text-align:right">{{ item.qty|floatformat:0 }}</td>
+          <td>
+            {% if item.found %}<span class="badge badge-green">Template found</span>
+            {% else %}<span class="badge badge-red">No template</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# Aggregated components #}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Required Components</span>
+    <span class="text-muted" style="font-size:12px;margin-left:8px">{{ rows|length }} material{{ rows|length|pluralize }}</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Material</th>
+          <th>Unit</th>
+          <th style="text-align:right">Required</th>
+          <th style="text-align:right">In Stock</th>
+          <th style="text-align:right">To Order</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr {% if row.to_order > 0 %}style="background:rgba(255,80,80,.05)"{% endif %}>
+          <td class="td-mono text-muted" style="font-size:11px">{{ row.sku }}</td>
+          <td style="font-size:13px">{{ row.name }}</td>
+          <td class="text-muted" style="font-size:12px">{{ row.unit }}</td>
+          <td class="td-mono" style="text-align:right">{{ row.required_qty|floatformat:0 }}</td>
+          <td class="td-mono" style="text-align:right;color:{% if row.in_stock >= row.required_qty %}var(--success,#28c864){% else %}#ff5050{% endif %}">{{ row.in_stock|floatformat:0 }}</td>
+          <td class="td-mono" style="text-align:right;font-weight:{% if row.to_order > 0 %}600{% else %}400{% endif %};color:{% if row.to_order > 0 %}#ff5050{% else %}var(--muted){% endif %}">
+            {% if row.to_order > 0 %}{{ row.to_order|floatformat:0 }}{% else %}&mdash;{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

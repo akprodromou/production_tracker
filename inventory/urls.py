@@ -6,6 +6,7 @@ urlpatterns = [
 
     # Reorder Alerts
     path('reorder-alerts/', views.ReorderAlertsView.as_view(), name='reorder-alerts'),
+    path('reorder-alerts/components/', views.ReorderComponentsView.as_view(), name='reorder-components'),
     path('reorder-alerts/export/', views.ReorderAlertsExportView.as_view(), name='reorder-alerts-export'),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
