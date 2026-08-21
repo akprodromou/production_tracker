@@ -80,14 +80,14 @@ input:focus, select:focus { border-color:var(--accent); }
           {{ settings_form.service_level }}
         </div>
         <div>
-          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Months Window</label>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Months to consider</label>
           {{ settings_form.months_window }}
         </div>
         <div>
-          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Z-Score <span style="font-weight:400">(auto-derived from service level)</span></label>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Z-Score <span style="font-weight:400">(calculated from service level)</span></label>
           <input type="text" value="{{ settings.z_score }}" disabled style="background:var(--surface);color:var(--muted);cursor:not-allowed">
           {{ settings_form.z_score }}
-          <div style="font-size:11px;color:var(--muted);margin-top:4px">90%&rarr;1.282 &nbsp; 95%&rarr;1.645 &nbsp; 99%&rarr;2.326</div>
+          <!-- <div style="font-size:11px;color:var(--muted);margin-top:4px">90%&rarr;1.282 &nbsp; 95%&rarr;1.645 &nbsp; 99%&rarr;2.326</div> -->
         </div>
       </div>
       <button type="submit" class="btn btn-primary btn-sm">Update</button>
@@ -165,7 +165,7 @@ input:focus, select:focus { border-color:var(--accent); }
       ROP = Avg &times; LT + Z &times; StdDev &times; &radic;LT
     </div>
     <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px">
-      <p style="margin:0 0 8px">For example: we sell <strong style="color:var(--text)">100 units/month</strong>, supplier takes <strong style="color:var(--text)">2 months</strong>. During lead time we expect to sell 100&times;2 = <strong style="color:var(--text)">200 units</strong> — so we reorder when stock hits 200. But 100 is only the average, so we add Safety Stock as a buffer against demand variability.</p>
+      <p style="margin:0 0 8px">For example: we sell <strong style="color:var(--text)">100 units/month</strong>, supplier takes <strong style="color:var(--text)">2 months</strong>. During lead time we expect to sell 100&times;2 = <strong style="color:var(--text)">200 units</strong>, so we reorder when stock hits 200. But 100 is only the average, so we add Safety Stock as a buffer against demand variability.</p>
       <p style="margin:0"><strong style="color:var(--text)">Safety Stock = Z &times; StdDev &times; &radic;Lead Time</strong><br>
       Z controls how conservative the buffer is; StdDev measures demand unpredictability; &radic;LT scales the buffer to the duration of exposure.</p>
     </div>
@@ -181,7 +181,7 @@ input:focus, select:focus { border-color:var(--accent); }
         <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px 4px 0">50%</td><td style="padding:4px;font-family:var(--mono);text-align:center">0.00</td><td style="padding:4px 0 4px 8px;color:var(--muted)">No safety stock</td></tr>
         <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px 4px 0">70%</td><td style="padding:4px;font-family:var(--mono);text-align:center">0.52</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Relatively small buffer</td></tr>
         <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px 4px 0">90%</td><td style="padding:4px;font-family:var(--mono);text-align:center">1.28</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Larger buffer</td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:rgba(79,142,247,.05)"><td style="padding:4px 8px 4px 0;color:var(--accent)">95%</td><td style="padding:4px;font-family:var(--mono);text-align:center;color:var(--accent)">1.645</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Recommended</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px 4px 0">95%</td><td style="padding:4px;font-family:var(--mono);text-align:center">1.645</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Recommended</td></tr>
         <tr><td style="padding:4px 8px 4px 0">99%</td><td style="padding:4px;font-family:var(--mono);text-align:center">2.326</td><td style="padding:4px 0 4px 8px;color:var(--muted)">Very large buffer</td></tr>
       </tbody>
     </table>

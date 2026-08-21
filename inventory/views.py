@@ -3189,14 +3189,14 @@ class ReorderComponentsView(View):
                 ).aggregate(t=DSum('quantity_reserved'))['t'] or Decimal('0')
                 in_stock = fin_stock - res_stock
 
-            to_order = max(Decimal('0'), required_qty - in_stock)
+            gap = in_stock - required_qty
             rows.append({
                 'sku':          mat.sku,
                 'name':         mat.name,
                 'unit':         mat.unit.name if mat.unit else '',
                 'required_qty': round(required_qty, 1),
                 'in_stock':     round(in_stock, 1),
-                'to_order':     round(to_order, 1),
+                'gap':          round(gap, 1),
             })
 
         return render(request, 'reorder/components.html', {
