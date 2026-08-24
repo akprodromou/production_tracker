@@ -1,3 +1,4 @@
+import os as _os
 import os
 from pathlib import Path
 import os
@@ -13,7 +14,6 @@ STATICFILES_DIRS = [
 SECRET_KEY = _os.environ.get('SECRET_KEY', 'django-insecure-local-dev-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-import os as _os
 DEBUG = _os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app', '.up.railway.app']
