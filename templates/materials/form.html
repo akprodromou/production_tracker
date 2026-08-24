@@ -7,10 +7,12 @@
   <div><h1>{{ form_title }}</h1></div>
 </div>
 
-<div class="card" style="max-width:560px">
-  <div class="card-body">
-    <form method="post">
-      {% csrf_token %}
+<form method="post" style="max-width:640px">
+  {% csrf_token %}
+
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Details</span></div>
+    <div class="card-body">
       <div class="form-grid">
         <div class="form-group">
           <label for="{{ form.name.id_for_label }}">Name</label>
@@ -36,28 +38,35 @@
           </div>
         </div>
       </div>
-      <div class="card-body" style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
-        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:12px">PALLET CONFIGURATION <span style="font-weight:400">(optional — used for volume calculations)</span></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-          <div class="form-group">
-            <label>Pack <span style="color:var(--muted);font-weight:400;font-size:11px">units per carton</span></label>
-            {{ form.pack }}
-          </div>
-          <div class="form-group">
-            <label>Pallet Tie <span style="color:var(--muted);font-weight:400;font-size:11px">boxes per layer</span></label>
-            {{ form.pallet_tie }}
-          </div>
-          <div class="form-group">
-            <label>Pallet High <span style="color:var(--muted);font-weight:400;font-size:11px">layers per pallet</span></label>
-            {{ form.pallet_high }}
-          </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">
+      <span class="card-title">Pallet Configuration</span>
+      <span style="color:var(--muted);font-size:12px;margin-left:8px">optional</span>
+    </div>
+    <div class="card-body">
+      <div class="form-grid form-grid-3">
+        <div class="form-group">
+          <label>Pack <span style="color:var(--muted);font-weight:400;font-size:11px">units per carton</span></label>
+          {{ form.pack }}
+        </div>
+        <div class="form-group">
+          <label>Pallet Tie <span style="color:var(--muted);font-weight:400;font-size:11px">boxes per layer</span></label>
+          {{ form.pallet_tie }}
+        </div>
+        <div class="form-group">
+          <label>Pallet High <span style="color:var(--muted);font-weight:400;font-size:11px">layers per pallet</span></label>
+          {{ form.pallet_high }}
         </div>
       </div>
-      <div class="form-actions mt-3">
-        <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
-        <a href="{% url 'material-list' %}" class="btn btn-secondary">Cancel</a>
-      </div>
-    </form>
+    </div>
   </div>
-</div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+    <a href="{% url 'material-list' %}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
 {% endblock %}
