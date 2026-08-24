@@ -35,6 +35,22 @@ class Material(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     category = models.CharField(max_length=3, choices=CATEGORY_CHOICES)
 
+    pack        = models.PositiveIntegerField(null=True, blank=True, help_text="Units per carton box")
+    pallet_tie  = models.PositiveIntegerField(null=True, blank=True, help_text="Boxes per pallet layer")
+    pallet_high = models.PositiveIntegerField(null=True, blank=True, help_text="Layers per pallet")
+
+    def pallet_capacity(self):
+        if self.pallet_tie and self.pallet_high:
+            return self.pallet_tie * self.pallet_high
+        return None
+
+    def pallets_for_qty(self, qty):
+        cap = self.pallet_capacity()
+        if cap and self.pack and self.pack > 0:
+            boxes = float(qty) / self.pack
+            return round(boxes / cap, 2)
+        return None
+
     def __str__(self):
         return f"{self.name} ({self.sku})"
 
