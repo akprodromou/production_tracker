@@ -36,6 +36,23 @@
           </div>
         </div>
       </div>
+      <div class="card-body" style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:12px">PALLET CONFIGURATION <span style="font-weight:400">(optional — used for volume calculations)</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label>Pack <span style="color:var(--muted);font-weight:400;font-size:11px">units per carton</span></label>
+            {{ form.pack }}
+          </div>
+          <div class="form-group">
+            <label>Pallet Tie <span style="color:var(--muted);font-weight:400;font-size:11px">boxes per layer</span></label>
+            {{ form.pallet_tie }}
+          </div>
+          <div class="form-group">
+            <label>Pallet High <span style="color:var(--muted);font-weight:400;font-size:11px">layers per pallet</span></label>
+            {{ form.pallet_high }}
+          </div>
+        </div>
+      </div>
       <div class="form-actions mt-3">
         <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
         <a href="{% url 'material-list' %}" class="btn btn-secondary">Cancel</a>

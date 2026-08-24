@@ -51,6 +51,7 @@
           <th style="text-align:right"><a href="?sort=in_stock&dir={% if sort == 'in_stock' and dir == 'desc' %}asc{% else %}desc{% endif %}" style="color:inherit;text-decoration:none">Stock</a></th>
           <th style="text-align:right"><a href="?sort=required_qty&dir={% if sort == 'required_qty' and dir == 'desc' %}asc{% else %}desc{% endif %}" style="color:inherit;text-decoration:none">Required</a></th>
           <th style="text-align:right"><a href="?sort=gap&dir={% if sort == 'gap' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:inherit;text-decoration:none">Gap</a></th>
+          <th style="text-align:right" title="Pallets = (required qty / pack) / (tie × high)">Volume (pallets)</th>
         </tr>
       </thead>
       <tbody>
@@ -63,6 +64,9 @@
           <td class="td-mono" style="text-align:right">{{ row.required_qty|floatformat:0 }}</td>
           <td class="td-mono" style="text-align:right;font-weight:600;color:{% if row.gap >= 0 %}#28c864{% else %}#ff5050{% endif %}">
             {% if row.gap >= 0 %}+{% endif %}{{ row.gap|floatformat:0 }}
+          </td>
+          <td class="td-mono" style="text-align:right;color:var(--muted)">
+            {% if row.pallets is not None %}{{ row.pallets }}{% else %}&mdash;{% endif %}
           </td>
         </tr>
         {% endfor %}
