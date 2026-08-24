@@ -3246,11 +3246,13 @@ class ReorderComponentsView(View):
                 res_stock = ProductBatchReservation.objects.filter(product_batch__material=mat, order_line__isnull=False).aggregate(t=DSum('quantity_reserved'))['t'] or Decimal('0')
                 in_stock = fin_stock - res_stock
             gap = in_stock - required_qty
+            pallets = mat.pallets_for_qty(float(required_qty)) if mat.pack and mat.pallet_tie and mat.pallet_high else None
             rows.append({
                 'sku': mat.sku, 'name': mat.name, 'unit': mat.unit.name if mat.unit else '',
                 'required_qty': round(required_qty, 1),
                 'in_stock': round(in_stock, 1),
                 'gap': round(gap, 1),
+                'pallets': pallets,
             })
 
         # Sort
