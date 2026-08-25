@@ -6,6 +6,10 @@
 <div class="page-header">
   <div><h1>{{ order.reference }}</h1><p>{{ order.client.name }}</p></div>
   <div class="page-actions">
+    <form method="post" action="{% url 'sales-order-components' order.pk %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secondary">&#9776; Check Component Availability</button>
+    </form>
     <a href="{% url 'sales-order-edit' order.pk %}" class="btn btn-secondary">Edit</a>
     <form method="post" action="{% url 'sales-order-delete' order.pk %}" style="display:inline">
       {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ order.reference }}?')">Delete</button>
@@ -58,7 +62,7 @@
   <div class="card-header"><span class="card-title">Items</span></div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>SKU</th><th>Description</th><th>Unit</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead>
+      <thead><tr><th>SKU</th><th>Description</th><th>Unit</th><th style="text-align:right">Qty</th><th style="text-align:right">Stock</th><th style="text-align:right">Gap</th></tr></thead>
       <tbody>
         {% for line in lines %}
         <tr>
@@ -66,8 +70,10 @@
           <td><strong>{{ line.material.name }}</strong></td>
           <td class="text-muted">{{ line.material.unit.name }}</td>
           <td class="td-mono" style="text-align:right">{{ line.quantity }}</td>
-          <td class="td-mono" style="text-align:right">{% if line.unit_price %}{{ line.unit_price }}{% else %}—{% endif %}</td>
-          <td class="td-mono" style="text-align:right">{% if line.line_total %}{{ line.line_total|floatformat:2 }}{% else %}—{% endif %}</td>
+          <td class="td-mono" style="text-align:right">{{ line.available_stock|floatformat:0|default:"—" }}</td>
+          <td class="td-mono" style="text-align:right;font-weight:600;color:{% if line.stock_gap >= 0 %}#28c864{% else %}#ff5050{% endif %}">
+            {% if line.stock_gap is not None %}{% if line.stock_gap >= 0 %}+{% endif %}{{ line.stock_gap|floatformat:0 }}{% else %}—{% endif %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>

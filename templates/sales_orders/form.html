@@ -88,15 +88,14 @@ var MATERIALS = {{ materials_json|safe }};
     <div class="card-header"><span class="card-title">Line Items</span></div>
     <div class="card-body">
       {{ formset.management_form }}
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:8px">
+      <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:8px">
         <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase">Material</span>
         <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase">Quantity</span>
-        <span class="text-muted" style="font-size:11px;font-family:var(--mono);text-transform:uppercase">Unit Price</span>
         <span></span>
       </div>
       <div id="lines-container">
         {% for lf in formset %}
-        <div class="line-row" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center">
+        <div class="line-row" style="display:grid;grid-template-columns:2fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center">
           <div class="search-wrap">
             <input type="text" class="search-input mat-search" autocomplete="off"
               placeholder="Search material or SKU…"
@@ -105,7 +104,6 @@ var MATERIALS = {{ materials_json|safe }};
             <div style="display:none">{{ lf.material }}{% for h in lf.hidden_fields %}{{ h }}{% endfor %}</div>
           </div>
           <div>{{ lf.quantity }}</div>
-          <div>{{ lf.unit_price }}</div>
           <div>
             {% if lf.instance.pk %}
               <div style="display:none">{{ lf.DELETE }}</div>
@@ -209,7 +207,7 @@ if (addBtn && total) {
     var prefix = total.id.replace('id_','').replace('-TOTAL_FORMS','');
     var row    = document.createElement('div');
     row.className = 'line-row';
-    row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center';
+    row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr auto;gap:10px;margin-bottom:8px;align-items:center';
     row.innerHTML =
       '<div class="search-wrap">' +
         '<input type="text" class="search-input mat-search" autocomplete="off" placeholder="Search material or SKU…">' +
@@ -220,7 +218,7 @@ if (addBtn && total) {
         '</select></div>' +
       '</div>' +
       '<div><input type="number" name="' + prefix + '-' + idx + '-quantity" step="0.001" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px"></div>' +
-      '<div><input type="number" name="' + prefix + '-' + idx + '-unit_price" step="0.0001" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px"></div>' +
+      
       '<div><button type="button" class="btn btn-danger btn-sm remove-line">✕</button></div>';
     container.appendChild(row);
     attachMatSearch(row);

@@ -194,7 +194,30 @@ class SalesOrderDetailView(View):
             SalesOrder.objects.select_related('client','carrier'),
             pk=pk
         )
-        lines = order.lines.select_related('material__unit').all()
+        from .models import ProductBatch, ProductBatchReservation, RawMaterialBatch, RawBatchAllocation
+        from django.db.models import Sum as DSum
+        from decimal import Decimal
+
+        raw_lines = order.lines.select_related('material__unit').all()
+        lines = []
+        for line in raw_lines:
+            mat = line.material
+            # Stock from ProductBatch (FIN) or RawMaterialBatch (RAW/PKG)
+            if mat.category == 'FIN':
+                total = ProductBatch.objects.filter(material=mat).aggregate(t=DSum('quantity_produced'))['t'] or Decimal('0')
+                reserved = ProductBatchReservation.objects.filter(
+                    product_batch__material=mat, order_line__isnull=False
+                ).aggregate(t=DSum('quantity_reserved'))['t'] or Decimal('0')
+                available = total - reserved
+            else:
+                total = RawMaterialBatch.objects.filter(material=mat).aggregate(t=DSum('total_quantity'))['t'] or Decimal('0')
+                allocated = RawBatchAllocation.objects.filter(raw_batch__material=mat).aggregate(t=DSum('quantity'))['t'] or Decimal('0')
+                available = total - allocated
+            gap = available - line.quantity
+            line.available_stock = round(available, 0)
+            line.stock_gap = round(gap, 0)
+            lines.append(line)
+
         return render(request, 'sales_orders/detail.html', {
             'order': order, 'lines': lines,
         })
@@ -3264,5 +3287,65 @@ class ReorderComponentsView(View):
         return render(request, 'reorder/components.html', {
             'rows': rows, 'sku_breakdown': sku_breakdown, 'selected': selected,
             'sort': sort, 'dir': 'desc' if reverse else 'asc',
+        })
+
+
+
+class SalesOrderComponentsView(View):
+    def post(self, request, pk):
+        from .models import SalesOrder, ProductionTemplate, Material, ProductBatch, ProductBatchReservation, RawMaterialBatch, RawBatchAllocation
+        from django.db.models import Sum as DSum
+        from decimal import Decimal
+        from collections import defaultdict
+
+        order = get_object_or_404(SalesOrder, pk=pk)
+        lines = order.lines.select_related('material__unit').all()
+
+        component_totals = defaultdict(Decimal)
+        component_materials = {}
+        sku_breakdown = []
+
+        for line in lines:
+            sku = line.material.sku
+            qty = line.quantity
+            try:
+                template = ProductionTemplate.objects.get(product=line.material)
+            except ProductionTemplate.DoesNotExist:
+                sku_breakdown.append({'sku': sku, 'name': line.material.name, 'qty': qty, 'found': False})
+                continue
+            sku_breakdown.append({'sku': sku, 'name': line.material.name, 'qty': qty, 'found': True})
+            for comp in template.components.select_related('material__unit').all():
+                required = comp.ratio * qty
+                component_totals[comp.material.pk] += required
+                component_materials[comp.material.pk] = comp.material
+
+        rows = []
+        for mat_id, required_qty in sorted(component_totals.items(), key=lambda x: component_materials[x[0]].sku):
+            mat = component_materials[mat_id]
+            if mat.category == 'FIN':
+                total = ProductBatch.objects.filter(material=mat).aggregate(t=DSum('quantity_produced'))['t'] or Decimal('0')
+                res = ProductBatchReservation.objects.filter(product_batch__material=mat, order_line__isnull=False).aggregate(t=DSum('quantity_reserved'))['t'] or Decimal('0')
+                in_stock = total - res
+            else:
+                total = RawMaterialBatch.objects.filter(material=mat).aggregate(t=DSum('total_quantity'))['t'] or Decimal('0')
+                alloc = RawBatchAllocation.objects.filter(raw_batch__material=mat).aggregate(t=DSum('quantity'))['t'] or Decimal('0')
+                in_stock = total - alloc
+            gap = in_stock - required_qty
+            pallets = mat.pallets_for_qty(float(required_qty)) if mat.pack and mat.pallet_tie and mat.pallet_high else None
+            rows.append({
+                'sku': mat.sku, 'name': mat.name, 'unit': mat.unit.name if mat.unit else '',
+                'required_qty': round(required_qty, 1),
+                'in_stock': round(in_stock, 1),
+                'gap': round(gap, 1),
+                'pallets': pallets,
+            })
+
+        return render(request, 'reorder/components.html', {
+            'rows': rows,
+            'sku_breakdown': sku_breakdown,
+            'selected': {},
+            'order': order,
+            'sort': 'gap',
+            'dir': 'asc',
         })
 
