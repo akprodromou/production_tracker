@@ -179,8 +179,8 @@ def calculate_rop():
         rop       = avg * lead_time + safety
 
         current   = float(stock.get(sku, Decimal('0')))
-        gap       = rop - current
-        reorder   = gap > 0
+        gap       = current - rop
+        reorder   = gap < 0
 
         rows.append({
             'sku':           sku,
