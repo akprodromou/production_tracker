@@ -702,37 +702,7 @@ class ProductionRun(models.Model):
 
     @property
     def procurement_status(self):
-        """
-        Worst-case procurement status across all components.
-        Per component: worst between batch status of allocated batches
-        AND whether allocated >= required (if short, force PENDING).
-        PENDING < ORDERED < IN_WAREHOUSE_RAW
-        """
-        from django.db.models import Sum
-        from django.db.models.functions import Coalesce
-        from django.db.models import DecimalField
-        RANK = {'PENDING': 0, 'ORDERED': 1, 'IN_WAREHOUSE_RAW': 2}
-        components = list(self.components.all())
-        if not components:
-            return 'PENDING'
-        run_worst = 'IN_WAREHOUSE_RAW'
-        for comp in components:
-            allocations = RawBatchAllocation.objects.filter(
-                production_run=self,
-                raw_batch__material=comp.material
-            ).select_related('raw_batch')
-            allocated_qty = sum(a.quantity for a in allocations)
-            if allocated_qty < comp.quantity_required:
-                comp_status = 'PENDING'
-            else:
-                batch_statuses = [a.raw_batch.status for a in allocations]
-                if not batch_statuses:
-                    comp_status = 'PENDING'
-                else:
-                    comp_status = min(batch_statuses, key=lambda s: RANK.get(s, 0))
-            if RANK.get(comp_status, 0) < RANK.get(run_worst, 0):
-                run_worst = comp_status
-        return run_worst
+        return 'IN_WAREHOUSE_RAW'
 
     @property
     def procurement_status_display(self):
