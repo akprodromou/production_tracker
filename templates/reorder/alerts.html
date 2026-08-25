@@ -238,8 +238,8 @@ input:focus, select:focus { border-color:var(--accent); }
           <th style="text-align:right">CV</th>
           <th style="text-align:right" title="(4) Lead time in months">LT</th>
           <th style="text-align:right" title="Safety Stock = Z(3) × StdDev(2) × √LT(4)">Safety</th>
-          <th style="text-align:right"><a href="?sort=rop&dir={% if sort == 'rop' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}" title="(5) ROP = Avg(1) × LT(4) + Z(3) × StdDev(2) × √LT(4)">ROP</a></th>
           <th style="text-align:right"><a href="?sort=current_stock&dir={% if sort == 'current_stock' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Stock</a></th>
+          <th style="text-align:right"><a href="?sort=rop&dir={% if sort == 'rop' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}" title="(5) ROP = Avg(1) × LT(4) + Z(3) × StdDev(2) × √LT(4)">ROP</a></th>
           <th style="text-align:right"><a href="?sort=gap&dir={% if sort == 'gap' and dir == 'desc' %}asc{% else %}desc{% endif %}&prefix={{ filter_prefix }}&reorder={{ filter_reorder }}">Gap</a></th>
           <th>Status</th>
         </tr>
