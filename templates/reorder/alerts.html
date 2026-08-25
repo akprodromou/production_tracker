@@ -258,8 +258,8 @@ input:focus, select:focus { border-color:var(--accent); }
           <td class="td-mono" style="text-align:right;color:var(--muted);font-size:11px">{{ row.cv|floatformat:2 }}</td>
           <td class="td-mono" style="text-align:right;font-size:11px">{{ row.lead_time }}</td>
           <td class="td-mono" style="text-align:right;font-size:11px">{{ row.safety_stock|floatformat:0 }}</td>
-          <td class="td-mono" style="text-align:right">{{ row.current_stock|floatformat:0 }}</td>
           <td class="td-mono" style="text-align:right;font-weight:600">{{ row.rop|floatformat:0 }}</td>
+          <td class="td-mono" style="text-align:right">{{ row.current_stock|floatformat:0 }}</td>
           <td class="td-mono {% if row.gap >= 0 %}rop-gap-neg{% else %}rop-gap-pos{% endif %}" style="text-align:right">{% if row.gap > 0 %}+{% endif %}{{ row.gap|floatformat:0 }}</td>
           <td>{% if row.reorder %}<span class="badge-reorder">RE-ORDER</span>{% else %}<span class="badge-ok">OK</span>{% endif %}</td>
         </tr>
