@@ -17,3 +17,8 @@ Thumbs.db
 .idea/
 
 .env
+
+# ERP export files
+inventory-*.xlsx
+suppliers_list*.xlsx
+production_run_templates*.xlsx
