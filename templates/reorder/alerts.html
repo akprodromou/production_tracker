@@ -209,7 +209,6 @@ input:focus, select:focus { border-color:var(--accent); }
     Re-order needed only
   </label>
   <input type="hidden" name="sort" value="{{ sort }}">
-  <input type="hidden" name="q" value="{{ filter_q }}">
   <input type="hidden" name="dir" value="{{ dir }}">
   {% if filter_prefix or filter_reorder or filter_q %}
   <a href="{% url 'reorder-alerts' %}" class="btn btn-ghost btn-sm">Clear</a>
