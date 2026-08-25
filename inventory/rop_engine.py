@@ -182,6 +182,8 @@ def calculate_rop():
         gap       = current - rop
         reorder   = gap < 0
 
+        rop_r     = round(rop, 1)
+        current_r = round(current, 1)
         rows.append({
             'sku':           sku,
             'name':          mat_map.get(sku, ''),
@@ -192,9 +194,9 @@ def calculate_rop():
             'cv':            round(cv, 3),
             'lead_time':     lead_time,
             'safety_stock':  round(safety, 1),
-            'rop':           round(rop, 1),
-            'current_stock': round(current, 1),
-            'gap':           round(gap, 1),
+            'rop':           rop_r,
+            'current_stock': current_r,
+            'gap':           round(current_r - rop_r, 1),
             'reorder':       reorder,
         })
 
