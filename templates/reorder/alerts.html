@@ -194,7 +194,10 @@ input:focus, select:focus { border-color:var(--accent); }
 
 
 {# Filters #}
-<form method="get" style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+<form method="get" style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+  <input type="text" name="q" value="{{ filter_q }}" placeholder="Search name or SKU…"
+    style="width:220px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:8px 12px;outline:none">
+  <button type="submit" class="btn btn-secondary btn-sm">Search</button>
   <select name="prefix" onchange="this.form.submit()" style="width:auto">
     <option value="">All categories</option>
     {% for p in fin_prefixes %}
@@ -206,8 +209,9 @@ input:focus, select:focus { border-color:var(--accent); }
     Re-order needed only
   </label>
   <input type="hidden" name="sort" value="{{ sort }}">
+  <input type="hidden" name="q" value="{{ filter_q }}">
   <input type="hidden" name="dir" value="{{ dir }}">
-  {% if filter_prefix or filter_reorder %}
+  {% if filter_prefix or filter_reorder or filter_q %}
   <a href="{% url 'reorder-alerts' %}" class="btn btn-ghost btn-sm">Clear</a>
   {% endif %}
   <span class="text-muted" style="font-size:12px;margin-left:auto">{{ rows|length }} SKU{{ rows|length|pluralize }}</span>

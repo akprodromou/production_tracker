@@ -2997,10 +2997,14 @@ class ReorderAlertsView(View):
         # Filter options
         filter_reorder = request.GET.get('reorder', '')
         filter_prefix  = request.GET.get('prefix', '')
+        filter_q       = request.GET.get('q', '').strip()
         if filter_reorder == '1':
             rows = [r for r in rows if r['reorder']]
         if filter_prefix:
             rows = [r for r in rows if r['sku'].startswith(filter_prefix + '-')]
+        if filter_q:
+            q = filter_q.lower()
+            rows = [r for r in rows if q in r['sku'].lower() or q in r['name'].lower()]
 
         # Sort
         sort = request.GET.get('sort', 'gap')
@@ -3034,6 +3038,7 @@ class ReorderAlertsView(View):
             'prefix_labels':  prefix_labels,
             'filter_reorder': filter_reorder,
             'filter_prefix':  filter_prefix,
+            'filter_q':       filter_q,
             'sort':           sort,
             'dir':            'desc' if reverse else 'asc',
             'fin_prefixes':   ['02','03','04','05','06','08','10','11'],
