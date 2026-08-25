@@ -31,23 +31,6 @@
       <span class="icon">🏢</span> Suppliers
     </a>
 
-    <div class="nav-section">Production</div>
-    <a href="{% url 'production-board' %}" class="{% if request.resolver_match.url_name == 'production-board' %}active{% endif %}">
-      <span class="icon">🟧</span> Production Board
-    </a>
-    <a href="{% url 'order-list' %}" class="{% if 'order' in request.resolver_match.url_name and 'sales' not in request.resolver_match.url_name and 'supply' not in request.resolver_match.url_name and 'board' not in request.resolver_match.url_name and 'client' not in request.resolver_match.url_name and 'reorder' not in request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">📋</span> Production Orders
-    </a>
-    <a href="{% url 'production-run-list' %}" class="{% if 'production-run' in request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">⚙️</span> Production Runs
-    </a>
-    <a href="{% url 'batch-list' %}" class="{% if 'batch-list' == request.resolver_match.url_name or 'batch-detail' == request.resolver_match.url_name or 'batch-create' == request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">📦</span> Raw Batches
-    </a>
-    <a href="{% url 'product-batch-list' %}" class="{% if 'product-batch' in request.resolver_match.url_name %}active{% endif %}">
-      <span class="icon">🏭</span> Product Batches
-    </a>
-
     <div class="nav-section">Analytics</div>
     <a href="{% url 'reorder-alerts' %}" class="{% if request.resolver_match.url_name == 'reorder-alerts' %}active{% endif %}">
       <span class="icon">&#128202;</span> Reorder Alerts
@@ -56,6 +39,12 @@
     <div class="nav-section">Reference</div>
     <a href="{% url 'material-list' %}" class="{% if 'material' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">🧪</span> Materials
+    </a>
+    <a href="{% url 'batch-list' %}" class="{% if 'batch-list' == request.resolver_match.url_name or 'batch-detail' == request.resolver_match.url_name or 'batch-create' == request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">📦</span> Raw Batches
+    </a>
+    <a href="{% url 'product-batch-list' %}" class="{% if 'product-batch' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="icon">🏭</span> Product Batches
     </a>
     <a href="{% url 'carrier-list' %}" class="{% if 'carrier' in request.resolver_match.url_name %}active{% endif %}">
       <span class="icon">🚚</span> Carriers
