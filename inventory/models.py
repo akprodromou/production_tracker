@@ -56,17 +56,9 @@ class Material(models.Model):
 
 
 class RawMaterialBatch(models.Model):
-    STATUS_CHOICES = [
-        ('PENDING',          'Pending — not yet ordered'),
-        ('ORDERED',          'Ordered from supplier'),
-        ('IN_WAREHOUSE_RAW', 'In Warehouse as Raw Material'),
-    ]
     material = models.ForeignKey('Material', on_delete=models.PROTECT)
     lot_number = models.CharField(max_length=100)
     total_quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default='PENDING'
-    )
     created_at = models.DateTimeField(default=timezone.now)
     location = models.ForeignKey('Location', on_delete=models.PROTECT)
 

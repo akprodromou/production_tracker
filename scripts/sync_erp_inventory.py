@@ -1,20 +1,34 @@
-r"""
+"""
 sync_erp_inventory.py
 ---------------------
+Syncs inventory quantities from the ERP xlsx export directly into the app.
+
+For each SKU + location:
+  - Deletes ALL existing batches (raw or product)
+  - Creates ONE new batch with quantity = Διαθ. Υπολ. from ERP
+  - Negative quantities are stored as-is (reflects ERP reality)
+  - Zero quantities result in no batch being created
+
 Run from project root:
-    python scripts\sync_erp_inventory.py inventory-2026-06-29.xlsx [--dry-run]
+    python scripts/sync_erp_inventory.py inventory-YYYY-MM-DD.xlsx [--dry-run]
 
-xlsx file export from Pylon:
+To run against Railway:
+    $env:DATABASE_URL="postgresql://postgres:GSUajhGKPuJMLpItMmZbduFbjMVWAeNE@hayabusa.proxy.rlwy.net:55480/railway"
+    python scripts/sync_erp_inventory.py inventory-2026-08-25.xlsx
+    $env:DATABASE_URL=""
+
+File naming convention: inventory-YYYY-MM-DD.xlsx
+
+Export from Pylon ERP:
     Αποθήκη / Αναφορές / Εκτυπώσεις / (Είδη / Υπηρεσίες / Πάγια) / Υπόλοιπα / Υπόλοιπα ανά Αποθήκη και Είδος
-
-Weekly ERP inventory sync:
-  - Creates missing materials and batches for new SKUs
-  - Creates new batches for the difference when ERP > DB
-  - Reduces existing batch quantities when ERP < DB
-  - Reports conflicts where reduction was not possible
+    click «Μπάντες»
+    click «Είδη»
+    Διαθ. Υπ.: Ορατή
+    Εκτέλεση Ως: Grid
+    Εξαγωγές / Εξαγωγή σε Excel (xlsx)
 """
 
-import os, sys
+import os, sys, re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
@@ -24,276 +38,197 @@ django.setup()
 import openpyxl
 from decimal import Decimal, InvalidOperation
 from datetime import date
-from django.db.models import Sum
-from inventory.models import (
-    Material, Location, Unit,
-    RawMaterialBatch, ProductBatch,
-    RawBatchAllocation, ProductBatchReservation,
-)
+from inventory.models import Material, Location, Unit, RawMaterialBatch, ProductBatch
+
+DRY_RUN = '--dry-run' in sys.argv
 
 LOCATION_MAP = {
-    "000001": 7,
-    "000002": 6,
-    "000005": 3,
-    "000006": 12,
-    "000007": 2,
-    "000009": 10,
-    "000013": 11,
-    "000014": 13,
+    '000001': 7,
+    '000002': 6,
+    '000005': 3,
+    '000006': 12,
+    '000007': 2,
+    '000009': 10,
+    '000013': 11,
+    '000014': 13,
 }
 
 UNIT_MAP = {
-    "Τεμάχια": "pcs",
-    "Κιλά":    "kg",
-    "Λίτρα":   "litres",
+    'Τεμάχια': 'pcs',
+    'Κιλά': 'kg',
+    'Λίτρα': 'litres',
 }
 
-DEFAULT_LOCATION_ID = 7
-DRY_RUN = '--dry-run' in sys.argv
 
-
-def sku_to_category(sku):
+def sku_category(sku):
     if sku.startswith('07-'):
         return 'RAW'
     if sku.startswith('01-'):
         return 'FXD'
-    s = sku.upper()
-    if s.startswith('\u0395\u0399\u0394\u0397-'):
+    if sku.upper().startswith('ΕΙΔΗ-'):
         return 'CON'
     return 'FIN'
 
 
-def get_or_create_unit(erp_unit_name):
-    unit_name = UNIT_MAP.get(erp_unit_name, erp_unit_name)
-    unit, created = Unit.objects.get_or_create(
-        name=unit_name,
-        defaults={'abbreviation': unit_name[:10]}
-    )
-    if created:
-        print(f"    Created unit: {unit_name}")
-    return unit
+def clean(v):
+    if v is None:
+        return ''
+    return str(v).strip()
 
 
-def get_or_create_material(sku, name, erp_unit_name):
+def to_decimal(v):
+    if v is None:
+        return None
+    s = str(v).replace(',', '.').strip()
     try:
-        return Material.objects.get(sku=sku), False
-    except Material.DoesNotExist:
-        pass
-    category = sku_to_category(sku)
-    unit = get_or_create_unit(erp_unit_name)
-    if DRY_RUN:
-        print(f"    [DRY RUN] Would create material: {sku} | {name} | category={category} | unit={unit.name}")
-        return None, True
-    material = Material.objects.create(sku=sku, name=name, category=category, unit=unit)
-    print(f"    Created material: {sku} | {name} | category={category}")
-    return material, True
+        return Decimal(s)
+    except InvalidOperation:
+        return None
 
 
-def parse_erp(filepath):
+def parse_xlsx(filepath):
     wb = openpyxl.load_workbook(filepath, read_only=True, data_only=True)
     ws = wb.active
     records = []
-    current_location_code = None
+    current_loc_code = None
 
     for row in ws.iter_rows(values_only=True):
-        values = [str(v).strip() if v is not None else '' for v in row]
-        non_empty = [v for v in values if v]
-        if not non_empty:
-            continue
-        first = non_empty[0]
+        col0 = clean(row[0]) if len(row) > 0 else ''
+        col1 = clean(row[1]) if len(row) > 1 else ''
 
-        if len(first) == 6 and first.isdigit():
-            current_location_code = first
+        if col0 and re.match(r'^\d{6}$', col0) and col0 in LOCATION_MAP:
+            current_loc_code = col0
             continue
 
-        if current_location_code and '-' in first and len(first) >= 10:
-            sku = first
-            raw = [v for v in values if v]
-            try:
-                if len(raw) < 5:
-                    continue
-                name     = raw[1]
-                erp_unit = raw[3]
-                qty      = Decimal(raw[4].replace(',', '.'))
-            except (InvalidOperation, IndexError):
-                continue
-            if current_location_code not in LOCATION_MAP:
-                continue
-            records.append({
-                'sku': sku, 'name': name, 'erp_unit': erp_unit,
-                'qty': qty, 'location_code': current_location_code,
-                'location_id': LOCATION_MAP[current_location_code],
-            })
+        if not current_loc_code or not col1 or '-' not in col1:
+            continue
+
+        sku      = col1
+        name     = clean(row[2]) if len(row) > 2 else ''
+        unit_erp = clean(row[5]) if len(row) > 5 else ''
+        diath    = to_decimal(row[11]) if len(row) > 11 else None
+
+        if diath is None:
+            continue
+
+        records.append({
+            'sku':         sku,
+            'name':        name,
+            'unit_name':   UNIT_MAP.get(unit_erp, unit_erp),
+            'qty':         diath,
+            'location_code': current_loc_code,
+            'location_id': LOCATION_MAP[current_loc_code],
+        })
 
     wb.close()
     return records
 
 
-def get_db_totals():
-    totals = {}
-    for b in RawMaterialBatch.objects.select_related('material').all():
-        key = (b.material.sku, b.location_id)
-        totals[key] = totals.get(key, Decimal('0')) + b.total_quantity
-    for b in ProductBatch.objects.select_related('material').all():
-        key = (b.material.sku, b.location_id)
-        totals[key] = totals.get(key, Decimal('0')) + b.quantity_produced
-    return totals
-
-
-def reduce_raw_batches(material, location_id, amount_to_reduce):
-    remaining = amount_to_reduce
-    conflicts = []
-    for batch in RawMaterialBatch.objects.filter(
-        material=material, location_id=location_id
-    ).order_by('-created_at'):
-        if remaining <= 0:
-            break
-        allocated = RawBatchAllocation.objects.filter(
-            raw_batch=batch
-        ).aggregate(t=Sum('quantity'))['t'] or Decimal('0')
-        reducible = batch.total_quantity - allocated
-        if reducible <= 0:
-            conflicts.append(f"    Batch {batch.lot_number}: fully allocated ({allocated}) — skipped")
-            continue
-        reduce_by = min(remaining, reducible)
-        if not DRY_RUN:
-            batch.total_quantity -= reduce_by
-            batch.save()
-        remaining -= reduce_by
-    return amount_to_reduce - remaining, conflicts
-
-
-def reduce_fin_batches(material, location_id, amount_to_reduce):
-    remaining = amount_to_reduce
-    conflicts = []
-    for batch in ProductBatch.objects.filter(
-        material=material, location_id=location_id
-    ).order_by('-created_at'):
-        if remaining <= 0:
-            break
-        reserved = ProductBatchReservation.objects.filter(
-            product_batch=batch
-        ).aggregate(t=Sum('quantity_reserved'))['t'] or Decimal('0')
-        reducible = batch.quantity_produced - reserved
-        if reducible <= 0:
-            conflicts.append(f"    Batch {batch.batch_number}: fully reserved ({reserved}) — skipped")
-            continue
-        reduce_by = min(remaining, reducible)
-        if not DRY_RUN:
-            batch.quantity_produced -= reduce_by
-            batch.save()
-        remaining -= reduce_by
-    return amount_to_reduce - remaining, conflicts
+def get_or_create_unit(name):
+    unit, _ = Unit.objects.get_or_create(
+        name=name, defaults={'abbreviation': name[:10]}
+    )
+    return unit
 
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1].startswith('--'):
-        print("Usage: python scripts/sync_erp_inventory.py <erp_export.xlsx> [--dry-run]")
+        print("Usage: python scripts/sync_erp_inventory.py <inventory.xlsx> [--dry-run]")
         sys.exit(1)
+
     filepath = sys.argv[1]
     if not os.path.exists(filepath):
         print(f"File not found: {filepath}")
         sys.exit(1)
 
     print(f"{'[DRY RUN] ' if DRY_RUN else ''}Reading: {filepath}\n")
-    erp_records = parse_erp(filepath)
-    print(f"Found {len(erp_records)} ERP line items\n")
+    records = parse_xlsx(filepath)
+    print(f"Found {len(records)} ERP line items\n")
 
-    db_totals         = get_db_totals()
-    today             = date.today().isoformat()
-    created_materials = 0
-    created_raw       = 0
-    created_fin       = 0
-    reduced_raw       = 0
-    reduced_fin       = 0
-    skipped_same      = 0
-    all_conflicts     = []
+    today        = date.today().isoformat()
+    written      = 0
+    skipped_zero = 0
+    errors       = []
 
-    for rec in erp_records:
-        sku         = rec['sku']
-        erp_qty     = max(rec['qty'], Decimal('0'))
-        location_id = rec['location_id']
-        loc_code    = rec['location_code']
-        name        = rec['name']
-        erp_unit    = rec['erp_unit']
+    for rec in records:
+        sku      = rec['sku']
+        qty      = rec['qty']
+        loc_id   = rec['location_id']
+        name     = rec['name']
+        category = sku_category(sku)
 
-        material, mat_created = get_or_create_material(sku, name, erp_unit)
-        if mat_created:
-            created_materials += 1
-        if material is None:
+        if category in ('FXD', 'CON'):
             continue
 
         try:
-            location = Location.objects.get(pk=location_id)
-        except Location.DoesNotExist:
-            print(f"  Location {location_id} not found — skipped {sku}")
-            continue
-
-        db_qty = db_totals.get((sku, location_id), Decimal('0'))
-        diff   = erp_qty - db_qty
-
-        if diff == 0:
-            skipped_same += 1
-            continue
-
-        category = material.category
-        label    = f"ERP-SYNC-{today}-{sku}-{loc_code}"
-
-        if diff > 0:
-            if category in ('RAW', 'PKG'):
-                if not DRY_RUN:
-                    if not RawMaterialBatch.objects.filter(lot_number=label, material=material).exists():
-                        RawMaterialBatch.objects.create(
-                            material=material, lot_number=label,
-                            total_quantity=diff, location=location,
-                            status='IN_WAREHOUSE_RAW',
-                        )
-                created_raw += 1
-                print(f"  + RAW: {label} | {name[:40]} | +{diff} @ {location.name}")
-            elif category == 'FIN':
-                if not DRY_RUN:
-                    if not ProductBatch.objects.filter(batch_number=label).exists():
-                        ProductBatch.objects.create(
-                            material=material, batch_number=label,
-                            quantity_produced=diff, location=location,
-                        )
-                created_fin += 1
-                print(f"  + FIN: {label} | {name[:40]} | +{diff} @ {location.name}")
-            else:
-                print(f"  SKIP non-stock category '{category}': {sku}")
-        else:
-            reduce_by = abs(diff)
-            print(f"  down {sku} @ {location.name}: DB={db_qty}, ERP={erp_qty}, reducing by {reduce_by}")
-            if category in ('RAW', 'PKG'):
-                reduced, conflicts = reduce_raw_batches(material, location_id, reduce_by)
-                reduced_raw += 1
-            elif category == 'FIN':
-                reduced, conflicts = reduce_fin_batches(material, location_id, reduce_by)
-                reduced_fin += 1
-            else:
+            material = Material.objects.get(sku=sku)
+        except Material.DoesNotExist:
+            if qty == 0:
+                skipped_zero += 1
                 continue
-            if conflicts:
-                all_conflicts.extend([f"  {sku} @ {location.name}:"] + conflicts)
-            if reduced < reduce_by:
-                all_conflicts.append(
-                    f"  {sku} @ {location.name}: reduced {reduced} of {reduce_by} needed — {reduce_by - reduced} unresolved"
+            unit = get_or_create_unit(rec['unit_name'])
+            if not DRY_RUN:
+                material = Material.objects.create(
+                    sku=sku, name=name, category=category, unit=unit
                 )
+                print(f"  CREATED material: {sku} | {name}")
+            else:
+                print(f"  [DRY RUN] Would create material: {sku} | {name}")
+                continue
+
+        try:
+            location = Location.objects.get(pk=loc_id)
+        except Location.DoesNotExist:
+            errors.append(f"Location {loc_id} not found — skipped {sku}")
+            continue
+
+        batch_ref = f"ERP-SYNC-{today}-{sku}-{loc_id}"
+
+        if DRY_RUN:
+            action = f"SET {qty}" if qty != 0 else "DELETE ALL (qty=0)"
+            print(f"  [DRY RUN] {action}: {sku} @ {location.name}")
+            continue
+
+        # Delete all existing batches for this SKU + location
+        if category == 'FIN':
+            ProductBatch.objects.filter(material=material, location_id=loc_id).delete()
+        else:
+            RawMaterialBatch.objects.filter(material=material, location_id=loc_id).delete()
+
+        if qty == 0:
+            skipped_zero += 1
+            continue
+
+        if category == 'FIN':
+            ProductBatch.objects.create(
+                material=material,
+                batch_number=batch_ref,
+                quantity_produced=qty,
+                location=location,
+            )
+        else:
+            RawMaterialBatch.objects.create(
+                material=material,
+                lot_number=batch_ref,
+                total_quantity=qty,
+                location=location,
+                status='IN_WAREHOUSE_RAW',
+            )
+
+        print(f"  {'+'if qty>0 else ''}{qty:>10} | {sku:<20} | {location.name}")
+        written += 1
 
     print(f"\n{'='*60}")
     print(f"{'[DRY RUN] ' if DRY_RUN else ''}SYNC COMPLETE")
     print(f"{'='*60}")
-    print(f"  Materials created   : {created_materials}")
-    print(f"  RAW batches created : {created_raw}")
-    print(f"  FIN batches created : {created_fin}")
-    print(f"  RAW batches reduced : {reduced_raw}")
-    print(f"  FIN batches reduced : {reduced_fin}")
-    print(f"  Unchanged           : {skipped_same}")
-    if all_conflicts:
-        print(f"\n  CONFLICTS ({len(all_conflicts)} notices):")
-        for c in all_conflicts:
-            print(c)
+    print(f"  Batches written  : {written}")
+    print(f"  Zero qty skipped : {skipped_zero}")
+    if errors:
+        print(f"\n  ERRORS ({len(errors)}):")
+        for e in errors:
+            print(f"    {e}")
     else:
-        print("\n  No conflicts.")
+        print("\n  No errors.")
 
 
 if __name__ == '__main__':

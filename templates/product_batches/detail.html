@@ -30,7 +30,6 @@
     <div class="text-mono" style="font-size:22px;font-weight:600;color:var(--accent)">
       {{ batch.quantity_produced|smart_qty:batch.material.unit.name }} <span style="font-size:13px;color:var(--muted)">{{ batch.material.unit.name }}</span>
     </div>
-    {% if batch.production_run %}<div style="font-size:10px;color:var(--muted);margin-top:2px">from run</div>{% endif %}
   </div>
   <div class="stat-card">
     <div class="stat-label">Reserved for Orders</div>
@@ -46,126 +45,6 @@
   </div>
 </div>
 
-
-{# ── LINKED PRODUCTION RUN ── #}
-<div class="card mb-3">
-  <div class="card-header">
-    <span class="card-title">Linked Production Run</span>
-  </div>
-  <div class="card-body">
-    {% if batch.production_run %}
-    <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)">
-      <div>
-        <a href="{% url 'production-run-detail' batch.production_run.pk %}"
-           style="color:var(--accent);text-decoration:none;font-weight:500;font-family:var(--mono)">
-          {{ batch.production_run.reference }}
-        </a>
-        <span class="text-muted" style="font-size:12px;margin-left:10px">
-          {{ batch.production_run.material.name }} ·
-          Planned {{ batch.production_run.planned_quantity|smart_qty:batch.production_run.material.unit.name }}
-          {{ batch.production_run.material.unit.name }}
-        </span>
-      </div>
-      <div style="margin-left:auto">
-        {% with bs=batch.production_run.board_status %}
-        {% if bs == 'PENDING' %}<span class="badge badge-grey">Pending</span>
-        {% elif bs == 'ORDERED' %}<span class="badge badge-blue">Ordered from Supplier</span>
-        {% elif bs == 'IN_WAREHOUSE_RAW' %}<span class="badge badge-green">In Warehouse</span>
-        {% endif %}
-        {% endwith %}
-      </div>
-    </div>
-    {% else %}
-    <p class="text-muted" style="font-size:13px">
-      No production run linked to this batch.
-      Link one from the
-      <a href="{% url 'production-run-list' %}" style="color:var(--accent)">Production Runs</a>
-      page.
-    </p>
-    {% endif %}
-  </div>
-</div>
-
-{# ── ORDER RESERVATIONS ── #}
-<div class="card mb-3">
-  <div class="card-header"><span class="card-title">Order Reservations</span></div>
-  <div class="card-body">
-
-    {# Existing reservations #}
-    {% if reservations %}
-    <div class="table-wrap mb-3">
-      <table>
-        <thead>
-          <tr><th>Order</th><th>Client</th><th>Product</th><th>Qty Reserved</th><th>Date</th><th></th></tr>
-        </thead>
-        <tbody>
-          {% for res in reservations %}
-          {% if res.order_line %}
-          <tr>
-            <td class="td-mono">
-              <a href="{% url 'order-detail' res.order_line.order.pk %}" style="color:var(--accent);text-decoration:none">
-                {{ res.order_line.order.reference }}
-              </a>
-            </td>
-            <td>{{ res.order_line.order.client.name }}</td>
-            <td>{{ res.order_line.material.name }}</td>
-            <td class="td-mono" style="color:var(--warn)">{{ res.quantity_reserved|smart_qty:batch.material.unit.name }}</td>
-            <td class="text-muted" style="font-size:12px">{{ res.created_at|date:"Y-m-d" }}</td>
-            <td>
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="delete_reservation">
-                <input type="hidden" name="reservation_id" value="{{ res.pk }}">
-                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-              </form>
-            </td>
-          </tr>
-          {% endif %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% endif %}
-
-    {# Add reservation form #}
-    {% if available > 0 and eligible_lines %}
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="reserve">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end">
-        <div class="form-group">
-          <label>Order Line</label>
-          <select name="order_line_id" required>
-            <option value="">Select order line…</option>
-            {% for line in eligible_lines %}
-            <option value="{{ line.pk }}">
-              {{ line.order.reference }} — {{ line.order.client.name }}
-              ({{ line.quantity_remaining }} remaining)
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Quantity (max {{ available|smart_qty:batch.material.unit.name }})</label>
-          <input type="number" name="quantity_reserved" step="0.001" min="0.001" max="{{ available|smart_qty:batch.material.unit.name }}" required>
-        </div>
-        <div class="form-group">
-          <label>Notes <span class="text-muted">(optional)</span></label>
-          <input type="text" name="notes" placeholder="e.g. Christmas 2026">
-        </div>
-        <div style="padding-bottom:1px">
-          <button type="submit" class="btn btn-primary">Reserve</button>
-        </div>
-      </div>
-    </form>
-    {% elif available <= 0 %}
-    <p class="text-muted" style="font-size:13px">No available stock to reserve.</p>
-    {% elif not eligible_lines %}
-    <p class="text-muted" style="font-size:13px">No unfulfilled order lines found for this product.</p>
-    {% endif %}
-
-  </div>
-</div>
 
 {# ── RAW MATERIAL CONSUMPTION ── #}
 {% if consumption_summary %}
