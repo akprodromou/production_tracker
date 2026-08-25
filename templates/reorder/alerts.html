@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Reorder Alerts{% endblock %}
-{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Reorder Alerts{% endblock %}
+{% block title %}Reorder Points{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> Reorder Points{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -34,7 +34,7 @@ input:focus, select:focus { border-color:var(--accent); }
 {% block content %}
 <div class="page-header">
   <div>
-    <h1>Reorder Alerts</h1>
+    <h1>Reorder Points</h1>
     <p class="text-muted" style="font-size:13px">
       {% if month_labels %}
         Based on {{ month_labels|length }} month{{ month_labels|length|pluralize }} of sales:

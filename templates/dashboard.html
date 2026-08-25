@@ -25,19 +25,6 @@
     </div>
   </a>
 
-  <a href="{% url 'production-board' %}" style="text-decoration:none">
-    <div class="card" style="padding:32px 24px;text-align:center;cursor:pointer;transition:border-color .15s;border:1px solid var(--border);border-radius:var(--radius)">
-      <div style="font-size:48px;margin-bottom:12px">🟧</div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:6px">Production Board</div>
-      <div style="font-size:13px;color:var(--muted)">Monitor production runs and component procurement status</div>
-      <div style="margin-top:16px">
-        <span class="badge badge-grey">{{ production_counts.PENDING|default:0 }} Pending</span>
-        <span class="badge badge-blue" style="margin-left:6px">{{ production_counts.ORDERED|default:0 }} Ordered</span>
-        <span class="badge badge-green" style="margin-left:6px">{{ production_counts.READY|default:0 }} Ready</span>
-      </div>
-    </div>
-  </a>
-
   <a href="{% url 'client-order-board' %}" style="text-decoration:none">
     <div class="card" style="padding:32px 24px;text-align:center;cursor:pointer;transition:border-color .15s;border:1px solid var(--border);border-radius:var(--radius)">
       <div style="font-size:48px;margin-bottom:12px">🟩</div>
