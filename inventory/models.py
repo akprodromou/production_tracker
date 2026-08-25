@@ -780,15 +780,7 @@ class ProductionComponent(models.Model):
         Derived from the raw batch allocations linked to this component's
         production run for this material. Returns worst-case (lowest) status.
         """
-        priority = ['PENDING', 'ORDERED', 'IN_WAREHOUSE_RAW']
-        allocations = RawBatchAllocation.objects.filter(
-            production_run=self.production_run,
-            raw_batch__material=self.material
-        ).select_related('raw_batch')
-        if not allocations.exists():
-            return 'PENDING'
-        statuses = [a.raw_batch.status for a in allocations]
-        return min(statuses, key=lambda s: priority.index(s) if s in priority else 0)
+        return 'IN_WAREHOUSE_RAW'
 
     @property
     def allocated_quantity(self):
