@@ -85,8 +85,6 @@
           <td><strong>{{ item.line.material.name }}</strong></td>
           <td class="text-muted">{{ item.line.material.unit.name }}</td>
           <td class="td-mono" style="text-align:right">{{ item.line.quantity|smart_qty:item.line.material.unit.name }}</td>
-          <td class="td-mono" style="text-align:right">{% if item.line.unit_price %}{{ item.line.unit_price }}{% else %}—{% endif %}</td>
-          <td class="td-mono" style="text-align:right">{% if item.line.line_total %}{{ item.line.line_total|floatformat:2 }}{% else %}—{% endif %}</td>
           <td>
             {% if item.finals %}
             <details>
