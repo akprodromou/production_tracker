@@ -3008,7 +3008,7 @@ class ReorderAlertsView(View):
 
         # Sort
         sort = request.GET.get('sort', 'gap')
-        reverse = request.GET.get('dir', 'desc') == 'desc'
+        reverse = request.GET.get('dir', 'asc') == 'desc'
         if sort in ('sku', 'name', 'avg', 'rop', 'current_stock', 'gap', 'cv', 'lead_time'):
             rows = sorted(rows, key=lambda r: (r[sort] or 0) if sort != 'sku' and sort != 'name' else r[sort], reverse=reverse)
 
