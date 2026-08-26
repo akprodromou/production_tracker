@@ -281,5 +281,21 @@ input:focus, select:focus { border-color:var(--accent); }
 document.getElementById('select-all').addEventListener('change', function() {
   document.querySelectorAll('.row-check').forEach(function(cb) { cb.checked = this.checked; }.bind(this));
 });
+
+// Shift-click range selection
+var lastChecked = null;
+document.querySelectorAll('.row-check').forEach(function(cb) {
+  cb.addEventListener('click', function(e) {
+    if (e.shiftKey && lastChecked) {
+      var boxes = Array.from(document.querySelectorAll('.row-check'));
+      var start = boxes.indexOf(lastChecked);
+      var end   = boxes.indexOf(this);
+      var lo = Math.min(start, end);
+      var hi = Math.max(start, end);
+      boxes.slice(lo, hi + 1).forEach(function(b) { b.checked = lastChecked.checked; });
+    }
+    lastChecked = this;
+  });
+});
 </script>
 {% endblock %}
