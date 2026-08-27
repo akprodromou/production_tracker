@@ -190,6 +190,19 @@ def calculate_pallets(order_lines):
             'total_height': round(current_height, 1),
         })
 
+    # Add gross weight per pallet (sum of SKU gross weights for layers on that pallet)
+    sku_gross_map = {s['sku']: s for s in skus}
+    for pallet in pallets:
+        pallet_gross = 0
+        for layer in pallet['layers']:
+            for sku_code in layer['skus']:
+                s = sku_gross_map.get(sku_code)
+                if s:
+                    # Apportion gross weight by cartons on this layer
+                    pallet_gross += s['gross_weight'] * s['pack'] * layer['cartons'] / len(layer['skus'])
+        pallet['total_gross'] = round(pallet_gross, 1)
+        pallet['total_gross_with_pallet'] = round(pallet_gross + 22.5, 1)
+
     return {
         'skus':         skus,
         'layers':       layers,

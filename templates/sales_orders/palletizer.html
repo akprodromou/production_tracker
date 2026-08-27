@@ -87,8 +87,10 @@
         <th style="text-align:right">Tie</th>
         <th style="text-align:right">Layers</th>
         <th style="text-align:right">Box H (cm)</th>
-        <th style="text-align:right">Net/unit</th>
-        <th style="text-align:right">Total Net</th>
+        <th style="text-align:right">Net Weight/unit</th>
+        <th style="text-align:right">Gross Weight/unit</th>
+        <th style="text-align:right">Total Net Weight</th>
+        <th style="text-align:right">Total Gross Weight</th>
       </tr></thead>
       <tbody>
         {% for s in result.skus %}
@@ -101,7 +103,9 @@
           <td class="td-mono" style="text-align:right">{{ s.layers_f|floatformat:2 }}</td>
           <td class="td-mono" style="text-align:right">{{ s.carton_height }}</td>
           <td class="td-mono" style="text-align:right">{{ s.net_weight }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.gross_weight }}</td>
           <td class="td-mono" style="text-align:right">{{ s.total_net }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.total_gross }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -114,10 +118,16 @@
 <div class="pallet-card">
   <div class="pallet-header">
     <span class="pallet-title">Pallet {{ pallet.number }}</span>
-    <span style="font-size:12px;color:var(--muted)">{{ pallet.layers|length }} layer{{ pallet.layers|length|pluralize }} &nbsp;&bull;&nbsp; {{ pallet.total_height }}cm total height</span>
+    <span style="font-size:12px;color:var(--muted)">
+      {{ pallet.layers|length }} layer{{ pallet.layers|length|pluralize }}
+      &nbsp;&bull;&nbsp;
+      Height: {{ pallet.total_height }}cm + 15cm pallet = <strong style="color:var(--text)">{{ pallet.total_height|add:15 }}cm</strong>
+      &nbsp;&bull;&nbsp;
+      Gross: {{ pallet.total_gross }}kg + 22.5kg pallet = <strong style="color:var(--text)">{{ pallet.total_gross_with_pallet }}kg</strong>
+    </span>
   </div>
-  <div style="padding:4px 20px 6px;display:grid;grid-template-columns:60px 1fr 80px 100px;gap:8px;font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border)">
-    <span>Layer</span><span>SKU(s)</span><span style="text-align:right">Box H</span><span style="text-align:right">Cum. H</span>
+  <div style="padding:4px 20px 6px;display:grid;grid-template-columns:60px 1fr 70px 80px 100px;gap:8px;font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border)">
+    <span>Layer</span><span>SKU(s)</span><span style="text-align:right">Cartons</span><span style="text-align:right">Box H</span><span style="text-align:right">Cum. H</span>
   </div>
   {% for layer in pallet.layers %}
   <div class="layer-row" style="{% if layer.combined %}background:rgba(45,212,160,.04){% endif %}">
@@ -131,6 +141,7 @@
         {% for name in layer.names %}{{ name }}{% if not forloop.last %} / {% endif %}{% endfor %}
       </div>
     </div>
+    <div class="td-mono" style="text-align:right;font-size:12px">{{ layer.cartons }}</div>
     <div class="layer-height">{{ layer.height }}cm</div>
     <div class="layer-cumulative" style="color:{% if layer.cumulative_height > result.max_height %}#ff5050{% else %}var(--text){% endif %}">
       {{ layer.cumulative_height }}cm
