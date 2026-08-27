@@ -53,12 +53,24 @@
           {{ form.pack }}
         </div>
         <div class="form-group">
-          <label>Pallet Tie <span style="color:var(--muted);font-weight:400;font-size:11px">boxes per layer</span></label>
+          <label>Pallet Tie <span style="color:var(--muted);font-weight:400;font-size:11px">boxes per layer (120×80cm)</span></label>
           {{ form.pallet_tie }}
         </div>
         <div class="form-group">
           <label>Pallet High <span style="color:var(--muted);font-weight:400;font-size:11px">layers per pallet</span></label>
           {{ form.pallet_high }}
+        </div>
+        <div class="form-group">
+          <label>Carton Height <span style="color:var(--muted);font-weight:400;font-size:11px">cm</span></label>
+          {{ form.carton_height }}
+        </div>
+        <div class="form-group">
+          <label>Net Weight <span style="color:var(--muted);font-weight:400;font-size:11px">kg per unit</span></label>
+          {{ form.net_weight }}
+        </div>
+        <div class="form-group">
+          <label>Gross Weight <span style="color:var(--muted);font-weight:400;font-size:11px">kg per unit</span></label>
+          {{ form.gross_weight }}
         </div>
       </div>
     </div>

@@ -60,7 +60,7 @@ class LocationForm(forms.ModelForm):
 class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
-        fields = ['name', 'sku', 'unit', 'category', 'pack', 'pallet_tie', 'pallet_high']
+        fields = ['name', 'sku', 'unit', 'category', 'pack', 'pallet_tie', 'pallet_high', 'carton_height', 'net_weight', 'gross_weight']
 
     def clean_sku(self):
         sku = self.cleaned_data['sku'].strip()

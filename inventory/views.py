@@ -3364,3 +3364,16 @@ class SalesOrderComponentsView(View):
             'dir': 'asc',
         })
 
+
+
+class SalesOrderPalletizerView(View):
+    def get(self, request, pk):
+        from inventory.palletizer import calculate_pallets
+        order = get_object_or_404(SalesOrder, pk=pk)
+        lines = order.lines.select_related('material__unit').all()
+        result = calculate_pallets(lines)
+        return render(request, 'sales_orders/palletizer.html', {
+            'order': order,
+            'result': result,
+        })
+

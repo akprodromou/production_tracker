@@ -6,6 +6,7 @@
 <div class="page-header">
   <div><h1>{{ order.reference }}</h1><p>{{ order.client.name }}</p></div>
   <div class="page-actions">
+    <a href="{% url 'sales-order-palletizer' order.pk %}" class="btn btn-secondary">&#128230; Palletizer</a>
     <form method="post" action="{% url 'sales-order-components' order.pk %}" style="display:inline">
       {% csrf_token %}
       <button type="submit" class="btn btn-secondary">&#9776; Check Component Availability</button>

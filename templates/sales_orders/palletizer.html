@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Palletizer — {{ order.reference }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a><span>/</span> <a href="{% url 'client-order-board' %}">Client Order Board</a><span>/</span> <a href="{% url 'sales-order-list' %}">Client Orders</a><span>/</span> <a href="{% url 'sales-order-detail' order.pk %}">{{ order.reference }}</a><span>/</span> Palletizer{% endblock %}
+
+{% block extra_head %}
+<style>
+.pallet-card { border:2px solid var(--accent); border-radius:var(--radius); margin-bottom:24px; overflow:hidden; }
+.pallet-header { background:rgba(79,142,247,.12); padding:12px 20px; display:flex; align-items:center; justify-content:space-between; }
+.pallet-title { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent); }
+.layer-row { display:flex; align-items:center; padding:8px 20px; border-bottom:1px solid var(--border); font-size:12px; }
+.layer-row:last-child { border-bottom:none; }
+.layer-num { font-family:var(--mono); color:var(--muted); width:60px; }
+.layer-skus { flex:1; }
+.layer-height { font-family:var(--mono); text-align:right; width:80px; color:var(--muted); }
+.layer-cumulative { font-family:var(--mono); text-align:right; width:100px; font-weight:600; }
+.badge-combined { background:rgba(45,212,160,.15); color:#2dd4a0; border:1px solid #2dd4a0; border-radius:4px; padding:1px 6px; font-size:10px; margin-left:6px; }
+.sku-tag { font-family:var(--mono); font-size:10px; color:var(--muted); }
+.warning-bar { background:rgba(245,166,35,.12); border:1px solid var(--warn); border-radius:var(--radius); padding:10px 16px; margin-bottom:16px; font-size:12px; color:var(--warn); }
+.missing-bar { background:rgba(224,82,82,.12); border:1px solid var(--danger); border-radius:var(--radius); padding:10px 16px; margin-bottom:16px; font-size:12px; color:var(--danger); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Palletizer</h1>
+    <p class="text-muted" style="font-size:13px">{{ order.reference }} &mdash; {{ order.client.name }} &mdash; 120&times;80cm EUR-1 pallets</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'sales-order-detail' order.pk %}" class="btn btn-secondary">&#8592; Back to Order</a>
+  </div>
+</div>
+
+{% if result.missing_data %}
+<div class="missing-bar">
+  <strong>&#9888; Missing pallet data for {{ result.missing_data|length }} SKU{{ result.missing_data|length|pluralize }}:</strong>
+  <ul style="margin:6px 0 0 16px;padding:0">
+    {% for m in result.missing_data %}<li>{{ m }}</li>{% endfor %}
+  </ul>
+  <div style="margin-top:6px">Edit each material at <a href="{% url 'material-list' %}" style="color:var(--warn)">Materials</a> to add Pack, Tie, Carton Height and Net Weight.</div>
+</div>
+{% endif %}
+
+{% if result.warnings %}
+{% for w in result.warnings %}
+<div class="warning-bar">&#9888; {{ w }}</div>
+{% endfor %}
+{% endif %}
+
+{% if not result.pallets %}
+<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--muted)">No pallet data available — ensure all SKUs have pallet configuration fields set.</div></div>
+{% else %}
+
+{# Summary #}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px">
+  <div class="card"><div class="card-body" style="text-align:center">
+    <div style="font-size:28px;font-weight:700;color:var(--accent)">{{ result.pallets|length }}</div>
+    <div style="font-size:12px;color:var(--muted)">Pallet{{ result.pallets|length|pluralize }}</div>
+  </div></div>
+  <div class="card"><div class="card-body" style="text-align:center">
+    <div style="font-size:28px;font-weight:700;color:var(--text)">{{ result.max_height }}cm</div>
+    <div style="font-size:12px;color:var(--muted)">Max height</div>
+  </div></div>
+  <div class="card"><div class="card-body" style="text-align:center">
+    <div style="font-size:28px;font-weight:700;color:var(--text)">{{ result.total_net }} kg</div>
+    <div style="font-size:12px;color:var(--muted)">Total net weight</div>
+  </div></div>
+  <div class="card"><div class="card-body" style="text-align:center">
+    <div style="font-size:28px;font-weight:700;color:var(--text)">{{ result.total_gross }} kg</div>
+    <div style="font-size:12px;color:var(--muted)">Total gross weight</div>
+  </div></div>
+  <div class="card"><div class="card-body" style="text-align:center">
+    <div style="font-size:28px;font-weight:700;color:{% if result.stackable %}#28c864{% else %}#ff5050{% endif %}">{% if result.stackable %}Yes{% else %}No{% endif %}</div>
+    <div style="font-size:12px;color:var(--muted)">Stackable</div>
+  </div></div>
+</div>
+
+{# SKU breakdown table #}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">SKU Breakdown</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>SKU</th><th>Description</th>
+        <th style="text-align:right">Qty</th>
+        <th style="text-align:right">Cartons</th>
+        <th style="text-align:right">Tie</th>
+        <th style="text-align:right">Layers</th>
+        <th style="text-align:right">Box H (cm)</th>
+        <th style="text-align:right">Net/unit</th>
+        <th style="text-align:right">Total Net</th>
+      </tr></thead>
+      <tbody>
+        {% for s in result.skus %}
+        <tr>
+          <td class="td-mono text-muted" style="font-size:11px">{{ s.sku }}</td>
+          <td style="font-size:12px;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.qty|floatformat:0 }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.cartons }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.tie }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.layers_f|floatformat:2 }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.carton_height }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.net_weight }}</td>
+          <td class="td-mono" style="text-align:right">{{ s.total_net }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# Pallets #}
+{% for pallet in result.pallets %}
+<div class="pallet-card">
+  <div class="pallet-header">
+    <span class="pallet-title">Pallet {{ pallet.number }}</span>
+    <span style="font-size:12px;color:var(--muted)">{{ pallet.layers|length }} layer{{ pallet.layers|length|pluralize }} &nbsp;&bull;&nbsp; {{ pallet.total_height }}cm total height</span>
+  </div>
+  <div style="padding:4px 20px 6px;display:grid;grid-template-columns:60px 1fr 80px 100px;gap:8px;font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border)">
+    <span>Layer</span><span>SKU(s)</span><span style="text-align:right">Box H</span><span style="text-align:right">Cum. H</span>
+  </div>
+  {% for layer in pallet.layers %}
+  <div class="layer-row" style="{% if layer.combined %}background:rgba(45,212,160,.04){% endif %}">
+    <div class="layer-num">L{{ forloop.counter }}</div>
+    <div class="layer-skus">
+      {% for sku in layer.skus %}
+      <span class="sku-tag">{{ sku }}</span>{% if not forloop.last %} &nbsp; {% endif %}
+      {% endfor %}
+      {% if layer.combined %}<span class="badge-combined">combined</span>{% endif %}
+      <div style="font-size:11px;color:var(--muted);margin-top:1px">
+        {% for name in layer.names %}{{ name }}{% if not forloop.last %} / {% endif %}{% endfor %}
+      </div>
+    </div>
+    <div class="layer-height">{{ layer.height }}cm</div>
+    <div class="layer-cumulative" style="color:{% if layer.cumulative_height > result.max_height %}#ff5050{% else %}var(--text){% endif %}">
+      {{ layer.cumulative_height }}cm
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
+{% endif %}
+{% endblock %}
