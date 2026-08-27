@@ -842,10 +842,20 @@ class MaterialListView(View):
             terms = q.split()
             for term in terms:
                 qs = qs.filter(Q(name__icontains=term) | Q(sku__icontains=term))
-        paginator = Paginator(qs.order_by('name'), 25)
+        sort = request.GET.get('sort', 'name')
+        direction = request.GET.get('dir', 'asc')
+        sort_map = {'name': 'name', 'sku': 'sku', 'category': 'category', 'unit': 'unit__name'}
+        order_field = sort_map.get(sort, 'name')
+        if direction == 'desc':
+            order_field = '-' + order_field
+        paginator = Paginator(qs.order_by(order_field), 25)
         return render(request, 'materials/list.html', {
             'materials':        paginator.get_page(request.GET.get('page')),
             'category_choices': Material.CATEGORY_CHOICES,
+            'sort':             sort,
+            'dir':              direction,
+            'q':                q,
+            'category':         category or '',
         })
 
 

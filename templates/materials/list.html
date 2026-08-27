@@ -41,10 +41,10 @@
     <table>
       <thead>
         <tr>
-          <th>SKU</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Unit</th>
+          <th><a href="?sort=sku&dir={% if sort == 'sku' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}&category={{ category }}" style="color:inherit;text-decoration:none">SKU{% if sort == 'sku' %} {% if dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+          <th><a href="?sort=name&dir={% if sort == 'name' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}&category={{ category }}" style="color:inherit;text-decoration:none">Name{% if sort == 'name' %} {% if dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+          <th><a href="?sort=category&dir={% if sort == 'category' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}&category={{ category }}" style="color:inherit;text-decoration:none">Category{% if sort == 'category' %} {% if dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
+          <th><a href="?sort=unit&dir={% if sort == 'unit' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}&category={{ category }}" style="color:inherit;text-decoration:none">Unit{% if sort == 'unit' %} {% if dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}</a></th>
           <th style="text-align:right">Actions</th>
         </tr>
       </thead>

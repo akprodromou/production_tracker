@@ -7,7 +7,10 @@ use file from Pylon as exported:
     Ενέργειες / Εξαγόμενα Grid / Εξαγωγή σε CSV
 
 python manage.py import_clients clients-inventory-2026-07-10.csv --dry-run
+
+$env:DATABASE_URL="postgresql://postgres:GSUajhGKPuJMLpItMmZbduFbjMVWAeNE@hayabusa.proxy.rlwy.net:55480/railway"
 python manage.py import_clients clients-inventory-2026-07-10.csv
+$env:DATABASE_URL=""
 '''
 
 
