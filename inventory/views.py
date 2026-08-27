@@ -3177,10 +3177,12 @@ class ReorderComponentsView(View):
         from collections import defaultdict
 
         # Collect selected SKUs and quantities — only where checkbox is checked
+        checked_skus = []
         selected = {}
         for key, val in request.POST.items():
             if key.startswith('sel_'):
                 sku = key[4:]
+                checked_skus.append(sku)
                 qty_val = request.POST.get(f'qty_{sku}', '0').replace(',', '')
                 try:
                     qty = Decimal(qty_val)
@@ -3189,8 +3191,11 @@ class ReorderComponentsView(View):
                 except Exception:
                     pass
 
-        if not selected:
+        if not checked_skus:
             messages.warning(request, 'No SKUs selected.')
+            return redirect('reorder-alerts')
+        if not selected:
+            messages.warning(request, 'Restock Quantity must be above 0 to calculate components. Adjust the quantities and try again.')
             return redirect('reorder-alerts')
 
         # Aggregate components across all selected SKUs
