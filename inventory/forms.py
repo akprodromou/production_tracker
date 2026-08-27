@@ -61,6 +61,11 @@ class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
         fields = ['name', 'sku', 'unit', 'category', 'pack', 'pallet_tie', 'pallet_high', 'carton_height', 'net_weight', 'gross_weight']
+        widgets = {
+            'carton_height': forms.NumberInput(attrs={'step': '0.1'}),
+            'net_weight':    forms.NumberInput(attrs={'step': '0.0001'}),
+            'gross_weight':  forms.NumberInput(attrs={'step': '0.0001'}),
+        }
 
     def clean_sku(self):
         sku = self.cleaned_data['sku'].strip()

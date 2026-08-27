@@ -39,8 +39,8 @@ class Material(models.Model):
     pallet_tie   = models.PositiveIntegerField(null=True, blank=True, help_text="Boxes per pallet layer (120x80cm)")
     pallet_high  = models.PositiveIntegerField(null=True, blank=True, help_text="Layers per pallet")
     carton_height = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True, help_text="Carton height in cm")
-    net_weight   = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True, help_text="Net weight per unit in kg")
-    gross_weight = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True, help_text="Gross weight per unit in kg")
+    net_weight   = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True, help_text="Net weight per unit in kg")
+    gross_weight = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True, help_text="Gross weight per unit in kg")
 
     def pallet_capacity(self):
         if self.pallet_tie and self.pallet_high:
