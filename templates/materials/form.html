@@ -9,6 +9,14 @@
 
 <form method="post" style="max-width:480px">
   {% csrf_token %}
+  {% if form.errors %}
+  <div class="msg msg-error" style="margin-bottom:16px">
+    Please fix the errors below:
+    {% for field, errors in form.errors.items %}
+    <div>{{ field }}: {{ errors|join:", " }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <div class="card mb-3">
     <div class="card-header"><span class="card-title">Details</span></div>
