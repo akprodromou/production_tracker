@@ -104,11 +104,11 @@ def calculate_pallets(order_lines):
     # ── Determine height limit and stackability ───────────────────
     heavy_count = sum(1 for s in skus if s['net_weight'] > float(HEAVY_THRESHOLD))
     pct_heavy   = heavy_count / len(skus)
-    max_height  = 160 if pct_heavy > 0.5 else 190
+    max_height  = 140 if pct_heavy > 0.5 else 165  # cargo height only, pallet base adds 15cm
     stackable   = pct_heavy == 1.0
 
     if pct_heavy > 0.5:
-        warnings.append(f"{heavy_count}/{len(skus)} SKUs are heavy (>{HEAVY_THRESHOLD}kg/unit) — max pallet height 160cm")
+        warnings.append(f"{heavy_count}/{len(skus)} SKUs are heavy (>{HEAVY_THRESHOLD}kg/unit) — max cargo height 140cm (155cm incl. pallet)")
     if stackable:
         warnings.append("All SKUs are heavy — pallets are stackable")
 
@@ -202,15 +202,20 @@ def calculate_pallets(order_lines):
                     pallet_gross += s['gross_weight'] * s['pack'] * layer['cartons'] / len(layer['skus'])
         pallet['total_gross'] = round(pallet_gross, 1)
         pallet['total_gross_with_pallet'] = round(pallet_gross + 22.5, 1)
+        pallet['total_cartons'] = sum(layer['cartons'] for layer in pallet['layers'])
+        pallet['total_height_with_pallet'] = round(pallet['total_height'] + 15, 1)
+        # Round total_height for display
+        pallet['total_height'] = round(pallet['total_height'], 1)
 
     return {
-        'skus':         skus,
-        'layers':       layers,
-        'pallets':      pallets,
-        'warnings':     warnings,
-        'stackable':    stackable,
-        'max_height':   max_height,
-        'missing_data': missing_data,
-        'total_net':    round(sum(s['total_net'] for s in skus), 2),
-        'total_gross':  round(sum(s['total_gross'] for s in skus), 2),
+        'skus':           skus,
+        'layers':         layers,
+        'pallets':        pallets,
+        'warnings':       warnings,
+        'stackable':      stackable,
+        'max_height':     max_height,
+        'missing_data':   missing_data,
+        'total_net':      round(sum(s['total_net'] for s in skus), 2),
+        'total_gross':    round(sum(s['total_gross'] for s in skus), 2),
+        'total_cartons':  sum(s['cartons'] for s in skus),
     }
