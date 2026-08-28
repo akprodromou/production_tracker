@@ -107,14 +107,12 @@
         {% endfor %}
       </tbody>
       <tfoot>
-        <tr style="border-top:2px solid var(--border);font-weight:600">
-          <td colspan="4" style="font-size:12px;color:var(--muted);padding:6px 0">Totals</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+        <tr style="border-top:2px solid var(--border);font-weight:600;background:var(--surface2)">
+          <td colspan="3" style="font-size:12px;color:var(--muted);padding:8px 0">Totals</td>
           <td class="td-mono" style="text-align:right">{{ result.total_cartons }}</td>
+          <td></td>
+          <td></td>
+          <td></td>
           <td></td>
           <td></td>
           <td class="td-mono" style="text-align:right">{{ result.total_net }}</td>
@@ -154,18 +152,18 @@
     </div>
   </div>
   {% endfor %}
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:14px 20px;background:var(--surface);border-top:2px solid var(--border);font-size:12px">
+  <div style="padding:12px 20px;background:var(--surface);border-top:2px solid var(--border);font-size:12px;display:flex;gap:32px;align-items:center">
     <div>
-      <div style="color:var(--muted);font-size:10px;text-transform:uppercase;font-family:var(--mono);margin-bottom:2px">Total Cartons</div>
-      <div style="font-weight:600;font-family:var(--mono)">{{ pallet.total_cartons }}</div>
+      <span style="color:var(--muted);font-family:var(--mono);font-size:10px;text-transform:uppercase;margin-right:6px">Total Cartons</span>
+      <span style="font-weight:600;font-family:var(--mono)">{{ pallet.total_cartons }}</span>
     </div>
     <div>
-      <div style="color:var(--muted);font-size:10px;text-transform:uppercase;font-family:var(--mono);margin-bottom:2px">Cargo Height</div>
-      <div style="font-weight:600;font-family:var(--mono)">{{ pallet.total_height|floatformat:1 }}cm + 15cm = {{ pallet.total_height_with_pallet }}cm</div>
+      <span style="color:var(--muted);font-family:var(--mono);font-size:10px;text-transform:uppercase;margin-right:6px">Cargo Height</span>
+      <span style="font-weight:600;font-family:var(--mono)">{{ pallet.total_height|floatformat:1 }}cm + 15cm pallet = {{ pallet.total_height_with_pallet }}cm</span>
     </div>
     <div>
-      <div style="color:var(--muted);font-size:10px;text-transform:uppercase;font-family:var(--mono);margin-bottom:2px">Gross Weight</div>
-      <div style="font-weight:600;font-family:var(--mono)">{{ pallet.total_gross }}kg + 22.5kg = {{ pallet.total_gross_with_pallet }}kg</div>
+      <span style="color:var(--muted);font-family:var(--mono);font-size:10px;text-transform:uppercase;margin-right:6px">Gross Weight</span>
+      <span style="font-weight:600;font-family:var(--mono)">{{ pallet.total_gross }}kg + 22.5kg pallet = {{ pallet.total_gross_with_pallet }}kg</span>
     </div>
   </div>
 </div>
