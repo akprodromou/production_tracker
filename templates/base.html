@@ -508,6 +508,7 @@
 
 <div class="main">
   <div class="topbar">
+<button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">&#9776;</button>
     <div class="topbar-breadcrumb">{% block breadcrumb %}<a href="{% url 'dashboard' %}">Dashboard</a>{% endblock %}</div>
     <div style="flex:1"></div>
     <span class="text-mono text-muted">{% now "Y-m-d" %}</span>
