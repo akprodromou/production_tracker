@@ -90,9 +90,52 @@ input:focus, select:focus { border-color:var(--accent); }
           <!-- <div style="font-size:11px;color:var(--muted);margin-top:4px">90%&rarr;1.282 &nbsp; 95%&rarr;1.645 &nbsp; 99%&rarr;2.326</div> -->
         </div>
       </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase">
+          Months to include
+          <span style="float:right;font-weight:400">
+            <a href="#" onclick="setAllMonths(true);return false" style="color:var(--accent);font-size:10px">All</a>
+            &nbsp;
+            <a href="#" onclick="setAllMonths(false);return false" style="color:var(--accent);font-size:10px">None</a>
+            &nbsp;
+            <a href="#" onclick="setLastN(6);return false" style="color:var(--accent);font-size:10px">Last 6</a>
+            &nbsp;
+            <a href="#" onclick="setLastN(3);return false" style="color:var(--accent);font-size:10px">Last 3</a>
+          </span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          {% for month in all_months %}
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-family:var(--mono);cursor:pointer;padding:3px 6px;border:1px solid var(--border);border-radius:4px;{% if month in selected_months %}background:rgba(79,142,247,.15);border-color:var(--accent);{% endif %}">
+            <input type="checkbox" name="month_{{ month|cut:'/' }}_{{ month|slice:'3:' }}" value="1"
+              {% if month in selected_months %}checked{% endif %}
+              onchange="this.closest('label').style.background=this.checked?'rgba(79,142,247,.15)':'';this.closest('label').style.borderColor=this.checked?'var(--accent)':'var(--border)'">
+            {{ month }}
+          </label>
+          {% empty %}
+          <span style="font-size:11px;color:var(--muted)">No sales files found in sales_data/</span>
+          {% endfor %}
+        </div>
+      </div>
       <button type="submit" class="btn btn-primary btn-sm">Update</button>
     </form>
     <script>
+    var allMonthCheckboxes = document.querySelectorAll('[name^="month_"]');
+    function setAllMonths(checked) {
+      allMonthCheckboxes.forEach(function(cb) {
+        cb.checked = checked;
+        cb.closest('label').style.background = checked ? 'rgba(79,142,247,.15)' : '';
+        cb.closest('label').style.borderColor = checked ? 'var(--accent)' : 'var(--border)';
+      });
+    }
+    function setLastN(n) {
+      var boxes = Array.from(allMonthCheckboxes);
+      boxes.forEach(function(cb, i) {
+        var checked = i >= boxes.length - n;
+        cb.checked = checked;
+        cb.closest('label').style.background = checked ? 'rgba(79,142,247,.15)' : '';
+        cb.closest('label').style.borderColor = checked ? 'var(--accent)' : 'var(--border)';
+      });
+    }
     document.getElementById('settings-form').querySelector('[name=service_level]').addEventListener('input', function() {
       var sl = parseFloat(this.value);
       var lookup = [[0.80,0.842],[0.85,1.036],[0.90,1.282],[0.92,1.405],[0.95,1.645],[0.97,1.881],[0.99,2.326],[0.999,3.090]];
@@ -186,7 +229,7 @@ input:focus, select:focus { border-color:var(--accent); }
       </tbody>
     </table>
     <div style="font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px">
-      <strong style="color:var(--text)">To update:</strong> export monthly sales from Pylon ERP as <code>sales-sheet-YYYY-MM.xlsx</code>, place in <code>sales_data/</code>, push to GitHub.
+      <strong style="color:var(--text)">To update:</strong> export monthly sales from Pylon (ERP Πωλήσεις ανά Είδος και Σειρά > Εκτέλεση ως: Flat Grid > Εξαγωγές > Εξαγωγή σε Excel) as <code>sales-sheet-YYYY-MM.xlsx</code>, place in <code>sales_data/</code>, push to GitHub.
     </div>
   </div>
 

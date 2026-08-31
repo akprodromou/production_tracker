@@ -34,7 +34,7 @@ FIN_PREFIXES = ('02-', '03-', '04-', '05-', '06-', '08-', '10-', '11-')
 FILE_PATTERN = re.compile(r'sales-sheet-(\d{4})-(\d{2})\.xlsx$', re.IGNORECASE)
 
 
-def get_sales_files(n=6):
+def get_sales_files(n=12):
     """Return up to n most recent sales xlsx files, sorted oldest first."""
     if not os.path.isdir(SALES_DATA_DIR):
         return []
@@ -46,6 +46,17 @@ def get_sales_files(n=6):
             files.append((year, month, fname))
     files.sort()
     return files[-n:]
+
+
+def get_all_available_files():
+    """Return all available sales files sorted oldest first."""
+    return get_sales_files(n=24)
+
+
+def get_default_selected_months(all_files):
+    """Return the 6 most recent month labels as defaults."""
+    labels = [f'{m:02d}/{y}' for y, m, _ in all_files]
+    return labels[-6:]
 
 
 def parse_sales_file(filepath):
@@ -123,18 +134,32 @@ def get_settings():
     return obj
 
 
-def calculate_rop():
+def calculate_rop(selected_months=None):
     """
     Main calculation function.
+    selected_months: list of 'MM/YYYY' labels to include, or None for last 6.
     Returns list of dicts, one per SKU.
     """
     settings   = get_settings()
     z_score    = float(settings.z_score)
-    n_months   = settings.months_window
     lead_times = get_lead_times()
     stock      = get_current_stock()
 
-    files = get_sales_files(n=n_months)
+    all_files = get_all_available_files()
+    if not all_files:
+        return [], []
+
+    # Determine which months to use
+    if selected_months is None:
+        selected_months = settings.selected_months or get_default_selected_months(all_files)
+
+    # Filter files to selected months
+    files = [
+        (y, m, fname) for y, m, fname in all_files
+        if f'{m:02d}/{y}' in selected_months
+    ]
+    files.sort()
+
     if not files:
         return [], []
 

@@ -2983,11 +2983,14 @@ class ShipmentHistoryView(View):
 
 class ReorderAlertsView(View):
     def get(self, request):
-        from .rop_engine import calculate_rop, get_settings, get_sales_files
+        from .rop_engine import calculate_rop, get_settings, get_sales_files, get_all_available_files, get_default_selected_months
         from .models import ReorderSettings, LeadTimeConfig
         from .forms import ReorderSettingsForm
 
         settings     = get_settings()
+        all_files    = get_all_available_files()
+        all_months   = [f'{m:02d}/{y}' for y, m, _ in all_files]
+        selected_months = settings.selected_months or get_default_selected_months(all_files)
 
         # Seed default lead times if not yet configured
         DEFAULT_LEAD_TIMES = {
@@ -3002,7 +3005,7 @@ class ReorderAlertsView(View):
             )
 
         files        = get_sales_files(n=settings.months_window)
-        rows, labels = calculate_rop()
+        rows, labels = calculate_rop(selected_months=selected_months)
 
         # Filter options
         filter_reorder = request.GET.get('reorder', '')
@@ -3041,6 +3044,8 @@ class ReorderAlertsView(View):
             'rows':           rows,
             'month_labels':   labels,
             'files':          files,
+            'all_months':     all_months,
+            'selected_months': selected_months,
             'settings':       settings,
             'settings_form':  settings_form,
             'lead_configs':   lead_configs,
@@ -3064,10 +3069,16 @@ class ReorderAlertsView(View):
         action = request.POST.get('action')
 
         if action == 'save_settings':
+            from .rop_engine import get_all_available_files, get_default_selected_months
             settings = get_settings()
             form = ReorderSettingsForm(request.POST, instance=settings)
             if form.is_valid():
                 obj = form.save(commit=False)
+                # Save selected months
+                all_files = get_all_available_files()
+                all_month_labels = [f'{m:02d}/{y}' for y, m, _ in all_files]
+                chosen = [lbl for lbl in all_month_labels if request.POST.get(f'month_{lbl.replace("/","_")}')]
+                obj.selected_months = chosen if chosen else get_default_selected_months(all_files)
                 # Auto-calculate z-score from service level
                 import math
                 sl = float(obj.service_level)
@@ -3114,7 +3125,7 @@ class ReorderAlertsExportView(View):
         from datetime import date
 
         settings     = get_settings()
-        rows, labels = calculate_rop()
+        rows, labels = calculate_rop(selected_months=selected_months)
 
         wb = openpyxl.Workbook()
         ws = wb.active

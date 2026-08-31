@@ -290,6 +290,8 @@ class SalesOrderLine(models.Model):
 
 class ReorderSettings(models.Model):
     """Global settings for reorder point calculation."""
+    selected_months = models.JSONField(default=list, blank=True,
+                          help_text="List of YYYY-MM strings to include in ROP calculation")
     service_level   = models.DecimalField(max_digits=6, decimal_places=4, default='0.9500',
                           help_text="Target service level, e.g. 0.95 for 95%")
     z_score         = models.DecimalField(max_digits=8, decimal_places=6, default='1.644854',
