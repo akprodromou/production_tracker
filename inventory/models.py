@@ -296,7 +296,7 @@ class ReorderSettings(models.Model):
                           help_text="Target service level, e.g. 0.95 for 95%")
     z_score         = models.DecimalField(max_digits=8, decimal_places=6, default='1.644854',
                           help_text="Z-score corresponding to service level (auto-hint: 0.95→1.645, 0.99→2.326)")
-updated_at      = models.DateTimeField(auto_now=True)
+    updated_at      = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Reorder Settings"
