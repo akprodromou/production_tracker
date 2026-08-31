@@ -3129,8 +3129,11 @@ class ReorderAlertsExportView(View):
         from django.http import HttpResponse
         from datetime import date
 
-        settings     = get_settings()
-        rows, labels = calculate_rop(selected_months=selected_months)
+        settings        = get_settings()
+        from inventory.rop_engine import get_all_available_files, get_default_selected_months
+        all_files       = get_all_available_files()
+        selected_months = settings.selected_months if settings.selected_months else get_default_selected_months(all_files)
+        rows, labels    = calculate_rop(selected_months=selected_months)
 
         wb = openpyxl.Workbook()
         ws = wb.active
