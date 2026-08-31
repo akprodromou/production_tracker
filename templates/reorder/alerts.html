@@ -80,10 +80,6 @@ input:focus, select:focus { border-color:var(--accent); }
           {{ settings_form.service_level }}
         </div>
         <div>
-          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Months to consider</label>
-          {{ settings_form.months_window }}
-        </div>
-        <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Z-Score <span style="font-weight:400">(calculated from service level)</span></label>
           <input type="text" value="{{ settings.z_score }}" disabled style="background:var(--surface);color:var(--muted);cursor:not-allowed">
           {{ settings_form.z_score }}
@@ -91,7 +87,7 @@ input:focus, select:focus { border-color:var(--accent); }
         </div>
       </div>
       <div style="margin-bottom:12px">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">
           Months to consider
           <span style="float:right;font-weight:400">
             <a href="#" onclick="setAllMonths(true);return false" style="color:var(--accent);font-size:10px">All</a>
