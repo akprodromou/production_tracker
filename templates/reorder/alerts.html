@@ -106,7 +106,7 @@ input:focus, select:focus { border-color:var(--accent); }
         <div style="display:flex;flex-wrap:wrap;gap:4px">
           {% for month in all_months %}
           <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-family:var(--mono);cursor:pointer;padding:3px 6px;border:1px solid var(--border);border-radius:4px;{% if month in selected_months %}background:rgba(79,142,247,.15);border-color:var(--accent);{% endif %}">
-            <input type="checkbox" name="month_{{ month|slugify }}" value="1"
+            <input type="checkbox" name="month_{{ month|cut:"/" }}" value="1"
               {% if month in selected_months %}checked{% endif %}
               onchange="this.closest('label').style.background=this.checked?'rgba(79,142,247,.15)':'';this.closest('label').style.borderColor=this.checked?'var(--accent)':'var(--border)'">
             {{ month }}
