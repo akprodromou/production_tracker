@@ -212,7 +212,6 @@ def main():
                 lot_number=batch_ref,
                 total_quantity=qty,
                 location=location,
-                status='IN_WAREHOUSE_RAW',
             )
 
         print(f"  {'+'if qty>0 else ''}{qty:>10} | {sku:<20} | {location.name}")

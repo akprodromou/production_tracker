@@ -5,14 +5,14 @@ Reads the ERP suppliers xlsx and imports into the Supplier model.
 Imports: code (Κωδικός), tin (ΑΦΜ), name (Όνομα), payment_terms (Όνομα - Τρόπος Πληρωμής).
 All other fields (contacts, address, notes) remain blank for manual entry later.
 
-use file from Pylon as exported:
+Export from Pylon EPR:
     Ενέργειες / Εξαγόμενα Grid / Εξαγωγή σε Excel
 
 Usage:
     python scripts/import_suppliers.py suppliers_list-2026-08-20.xlsx [--dry-run]
 
 Run against Railway:
-    $env:DATABASE_URL="postgresql://..."
+    $env:DATABASE_URL="postgresql://postgres:GSUajhGKPuJMLpItMmZbduFbjMVWAeNE@hayabusa.proxy.rlwy.net:55480/railway"
     python scripts/import_suppliers.py suppliers_list-2026-08-20.xlsx
     $env:DATABASE_URL=""
 """

@@ -4,6 +4,16 @@ update_material_names.py
 Updates material names in the database to match ERP names from the
 inventory xlsx file (same format as used by sync_erp_inventory.py).
 
+File naming convention: inventory-YYYY-MM-DD.xlsx
+
+Export from Pylon ERP:
+    Αποθήκη / Αναφορές / Εκτυπώσεις / (Είδη / Υπηρεσίες / Πάγια) / Υπόλοιπα / Υπόλοιπα ανά Αποθήκη και Είδος
+    click «Μπάντες»
+    click «Είδη»
+    Διαθ. Υπ.: Ορατή
+    Εκτέλεση Ως: Grid
+    Εξαγωγές / Εξαγωγή σε Excel (xlsx)
+
 Run from project root:
     python update_material_names.py inventory-2026-08-20.xlsx [--dry-run]
 
@@ -14,7 +24,7 @@ To run against Railway:
 """
 
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
@@ -66,6 +76,10 @@ def main():
         sys.exit(1)
 
     filepath = sys.argv[1]
+    # If not an absolute path, resolve relative to project root (parent of scripts/)
+    if not os.path.isabs(filepath):
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        filepath = os.path.join(project_root, filepath)
     if not os.path.exists(filepath):
         print(f"File not found: {filepath}")
         sys.exit(1)

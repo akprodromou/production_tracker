@@ -1,32 +1,22 @@
 """
 import_production_templates.py
 -------------------------------
-Run from project root:
-    python scripts/import_production_templates.py production_run_templates_database.xlsx [--dry-run]
-    python scripts/import_production_templates.py production_run_templates_database.xlsx
 
-use file from Pylon as exported in xlsx:
-Αποθήκη / Αναφορές / Εκτυπώσεις / Σύνθεση / Προδιαγραφές Σετ Κιτ
+Export from Pylon EPR:
+    Αποθήκη / Αναφορές / Εκτυπώσεις / Σύνθεση / Προδιαγραφές Σετ Κιτ (xlsx form)
+    Εκτέλεση ως: Grid
+    Εξαγωγές / Εξαγωγή σε Excel
+
+To run against Railway, run from project root:
+    $env:DATABASE_URL="postgresql://postgres:GSUajhGKPuJMLpItMmZbduFbjMVWAeNE@hayabusa.proxy.rlwy.net:55480/railway"
+    python scripts/import_production_templates.py production_run_templates_database.xlsx
+    $env:DATABASE_URL=""
 
 Reads the ERP "Set Kit Specifications" (Προδιαγραφές Σετ Κίτ) export and
 creates/updates ProductionTemplate + ProductionTemplateComponent records
 in the database. These act as ready-made "recipes": given a finished
 product SKU, the template tells you which raw materials (and in what
 ratio) are required to produce one unit.
-
-File format (one block per finished product):
-    <SKU>                                    <empty> <empty> <Product Name>
-    <empty row>
-    <empty>  Κωδικός          <empty> <empty> Όνομα
-    <empty row>
-    <empty>  <SKU>            <empty> <empty> <Product Name>
-    <empty row>
-    <empty>  <empty> Είδος - Όνομα <empty> <empty> Προδιαγραφή Σετ Κίτ - Όνομα ... Ποσ. Σετ : Ποσ. Υλικών (col 16)
-    <empty row>
-    <empty>  <empty> <Material Name>        <empty> <empty> <Product Name> ... <ratio> (col 16)
-    <empty row>
-    ... (repeat per component) ...
-    <empty rows> -> next product block
 
 Behaviour:
   - Finished product is matched to inventory.Material by SKU (column 0 of the block header row).
