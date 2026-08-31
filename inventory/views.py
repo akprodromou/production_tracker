@@ -2990,7 +2990,7 @@ class ReorderAlertsView(View):
         settings     = get_settings()
         all_files    = get_all_available_files()
         all_months   = [f'{m:02d}/{y}' for y, m, _ in all_files]
-        selected_months = settings.selected_months or get_default_selected_months(all_files)
+        selected_months = settings.selected_months if settings.selected_months else get_default_selected_months(all_files)
 
         # Seed default lead times if not yet configured
         DEFAULT_LEAD_TIMES = {
@@ -3082,7 +3082,7 @@ class ReorderAlertsView(View):
                 def slugify_month(lbl):
                     return _re.sub(r'[^a-z0-9]+', '-', lbl.lower()).strip('-')
                 chosen = [lbl for lbl in all_month_labels if request.POST.get(f'month_{slugify_month(lbl)}')]
-                obj.selected_months = chosen if chosen else get_default_selected_months(all_files)
+                obj.selected_months = chosen  # save exactly what was checked (may be empty)
                 # Auto-calculate z-score from service level
                 import math
                 sl = float(obj.service_level)
