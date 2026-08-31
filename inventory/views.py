@@ -3077,7 +3077,11 @@ class ReorderAlertsView(View):
                 # Save selected months
                 all_files = get_all_available_files()
                 all_month_labels = [f'{m:02d}/{y}' for y, m, _ in all_files]
-                chosen = [lbl for lbl in all_month_labels if request.POST.get(f'month_{lbl.replace("/","_")}')]
+                # Template uses slugify: '02/2026' → '02-2026'
+                import re as _re
+                def slugify_month(lbl):
+                    return _re.sub(r'[^a-z0-9]+', '-', lbl.lower()).strip('-')
+                chosen = [lbl for lbl in all_month_labels if request.POST.get(f'month_{slugify_month(lbl)}')]
                 obj.selected_months = chosen if chosen else get_default_selected_months(all_files)
                 # Auto-calculate z-score from service level
                 import math
@@ -3392,4 +3396,82 @@ class SalesOrderPalletizerView(View):
             'order': order,
             'result': result,
         })
+
+
+
+class ReorderComponentsExportView(View):
+    def get(self, request):
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill
+        from django.http import HttpResponse
+        from datetime import date
+        from decimal import Decimal
+
+        # Get stored selection from session
+        selected = request.session.get('rop_selected', {})
+        if not selected:
+            return redirect('reorder-alerts')
+        selected = {k: Decimal(str(v)) for k, v in selected.items()}
+
+        # Re-run component calculation (same as ReorderComponentsView._render)
+        from .models import ProductionTemplate, Material, ProductBatch, ProductBatchReservation, RawMaterialBatch, RawBatchAllocation
+        from django.db.models import Sum as DSum
+        from collections import defaultdict
+
+        component_totals = defaultdict(Decimal)
+        component_materials = {}
+
+        for sku, restock_qty in selected.items():
+            try:
+                material = Material.objects.get(sku=sku)
+                template = ProductionTemplate.objects.get(product=material)
+            except (Material.DoesNotExist, ProductionTemplate.DoesNotExist):
+                continue
+            for comp in template.components.select_related('material__unit').all():
+                required = comp.ratio * restock_qty
+                component_totals[comp.material.pk] += required
+                component_materials[comp.material.pk] = comp.material
+
+        rows = []
+        for mat_id, required_qty in sorted(component_totals.items(), key=lambda x: component_materials[x[0]].sku):
+            mat = component_materials[mat_id]
+            if mat.category == 'FIN':
+                total = ProductBatch.objects.filter(material=mat).aggregate(t=DSum('quantity_produced'))['t'] or Decimal('0')
+                res = ProductBatchReservation.objects.filter(product_batch__material=mat, order_line__isnull=False).aggregate(t=DSum('quantity_reserved'))['t'] or Decimal('0')
+                in_stock = total - res
+            else:
+                total = RawMaterialBatch.objects.filter(material=mat).aggregate(t=DSum('total_quantity'))['t'] or Decimal('0')
+                alloc = RawBatchAllocation.objects.filter(raw_batch__material=mat).aggregate(t=DSum('quantity'))['t'] or Decimal('0')
+                in_stock = total - alloc
+            gap = in_stock - required_qty
+            rows.append({
+                'sku': mat.sku, 'name': mat.name, 'unit': mat.unit.name if mat.unit else '',
+                'required_qty': round(required_qty, 1),
+                'in_stock': round(in_stock, 1),
+                'gap': round(gap, 1),
+            })
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'Component Requirements'
+        headers = ['SKU', 'Material', 'Unit', 'Stock', 'Required', 'Gap']
+        ws.append(headers)
+        for cell in ws[1]:
+            cell.font = Font(bold=True, color='FFFFFF')
+            cell.fill = PatternFill('solid', fgColor='1F3864')
+
+        red_fill = PatternFill('solid', fgColor='FFCCCC')
+        green_fill = PatternFill('solid', fgColor='CCFFCC')
+        for row in rows:
+            ws.append([row['sku'], row['name'], row['unit'], row['in_stock'], row['required_qty'], row['gap']])
+            fill = green_fill if row['gap'] >= 0 else red_fill
+            ws.cell(ws.max_row, 6).fill = fill
+
+        ws.column_dimensions['A'].width = 14
+        ws.column_dimensions['B'].width = 45
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="components-{date.today()}.xlsx"'
+        wb.save(response)
+        return response
 

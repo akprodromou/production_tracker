@@ -92,7 +92,7 @@ input:focus, select:focus { border-color:var(--accent); }
       </div>
       <div style="margin-bottom:12px">
         <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase">
-          Months to include
+          Months to consider
           <span style="float:right;font-weight:400">
             <a href="#" onclick="setAllMonths(true);return false" style="color:var(--accent);font-size:10px">All</a>
             &nbsp;
@@ -106,7 +106,7 @@ input:focus, select:focus { border-color:var(--accent); }
         <div style="display:flex;flex-wrap:wrap;gap:4px">
           {% for month in all_months %}
           <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-family:var(--mono);cursor:pointer;padding:3px 6px;border:1px solid var(--border);border-radius:4px;{% if month in selected_months %}background:rgba(79,142,247,.15);border-color:var(--accent);{% endif %}">
-            <input type="checkbox" name="month_{{ month|cut:'/' }}_{{ month|slice:'3:' }}" value="1"
+            <input type="checkbox" name="month_{{ month|slugify }}" value="1"
               {% if month in selected_months %}checked{% endif %}
               onchange="this.closest('label').style.background=this.checked?'rgba(79,142,247,.15)':'';this.closest('label').style.borderColor=this.checked?'var(--accent)':'var(--border)'">
             {{ month }}
