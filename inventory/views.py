@@ -252,8 +252,10 @@ class SalesOrderCreateView(View):
     def get(self, request):
         from .forms import SalesOrderForm, SalesOrderLineFormSet
         ctx = self._ctx()
+        from datetime import date as _date
         ctx.update({
-            'form': SalesOrderForm(), 'formset': SalesOrderLineFormSet(),
+            'form': SalesOrderForm(initial={'order_date': _date.today()}),
+            'formset': SalesOrderLineFormSet(),
             'form_title': 'New Client Order', 'submit_label': 'Create Order',
         })
         return render(request, 'sales_orders/form.html', ctx)
@@ -269,7 +271,7 @@ class SalesOrderCreateView(View):
             formset.instance = order
             formset.save()
             messages.success(request, f'Client order {order.reference} created.')
-            return redirect('sales-order-detail', pk=order.pk)
+            return redirect('client-order-board')
         ctx = self._ctx()
         ctx.update({'form': form, 'formset': formset,
             'form_title': 'New Client Order', 'submit_label': 'Create Order'})
@@ -597,8 +599,9 @@ class SupplyOrderCreateView(View):
     def get(self, request):
         from .forms import SupplyOrderForm, SupplyOrderLineFormSet
         ctx = self._ctx()
+        from datetime import date as _date
         ctx.update({
-            'form':         SupplyOrderForm(),
+            'form':         SupplyOrderForm(initial={'order_date': _date.today()}),
             'formset':      SupplyOrderLineFormSet(),
             'form_title':   'New Supply Order',
             'submit_label': 'Create Order',
@@ -616,7 +619,7 @@ class SupplyOrderCreateView(View):
             formset.instance = order
             formset.save()
             messages.success(request, f'Supply order {order.reference} created.')
-            return redirect('supply-order-detail', pk=order.pk)
+            return redirect('supply-order-board')
         ctx = self._ctx()
         ctx.update({'form': form, 'formset': formset,
             'form_title': 'New Supply Order', 'submit_label': 'Create Order'})
