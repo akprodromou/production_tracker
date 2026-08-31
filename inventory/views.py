@@ -3004,7 +3004,7 @@ class ReorderAlertsView(View):
                 defaults={'lead_time_months': lt}
             )
 
-        files        = get_sales_files(n=settings.months_window)
+        files        = all_files
         rows, labels = calculate_rop(selected_months=selected_months)
 
         # Filter options
