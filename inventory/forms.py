@@ -590,9 +590,8 @@ SalesOrderLineFormSet = forms.inlineformset_factory(
 class ReorderSettingsForm(forms.ModelForm):
     class Meta:
         model = ReorderSettings
-        fields = ['service_level', 'z_score', 'months_window']
+        fields = ['service_level', 'z_score']
         widgets = {
             'service_level': forms.NumberInput(attrs={'step': '0.01', 'min': '0.5', 'max': '0.999'}),
             'z_score':       forms.NumberInput(attrs={'step': '0.001', 'type': 'hidden'}),
-            'months_window': forms.NumberInput(attrs={'min': '1', 'max': '24'}),
         }
