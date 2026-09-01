@@ -47,6 +47,7 @@
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
+      transition: transform .25s ease;
       position: fixed;
       top: 0; left: 0; bottom: 0;
       z-index: 100;
@@ -470,14 +471,15 @@
     .mt-3 { margin-top: 20px; }
 
     @media (max-width: 900px) {
-      .sidebar { transform: translateX(-100%); transition: transform .25s ease; position:fixed; z-index:200; height:100vh; }
+      .sidebar { transform: translateX(-100%); position:fixed; z-index:200; height:100vh; top:0; left:0; }
       .sidebar.open { transform: translateX(0); }
-      .main { margin-left: 0; }
+      .main { margin-left: 0; width: 100vw; }
+      .topbar { width: 100vw; }
       .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
       .stat-grid-4 { grid-template-columns: repeat(2,1fr); }
       .stock-grid { grid-template-columns: repeat(3,1fr); }
-      .hamburger { display:flex; }
-      .sidebar-overlay { display:block; }
+      .hamburger { display:flex !important; }
+      .sidebar-overlay { display:none; }
     }
     .hamburger {
       display: none;
