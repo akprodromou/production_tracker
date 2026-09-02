@@ -4,6 +4,7 @@ from inventory.models import Client
 
 '''
 Export from Pylon EPR:
+    Συναλλασόμενοι / Πελάτες
     Ενέργειες / Εξαγόμενα Grid / Εξαγωγή σε CSV
 
 python manage.py import_clients clients-inventory-2026-07-10.csv --dry-run

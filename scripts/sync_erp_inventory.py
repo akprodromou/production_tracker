@@ -24,7 +24,7 @@ Export from Pylon ERP:
     click «Μπάντες»
     click «Είδη»
     Διαθ. Υπ.: Ορατή
-    Εκτέλεση Ως: Grid
+    Εκτέλεση Ως: Grid > Εκτέλεση
     Εξαγωγές / Εξαγωγή σε Excel (xlsx)
 """
 
