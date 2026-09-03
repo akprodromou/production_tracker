@@ -8,13 +8,14 @@ For each SKU + location:
   - Creates ONE new batch with quantity = Διαθ. Υπολ. from ERP
   - Negative quantities are stored as-is (reflects ERP reality)
   - Zero quantities result in no batch being created
+  - SKU+location combos present in DB but absent from ERP file are also deleted
 
 Run from project root:
     python scripts/sync_erp_inventory.py inventory-YYYY-MM-DD.xlsx [--dry-run]
 
 To run against Railway:
     $env:DATABASE_URL="postgresql://postgres:GSUajhGKPuJMLpItMmZbduFbjMVWAeNE@hayabusa.proxy.rlwy.net:55480/railway"
-    python scripts/sync_erp_inventory.py inventory-2026-08-25.xlsx
+    python scripts/sync_erp_inventory.py inventory-2026-09-02.xlsx
     $env:DATABASE_URL=""
 
 File naming convention: inventory-YYYY-MM-DD.xlsx
@@ -24,7 +25,7 @@ Export from Pylon ERP:
     click «Μπάντες»
     click «Είδη»
     Διαθ. Υπ.: Ορατή
-    Εκτέλεση Ως: Grid > Εκτέλεση
+    Εκτέλεση Ως: Grid
     Εξαγωγές / Εξαγωγή σε Excel (xlsx)
 """
 
@@ -148,7 +149,11 @@ def main():
     today        = date.today().isoformat()
     written      = 0
     skipped_zero = 0
+    deleted_stale = 0
     errors       = []
+
+    # Track which (sku, location_id) combos appear in ERP file
+    erp_combos = set()
 
     for rec in records:
         sku      = rec['sku']
@@ -159,6 +164,8 @@ def main():
 
         if category in ('FXD', 'CON'):
             continue
+
+        erp_combos.add((sku, loc_id))
 
         try:
             material = Material.objects.get(sku=sku)
@@ -217,11 +224,50 @@ def main():
         print(f"  {'+'if qty>0 else ''}{qty:>10} | {sku:<20} | {location.name}")
         written += 1
 
+    # ── Delete stale batches for SKUs seen in ERP but missing locations ──
+    # For any SKU that appeared in the ERP file, delete batches for locations
+    # that are in our LOCATION_MAP but NOT in the ERP file for that SKU
+    print("\nCleaning up stale batches for locations no longer in ERP...")
+    erp_skus = {sku for sku, _ in erp_combos}
+    all_loc_ids = set(LOCATION_MAP.values())
+
+    for sku in erp_skus:
+        category = sku_category(sku)
+        if category in ('FXD', 'CON'):
+            continue
+        try:
+            material = Material.objects.get(sku=sku)
+        except Material.DoesNotExist:
+            continue
+
+        # Locations in our map but not in ERP file for this SKU
+        erp_locs_for_sku = {loc_id for s, loc_id in erp_combos if s == sku}
+        stale_locs = all_loc_ids - erp_locs_for_sku
+
+        for loc_id in stale_locs:
+            if category == 'FIN':
+                deleted = ProductBatch.objects.filter(material=material, location_id=loc_id)
+            else:
+                deleted = RawMaterialBatch.objects.filter(material=material, location_id=loc_id)
+
+            count = deleted.count()
+            if count > 0:
+                if not DRY_RUN:
+                    deleted.delete()
+                try:
+                    loc = Location.objects.get(pk=loc_id)
+                    loc_name = loc.name
+                except Location.DoesNotExist:
+                    loc_name = str(loc_id)
+                print(f"  STALE DELETED: {sku} @ {loc_name} ({count} batch{'es' if count>1 else ''})")
+                deleted_stale += count
+
     print(f"\n{'='*60}")
     print(f"{'[DRY RUN] ' if DRY_RUN else ''}SYNC COMPLETE")
     print(f"{'='*60}")
-    print(f"  Batches written  : {written}")
-    print(f"  Zero qty skipped : {skipped_zero}")
+    print(f"  Batches written      : {written}")
+    print(f"  Zero qty skipped     : {skipped_zero}")
+    print(f"  Stale batches deleted: {deleted_stale}")
     if errors:
         print(f"\n  ERRORS ({len(errors)}):")
         for e in errors:
