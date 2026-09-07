@@ -82,6 +82,42 @@
   </div>
 </div>
 
+{# ── STOCK SUMMARY ── #}
+{% if stock_summary %}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Stock Summary</span></div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      <div class="stat-card">
+        <div class="stat-label">Total in Stock</div>
+        <div class="stat-value">{{ stock_summary.total|smart_qty:material.unit.name }}</div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+      {% if stock_summary.type == 'raw' %}
+      <div class="stat-card">
+        <div class="stat-label">Allocated to Runs</div>
+        <div class="stat-value" style="color:var(--warn)">{{ stock_summary.allocated|smart_qty:material.unit.name }}</div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+      {% else %}
+      <div class="stat-card">
+        <div class="stat-label">Reserved for Orders</div>
+        <div class="stat-value" style="color:var(--warn)">{{ stock_summary.reserved|smart_qty:material.unit.name }}</div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+      {% endif %}
+      <div class="stat-card">
+        <div class="stat-label">Net Available</div>
+        <div class="stat-value" style="{% if stock_summary.net_available > 0 %}color:var(--accent2){% else %}color:var(--danger){% endif %}">
+          {{ stock_summary.net_available|smart_qty:material.unit.name }}
+        </div>
+        <div class="stat-sub">{{ material.unit.name }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 {# ── PALLET CONFIGURATION ── #}
 {% if material.pack or material.pallet_tie or material.pallet_high or material.carton_height or material.net_weight or material.gross_weight %}
 <div class="card mb-3">
@@ -119,14 +155,14 @@
       {% if material.net_weight %}
       <div class="stat-card">
         <div class="stat-label">Net Weight</div>
-        <div class="stat-value">{{ material.net_weight }}</div>
+        <div class="stat-value">{{ material.net_weight|floatformat:-4 }}</div>
         <div class="stat-sub">kg per unit</div>
       </div>
       {% endif %}
       {% if material.gross_weight %}
       <div class="stat-card">
         <div class="stat-label">Gross Weight</div>
-        <div class="stat-value">{{ material.gross_weight }}</div>
+        <div class="stat-value">{{ material.gross_weight|floatformat:-4 }}</div>
         <div class="stat-sub">kg per unit</div>
       </div>
       {% endif %}
@@ -135,42 +171,6 @@
 </div>
 {% endif %}
 
-
-{# ── STOCK SUMMARY ── #}
-{% if stock_summary %}
-<div class="card mb-3">
-  <div class="card-header"><span class="card-title">Stock Summary</span></div>
-  <div class="card-body">
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-      <div class="stat-card">
-        <div class="stat-label">Total in Stock</div>
-        <div class="stat-value">{{ stock_summary.total|smart_qty:material.unit.name }}</div>
-        <div class="stat-sub">{{ material.unit.name }}</div>
-      </div>
-      {% if stock_summary.type == 'raw' %}
-      <div class="stat-card">
-        <div class="stat-label">Allocated to Runs</div>
-        <div class="stat-value" style="color:var(--warn)">{{ stock_summary.allocated|smart_qty:material.unit.name }}</div>
-        <div class="stat-sub">{{ material.unit.name }}</div>
-      </div>
-      {% else %}
-      <div class="stat-card">
-        <div class="stat-label">Reserved for Orders</div>
-        <div class="stat-value" style="color:var(--warn)">{{ stock_summary.reserved|smart_qty:material.unit.name }}</div>
-        <div class="stat-sub">{{ material.unit.name }}</div>
-      </div>
-      {% endif %}
-      <div class="stat-card">
-        <div class="stat-label">Net Available</div>
-        <div class="stat-value" style="{% if stock_summary.net_available > 0 %}color:var(--accent2){% else %}color:var(--danger){% endif %}">
-          {{ stock_summary.net_available|smart_qty:material.unit.name }}
-        </div>
-        <div class="stat-sub">{{ material.unit.name }}</div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
 
 {% if material.category == 'FIN' %}
 
