@@ -82,6 +82,60 @@
   </div>
 </div>
 
+{# ── PALLET CONFIGURATION ── #}
+{% if material.pack or material.pallet_tie or material.pallet_high or material.carton_height or material.net_weight or material.gross_weight %}
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Pallet Configuration</span></div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      {% if material.pack %}
+      <div class="stat-card">
+        <div class="stat-label">Pack</div>
+        <div class="stat-value">{{ material.pack }}</div>
+        <div class="stat-sub">units per carton</div>
+      </div>
+      {% endif %}
+      {% if material.pallet_tie %}
+      <div class="stat-card">
+        <div class="stat-label">Pallet Tie</div>
+        <div class="stat-value">{{ material.pallet_tie }}</div>
+        <div class="stat-sub">boxes per layer (120×80cm)</div>
+      </div>
+      {% endif %}
+      {% if material.pallet_high %}
+      <div class="stat-card">
+        <div class="stat-label">Pallet High</div>
+        <div class="stat-value">{{ material.pallet_high }}</div>
+        <div class="stat-sub">layers per pallet</div>
+      </div>
+      {% endif %}
+      {% if material.carton_height %}
+      <div class="stat-card">
+        <div class="stat-label">Carton Height</div>
+        <div class="stat-value">{{ material.carton_height }}</div>
+        <div class="stat-sub">cm</div>
+      </div>
+      {% endif %}
+      {% if material.net_weight %}
+      <div class="stat-card">
+        <div class="stat-label">Net Weight</div>
+        <div class="stat-value">{{ material.net_weight }}</div>
+        <div class="stat-sub">kg per unit</div>
+      </div>
+      {% endif %}
+      {% if material.gross_weight %}
+      <div class="stat-card">
+        <div class="stat-label">Gross Weight</div>
+        <div class="stat-value">{{ material.gross_weight }}</div>
+        <div class="stat-sub">kg per unit</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+
 {# ── STOCK SUMMARY ── #}
 {% if stock_summary %}
 <div class="card mb-3">
