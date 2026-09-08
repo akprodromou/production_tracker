@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
 
     # Reorder Alerts
+    path('stock-report/', views.StockReportView.as_view(), name='stock-report'),
     path('reorder-alerts/', views.ReorderAlertsView.as_view(), name='reorder-alerts'),
     path('reorder-alerts/components/', views.ReorderComponentsView.as_view(), name='reorder-components'),
     path('reorder-alerts/components/export/', views.ReorderComponentsExportView.as_view(), name='reorder-components-export'),

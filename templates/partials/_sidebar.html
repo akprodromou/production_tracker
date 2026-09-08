@@ -35,6 +35,9 @@
     <a href="{% url 'reorder-alerts' %}" class="{% if request.resolver_match.url_name == 'reorder-alerts' %}active{% endif %}">
       <span class="icon">&#128202;</span> Reorder Points
     </a>
+    <a href="{% url 'stock-report' %}" class="{% if request.resolver_match.url_name == 'stock-report' %}active{% endif %}">
+      <span class="icon">&#128200;</span> Stock Report
+    </a>
 
     <div class="nav-section">Reference</div>
     <a href="{% url 'material-list' %}" class="{% if 'material' in request.resolver_match.url_name %}active{% endif %}">
