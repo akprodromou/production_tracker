@@ -10,14 +10,14 @@
     font-family: var(--mono); font-size: 12px; text-transform: uppercase;
     color: var(--muted); padding: 10px 12px; text-align: left;
     border-bottom: 2px solid var(--border);
-    position: sticky; top: 52px; background: var(--surface); z-index: 10;
+    position: sticky; top: 52px; background: var(--surface); z-index: 10; box-shadow: 0 2px 0 var(--border);
   }
   .report-table th.num, .report-table td.num { text-align: right; }
   .report-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  .col-name      { width: 180px; }
-  .col-breakdown { width: 340px; }
-  .col-sku       { width: 130px; }
-  .col-stock     { width: 120px; }
+  .col-name      { width: 540px; }
+  .col-breakdown { width: 544px; }
+  .col-sku       { width: 130px; text-align: center; }
+  .col-stock     { width: 120px; text-align: center; }
   /* Name group cell */
   .name-cell { font-weight: 600; font-size: 13px; padding: 10px 12px; }
   /* Raw/packaging rows — muted italic */
@@ -28,6 +28,8 @@
   .stock-neg  { color: #ff5050; font-weight: 600; }
   .stock-zero { color: var(--muted); }
   .stock-na   { color: var(--muted); font-size: 11px; }
+  /* Prevent first row being obscured by sticky header */
+  .report-table tbody tr:first-child td { padding-top: 14px; }
   /* Name color accent as left border stripe */
   .name-stripe { border-left: 4px solid var(--border); padding-left: 10px; }
 </style>
@@ -51,8 +53,8 @@
         <tr>
           <th class="col-name">Name</th>
           <th class="col-breakdown">Breakdown</th>
-          <th class="col-sku">SKU</th>
-          <th class="col-stock num">Stock</th>
+          <th class="col-sku" style="text-align:center">SKU</th>
+          <th class="col-stock" style="text-align:center">Stock</th>
         </tr>
       </thead>
       <tbody>
@@ -77,14 +79,14 @@
           </td>
 
           {# SKU cell #}
-          <td class="td-mono text-muted" style="font-size:11px">
+          <td class="td-mono text-muted" style="font-size:11px;text-align:center">
             {% if row.sku %}
               <a href="{% url 'material-list' %}?q={{ row.sku }}" style="color:var(--muted);text-decoration:none">{{ row.sku }}</a>
             {% else %}—{% endif %}
           </td>
 
           {# Stock cell #}
-          <td class="num">
+          <td style="text-align:center">
             {% if row.sku %}
               {% if row.stock is None %}
                 <span class="stock-na">—</span>
