@@ -3517,5 +3517,19 @@ class StockReportView(View):
                 'stock':      stock,
             })
 
-        return render(request, 'stock_report/report.html', {'rows': rows})
+        # Get last ERP sync date from batch lot numbers
+        last_sync = None
+        last_raw = RawMaterialBatch.objects.filter(
+            lot_number__startswith='ERP-SYNC-'
+        ).order_by('-created_at').first()
+        if last_raw:
+            # lot_number format: ERP-SYNC-YYYY-MM-DD-sku-locid
+            parts = last_raw.lot_number.split('-')
+            if len(parts) >= 5:
+                try:
+                    last_sync = f"{parts[2]}-{parts[3]}-{parts[4]}"
+                except Exception:
+                    last_sync = str(last_raw.created_at.date())
+
+        return render(request, 'stock_report/report.html', {'rows': rows, 'last_sync': last_sync})
 
