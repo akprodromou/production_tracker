@@ -59,7 +59,10 @@
       </thead>
       <tbody>
         {% for row in rows %}
-        <tr class="{% if row.name and not forloop.first %}group-start{% endif %}">
+        {% if row.name and not forloop.first %}
+        <tr style="height:6px;background:var(--surface2)"><td colspan="4"></td></tr>
+        {% endif %}
+        <tr>
           {# Name cell #}
           {% if row.name %}
           <td class="name-cell"
