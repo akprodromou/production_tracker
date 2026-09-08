@@ -29,6 +29,7 @@
   .stock-neg  { color: #ff5050; font-weight: 600; }
   .stock-zero { color: var(--muted); }
   .stock-na   { color: var(--muted); font-size: 11px; }
+  .group-start td { border-top: 2px solid var(--border); }
   /* Name color accent as left border stripe */
   .name-stripe { border-left: 4px solid var(--border); padding-left: 10px; }
 </style>
@@ -58,7 +59,7 @@
       </thead>
       <tbody>
         {% for row in rows %}
-        <tr class="{% if not forloop.last %}{% with next=rows|slice:forloop.counter %}{% for n in next %}{% if forloop.first and n.name %}group-last{% endif %}{% endfor %}{% endwith %}{% endif %}">
+        <tr class="{% if row.name and not forloop.first %}group-start{% endif %}">
           {# Name cell #}
           {% if row.name %}
           <td class="name-cell"
