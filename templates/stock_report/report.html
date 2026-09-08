@@ -9,7 +9,7 @@
   .report-table { border-collapse: collapse; font-size: 13px; table-layout: fixed; width: auto; min-width: 700px; }
   .report-table thead tr th {
     font-family: var(--mono); font-size: 12px; text-transform: uppercase;
-    color: var(--muted); padding: 10px 12px; text-align: left;
+    color: var(--muted); padding: 5px 12px; text-align: left;
     border-bottom: 2px solid var(--border);
     position: sticky; top: 0; background: var(--surface); z-index: 10; box-shadow: 0 2px 0 var(--border);
   }
@@ -37,7 +37,7 @@
 
 {% block content %}
 <div class="page-header">
-  <div><h1>Stock Report</h1><p style="color:var(--muted);font-size:13px">ERP data valid as of: {% if last_sync %}{{ last_sync }}{% else %}unknown{% endif %}</p></div>
+  <div><h1>Stock Report</h1><p style="color:var(--muted);font-size:13px">ERP data last updated on: {% if last_sync %}{{ last_sync }}{% else %}unknown{% endif %}</p></div>
 </div>
 
 <div class="card">
