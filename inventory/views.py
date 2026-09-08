@@ -5162,8 +5162,16 @@ class StockReportView(View):
                     "is_raw": r["is_raw"],
                     "sku": sku,
                     "stock": stock,
+                    "group_even": None,
                 }
             )
+
+        # Assign alternating group background
+        group_idx = 0
+        for row in rows:
+            if row["name"]:
+                group_idx += 1
+            row["group_even"] = (group_idx % 2 == 0)
 
         # Get last ERP sync date from batch lot numbers
         last_sync = None
