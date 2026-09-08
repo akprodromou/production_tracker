@@ -4,26 +4,32 @@
 
 {% block extra_head %}
 <style>
-  .report-table { width:100%; border-collapse:collapse; font-size:13px; }
-  .report-table th {
-    font-family:var(--mono); font-size:10px; text-transform:uppercase;
-    color:var(--muted); padding:8px 12px; text-align:left;
-    border-bottom:2px solid var(--border); position:sticky; top:52px;
-    background:var(--surface); z-index:10;
+  .report-wrap { overflow-x: auto; }
+  .report-table { border-collapse: collapse; font-size: 13px; table-layout: fixed; width: auto; min-width: 700px; }
+  .report-table thead tr th {
+    font-family: var(--mono); font-size: 12px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 12px; text-align: left;
+    border-bottom: 2px solid var(--border);
+    position: sticky; top: 52px; background: var(--surface); z-index: 10;
   }
-  .report-table th.num { text-align:right; }
-  .report-table td { padding:7px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
-  .report-table td.num { text-align:right; font-family:var(--mono); }
-  .name-cell {
-    font-weight:600; font-size:13px; white-space:nowrap;
-    padding:10px 12px; border-bottom:1px solid var(--border);
-  }
-  .breakdown-raw { color:var(--muted); font-size:12px; }
-  .breakdown-fin { font-size:12px; }
-  .stock-pos { color:#28c864; font-weight:600; }
-  .stock-neg { color:#ff5050; font-weight:600; }
-  .stock-zero { color:var(--muted); }
-  .stock-na { color:var(--muted); font-size:11px; }
+  .report-table th.num, .report-table td.num { text-align: right; }
+  .report-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .col-name      { width: 180px; }
+  .col-breakdown { width: 340px; }
+  .col-sku       { width: 130px; }
+  .col-stock     { width: 120px; }
+  /* Name group cell */
+  .name-cell { font-weight: 600; font-size: 13px; padding: 10px 12px; }
+  /* Raw/packaging rows — muted italic */
+  .breakdown-raw { color: var(--muted); font-size: 12px; font-style: italic; }
+  .breakdown-fin { font-size: 12px; }
+  /* Stock colors */
+  .stock-pos  { color: #28c864; font-weight: 600; }
+  .stock-neg  { color: #ff5050; font-weight: 600; }
+  .stock-zero { color: var(--muted); }
+  .stock-na   { color: var(--muted); font-size: 11px; }
+  /* Name color accent as left border stripe */
+  .name-stripe { border-left: 4px solid var(--border); padding-left: 10px; }
 </style>
 {% endblock %}
 
@@ -33,28 +39,36 @@
 </div>
 
 <div class="card">
-  <div class="table-wrap">
+  <div class="report-wrap">
     <table class="report-table">
+      <colgroup>
+        <col class="col-name">
+        <col class="col-breakdown">
+        <col class="col-sku">
+        <col class="col-stock">
+      </colgroup>
       <thead>
         <tr>
-          <th style="width:200px">Name</th>
-          <th>Breakdown</th>
-          <th style="width:120px">SKU</th>
-          <th class="num" style="width:120px">Available Stock</th>
+          <th class="col-name">Name</th>
+          <th class="col-breakdown">Breakdown</th>
+          <th class="col-sku">SKU</th>
+          <th class="col-stock num">Stock</th>
         </tr>
       </thead>
       <tbody>
         {% for row in rows %}
         <tr>
-          {# Name cell — only shown on first row of each group #}
+          {# Name cell #}
           {% if row.name %}
           <td class="name-cell"
             {% if row.name_color %}
-            style="background:#{{ row.name_color|slice:'2:' }}22;border-left:3px solid #{{ row.name_color|slice:'2:' }};"
+            style="border-left:4px solid #{{ row.name_color|slice:'2:' }};padding-left:10px;background:rgba(0,0,0,0.15)"
+            {% else %}
+            style="border-left:4px solid var(--border);padding-left:10px"
             {% endif %}
           >{{ row.name }}</td>
           {% else %}
-          <td style="border-bottom:1px solid var(--border)"></td>
+          <td style="border-left:4px solid transparent"></td>
           {% endif %}
 
           {# Breakdown cell #}
@@ -73,7 +87,7 @@
           <td class="num">
             {% if row.sku %}
               {% if row.stock is None %}
-                <span class="stock-na">no data</span>
+                <span class="stock-na">—</span>
               {% elif row.stock > 0 %}
                 <span class="stock-pos">{{ row.stock }}</span>
               {% elif row.stock < 0 %}
