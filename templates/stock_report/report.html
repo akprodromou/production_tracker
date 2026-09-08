@@ -65,7 +65,7 @@
           {# SKU cell #}
           <td class="td-mono text-muted" style="font-size:11px">
             {% if row.sku %}
-              <a href="{% url 'material-detail' row.sku|urlencode %}" style="color:var(--muted);text-decoration:none">{{ row.sku }}</a>
+              <a href="{% url 'material-list' %}?q={{ row.sku }}" style="color:var(--muted);text-decoration:none">{{ row.sku }}</a>
             {% else %}—{% endif %}
           </td>
 
