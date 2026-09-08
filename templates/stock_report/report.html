@@ -22,8 +22,8 @@
   /* Name group cell */
   .name-cell { font-weight: 600; font-size: 13px; padding: 10px 12px; }
   /* Raw/packaging rows — muted italic */
-  .breakdown-raw { color: var(--muted); font-size: 12px; font-style: italic; }
-  .breakdown-fin { font-size: 12px; }
+  .breakdown-raw { color: var(--muted); font-size: 13px; }
+  .breakdown-fin { font-size: 13px; }
   /* Stock colors */
   .stock-pos  { color: #28c864; font-weight: 600; }
   .stock-neg  { color: #ff5050; font-weight: 600; }
@@ -58,7 +58,7 @@
       </thead>
       <tbody>
         {% for row in rows %}
-        <tr>
+        <tr class="{% if not forloop.last %}{% with next=rows|slice:forloop.counter %}{% for n in next %}{% if forloop.first and n.name %}group-last{% endif %}{% endfor %}{% endwith %}{% endif %}">
           {# Name cell #}
           {% if row.name %}
           <td class="name-cell"
