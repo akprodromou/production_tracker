@@ -5150,8 +5150,14 @@ class StockReportView(View):
         for r in _STOCK_REPORT_ROWS:
             sku = r["sku"]
             if sku:
-                stock = raw_stock.get(sku) or fin_stock.get(sku)
-                stock = int(stock) if stock is not None else None
+                raw = raw_stock.get(sku)
+                fin = fin_stock.get(sku)
+                if raw is not None:
+                    stock = int(raw)
+                elif fin is not None:
+                    stock = int(fin)
+                else:
+                    stock = None
             else:
                 stock = None
             rows.append(
