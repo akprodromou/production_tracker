@@ -4205,23 +4205,46 @@ class ReorderComponentsView(View):
         component_materials = {}  # material_id -> material obj
         sku_breakdown = []  # for display
 
+        def expand_components(material, qty, depth=0, visited=None):
+            """Recursively expand template components, summing into component_totals."""
+            if visited is None:
+                visited = set()
+            if material.pk in visited:
+                return  # prevent infinite loops
+            visited = visited | {material.pk}
+            try:
+                template = ProductionTemplate.objects.get(product=material)
+            except ProductionTemplate.DoesNotExist:
+                # No template — treat as leaf component
+                component_totals[material.pk] += qty
+                component_materials[material.pk] = material
+                return
+            for comp in template.components.select_related("material__unit").all():
+                required = comp.ratio * qty
+                if comp.material.category == "FIN":
+                    try:
+                        ProductionTemplate.objects.get(product=comp.material)
+                        # Has its own template — recurse
+                        expand_components(comp.material, required, depth+1, visited)
+                        continue
+                    except ProductionTemplate.DoesNotExist:
+                        pass
+                # Leaf component
+                component_totals[comp.material.pk] += required
+                component_materials[comp.material.pk] = comp.material
+
         for sku, restock_qty in selected.items():
             try:
                 material = Material.objects.get(sku=sku)
-                template = ProductionTemplate.objects.get(product=material)
-            except (Material.DoesNotExist, ProductionTemplate.DoesNotExist):
+            except Material.DoesNotExist:
                 sku_breakdown.append(
                     {"sku": sku, "name": sku, "qty": restock_qty, "found": False}
                 )
                 continue
-
             sku_breakdown.append(
                 {"sku": sku, "name": material.name, "qty": restock_qty, "found": True}
             )
-            for comp in template.components.select_related("material__unit").all():
-                required = comp.ratio * restock_qty
-                component_totals[comp.material.pk] += required
-                component_materials[comp.material.pk] = comp.material
+            expand_components(material, restock_qty)
 
         # Get current stock for each component material
         rows = []
@@ -4281,11 +4304,34 @@ class ReorderComponentsView(View):
         component_materials = {}
         sku_breakdown = []
 
+        def expand_components(material, qty, visited=None):
+            if visited is None:
+                visited = set()
+            if material.pk in visited:
+                return
+            visited = visited | {material.pk}
+            try:
+                template = ProductionTemplate.objects.get(product=material)
+            except ProductionTemplate.DoesNotExist:
+                component_totals[material.pk] += qty
+                component_materials[material.pk] = material
+                return
+            for comp in template.components.select_related("material__unit").all():
+                required = comp.ratio * qty
+                if comp.material.category == "FIN":
+                    try:
+                        ProductionTemplate.objects.get(product=comp.material)
+                        expand_components(comp.material, required, visited)
+                        continue
+                    except ProductionTemplate.DoesNotExist:
+                        pass
+                component_totals[comp.material.pk] += required
+                component_materials[comp.material.pk] = comp.material
+
         for sku, restock_qty in selected.items():
             try:
                 material = Material.objects.get(sku=sku)
-                template = ProductionTemplate.objects.get(product=material)
-            except (Material.DoesNotExist, ProductionTemplate.DoesNotExist):
+            except Material.DoesNotExist:
                 sku_breakdown.append(
                     {"sku": sku, "name": sku, "qty": restock_qty, "found": False}
                 )
@@ -4293,10 +4339,7 @@ class ReorderComponentsView(View):
             sku_breakdown.append(
                 {"sku": sku, "name": material.name, "qty": restock_qty, "found": True}
             )
-            for comp in template.components.select_related("material__unit").all():
-                required = comp.ratio * restock_qty
-                component_totals[comp.material.pk] += required
-                component_materials[comp.material.pk] = comp.material
+            expand_components(material, restock_qty)
 
         rows = []
         for mat_id, required_qty in sorted(

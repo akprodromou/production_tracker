@@ -3,7 +3,8 @@ import_production_templates.py
 -------------------------------
 
 Export from Pylon EPR:
-    Αποθήκη / Αναφορές / Εκτυπώσεις / Σύνθεση / Προδιαγραφές Σετ Κιτ (xlsx form)
+    Αποθήκη / Αναφορές / Εκτυπώσεις / Σύνθεση / Προδιαγραφές Σετ Κιτ
+    Μπάντες / Υλικά / Είδος - Κωδικός > Ορατό: Ναι
     Εκτέλεση ως: Grid
     Εξαγωγές / Εξαγωγή σε Excel
 
@@ -28,7 +29,7 @@ Behaviour:
     reported at the end, nothing is silently dropped.
 """
 
-import os, sys, re
+import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
@@ -40,51 +41,49 @@ from decimal import Decimal, InvalidOperation
 from inventory.models import Material, ProductionTemplate, ProductionTemplateComponent
 
 DRY_RUN = '--dry-run' in sys.argv
-SKU_RE  = re.compile(r'^\d{2}-\d+$')
 
 
-def clean(v):
-    if v is None:
-        return ''
-    return str(v).strip()
-
-
-def parse_file(filepath):
+def parse_xlsx(filepath):
+    """
+    Parse the ERP set-kit xlsx.
+    Structure:
+      - Row with col0 = finished product SKU (6-digit starts row group)
+      - Component rows: col2=name, col15=ratio, col21=component SKU
+    Returns list of dicts: {sku, product_name, components: [{sku, ratio}]}
+    """
     wb = openpyxl.load_workbook(filepath, read_only=True, data_only=True)
     ws = wb.active
-
-    blocks  = []
+    templates = []
     current = None
 
     for row in ws.iter_rows(values_only=True):
-        # pad row to at least 17 columns
-        row = list(row) + [None] * 17
-        c0  = clean(row[0])
-        c2  = clean(row[2])
-        c5  = clean(row[5])
-        c16 = clean(row[16])
+        col0  = str(row[0]).strip()  if row[0]  else ''
+        col2  = str(row[2]).strip()  if len(row) > 2  and row[2]  else ''
+        col3  = str(row[3]).strip()  if len(row) > 3  and row[3]  else ''
+        col15 = row[15] if len(row) > 15 else None
+        col21 = str(row[21]).strip() if len(row) > 21 and row[21] else ''
 
-        # New product block: col0 matches SKU pattern
-        if SKU_RE.match(c0):
+        # New finished product header row
+        if col0 and '-' in col0 and col3:
             if current:
-                blocks.append(current)
-            product_name = clean(row[3])
-            current = {'sku': c0, 'product_name': product_name, 'components': []}
+                templates.append(current)
+            current = {'sku': col0, 'product_name': col3, 'components': []}
             continue
 
-        # Component row: col2 = material name, col5 non-empty, col16 = ratio
-        if current and c2 and c2 != '\u0395\u03af\u03b4\u03bf\u03c2 - \u038c\u03bd\u03bf\u03bc\u03b1' and c5 and c16:
+        # Component row: has a component SKU in col21 and ratio in col15
+        if current and col21 and '-' in col21 and col15 is not None:
             try:
-                ratio = Decimal(c16.replace(',', '.'))
+                ratio = Decimal(str(col15))
             except InvalidOperation:
                 continue
-            current['components'].append({'name': c2, 'ratio': ratio})
+            if ratio > 0:
+                current['components'].append({'sku': col21, 'ratio': ratio})
 
     if current:
-        blocks.append(current)
+        templates.append(current)
 
     wb.close()
-    return blocks
+    return templates
 
 
 def main():
@@ -98,36 +97,37 @@ def main():
         sys.exit(1)
 
     print(f"{'[DRY RUN] ' if DRY_RUN else ''}Reading: {filepath}\n")
-    blocks = parse_file(filepath)
-    print(f"Found {len(blocks)} product templates in file\n")
+    templates = parse_xlsx(filepath)
+    print(f"Found {len(templates)} product templates in file\n")
 
     templates_created  = 0
     templates_updated  = 0
     components_written = 0
-    unmatched_products  = []
-    unmatched_materials = set()
+    skipped_no_product = []
+    skipped_no_component = []
 
-    for block in blocks:
-        sku = block['sku']
+    for block in templates:
+        sku          = block['sku']
+        product_name = block['product_name']
+        components   = block['components']
+
         try:
             product = Material.objects.get(sku=sku)
         except Material.DoesNotExist:
-            unmatched_products.append((sku, block['product_name']))
+            skipped_no_product.append(f"{sku}  {product_name}")
             continue
 
+        # Resolve components by SKU
         resolved = []
-        for comp in block['components']:
-            name = comp['name']
+        for comp in components:
             try:
-                material = Material.objects.get(name__iexact=name)
+                mat = Material.objects.get(sku=comp['sku'])
+                resolved.append((mat, comp['ratio']))
             except Material.DoesNotExist:
-                unmatched_materials.add(name)
-                continue
-            except Material.MultipleObjectsReturned:
-                material = Material.objects.filter(name__iexact=name).first()
-            resolved.append({'material': material, 'ratio': comp['ratio']})
+                skipped_no_component.append(f"{comp['sku']} (component of {sku})")
 
         if not resolved:
+            skipped_no_product.append(f"{sku}  {product_name} — no components resolved")
             continue
 
         if DRY_RUN:
@@ -142,11 +142,11 @@ def main():
             templates_updated += 1
             template.components.all().delete()
 
-        for rc in resolved:
+        for mat, ratio in resolved:
             ProductionTemplateComponent.objects.create(
                 template=template,
-                material=rc['material'],
-                ratio=rc['ratio'],
+                material=mat,
+                ratio=ratio,
             )
             components_written += 1
 
@@ -159,18 +159,17 @@ def main():
     print(f"  Templates updated  : {templates_updated}")
     print(f"  Components written : {components_written}")
 
-    if unmatched_products:
-        print(f"\n  Finished products not found ({len(unmatched_products)}):")
-        for sku, name in unmatched_products:
-            print(f"    {sku}  {name}")
+    if skipped_no_product:
+        print(f"\n  Finished products not found or no components ({len(skipped_no_product)}):")
+        for s in skipped_no_product:
+            print(f"    {s}")
 
-    if unmatched_materials:
-        print(f"\n  Component materials not found ({len(unmatched_materials)}):")
-        for name in sorted(unmatched_materials):
-            print(f"    {name}")
-
-    if not unmatched_products and not unmatched_materials:
-        print("\n  No unmatched items.")
+    if skipped_no_component:
+        print(f"\n  Component SKUs not found ({len(skipped_no_component)}):")
+        for s in skipped_no_component[:20]:
+            print(f"    {s}")
+        if len(skipped_no_component) > 20:
+            print(f"    ... and {len(skipped_no_component)-20} more")
 
 
 if __name__ == '__main__':
