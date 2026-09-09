@@ -4,7 +4,7 @@
 
 {% block extra_head %}
 <style>
-  .report-wrap { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 160px); }
+  .report-wrap { overflow-x: auto; width: fit-content; max-width: 100%; }
   .report-table {
     border-collapse: collapse; font-size: 13px;
     table-layout: fixed; width: auto; min-width: 700px;
@@ -23,17 +23,17 @@
     vertical-align: middle;
   }
   .col-name      { width: 432px; }
-  .col-breakdown { width: 544px; }
+  .col-breakdown { width: 582px; }
   .col-sku       { width: 130px; }
   .col-stock     { width: 120px; }
   .name-cell     { font-weight: 600; font-size: 13px; padding: 10px 12px; }
-  .raw-cell      { background: #323232; font-size: 13px; }
+  .raw-cell      { background: #191919; font-size: 13px; }
   .fin-cell      { font-size: 13px; }
   .stock-pos     { color: #28c864; font-weight: 600; }
   .stock-neg     { color: #ff5050; font-weight: 600; }
   .stock-zero    { color: #ff5050; font-weight: 600; }
   .stock-na      { color: var(--muted); }
-  .spacer-row td { border: none; height: 6px; background: transparent; padding: 0; }
+  .spacer-row td { border: none; height: 12px; background: transparent; padding: 0; }
 </style>
 {% endblock %}
 
