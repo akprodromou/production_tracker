@@ -4638,13 +4638,6 @@ _STOCK_REPORT_ROWS = [
     {
         "name": None,
         "name_color": None,
-        "breakdown": "Snowman 500 ml - KR label filled",
-        "is_raw": False,
-        "sku": None,
-    },
-    {
-        "name": None,
-        "name_color": None,
         "breakdown": "Snowman 500 ml - EU label filled",
         "is_raw": False,
         "sku": "02-0000096",
@@ -4673,23 +4666,9 @@ _STOCK_REPORT_ROWS = [
     {
         "name": None,
         "name_color": None,
-        "breakdown": "Black 500ml EU - Empty painted bottles (Pepper)",
-        "is_raw": True,
-        "sku": None,
-    },
-    {
-        "name": None,
-        "name_color": None,
         "breakdown": "Black 500ml EU - Empty painted bottles (Berlin)",
         "is_raw": True,
         "sku": "07-0000135",
-    },
-    {
-        "name": None,
-        "name_color": None,
-        "breakdown": "Black 500ml US - Empty painted bottles (Pepper)",
-        "is_raw": True,
-        "sku": None,
     },
     {
         "name": None,
@@ -4718,13 +4697,6 @@ _STOCK_REPORT_ROWS = [
         "breakdown": "Black 500ml - US label filled",
         "is_raw": False,
         "sku": "02-0000015",
-    },
-    {
-        "name": "Valentine 500ml",
-        "name_color": "FFEAD1DC",
-        "breakdown": "Valentine 500ml KR - Empty painted bottles (Pepper)",
-        "is_raw": True,
-        "sku": None,
     },
     {
         "name": None,
@@ -4783,25 +4755,11 @@ _STOCK_REPORT_ROWS = [
         "sku": "02-0000016",
     },
     {
-        "name": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml",
-        "name_color": "FFD9EAD3",
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml KR - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
-    },
-    {
         "name": None,
         "name_color": None,
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml EU - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000128",
-    },
-    {
-        "name": None,
-        "name_color": None,
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml US - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
     },
     {
         "name": None,
@@ -4823,13 +4781,6 @@ _STOCK_REPORT_ROWS = [
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με βασιλικό, bottle 200ml - US label filled",
         "is_raw": False,
         "sku": "02-0000010",
-    },
-    {
-        "name": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml",
-        "name_color": "FFFFF2CC",
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με λεμόνι, bottle 200ml KR - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
     },
     {
         "name": None,
@@ -4867,25 +4818,11 @@ _STOCK_REPORT_ROWS = [
         "sku": "02-0000021",
     },
     {
-        "name": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml",
-        "name_color": "FFE6B8AF",
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml KR - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
-    },
-    {
         "name": None,
         "name_color": None,
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml EU - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000125",
-    },
-    {
-        "name": None,
-        "name_color": None,
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με πιπεριά τσίλι, bottle 200ml US - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
     },
     {
         "name": None,
@@ -4909,25 +4846,11 @@ _STOCK_REPORT_ROWS = [
         "sku": "02-0000013",
     },
     {
-        "name": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml",
-        "name_color": "FFDACDB2",
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml KR - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
-    },
-    {
         "name": None,
         "name_color": None,
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml EU - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000126",
-    },
-    {
-        "name": None,
-        "name_color": None,
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml US - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
     },
     {
         "name": None,
@@ -4949,13 +4872,6 @@ _STOCK_REPORT_ROWS = [
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με σκόρδο, bottle 200ml - US label filled",
         "is_raw": False,
         "sku": "02-0000014",
-    },
-    {
-        "name": "Εξαιρετικό παρθένο ελαιόλαδο με τρούφα, bottle 200ml",
-        "name_color": "FFF5F5DC",
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με τρούφα, bottle 200ml KR - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
     },
     {
         "name": None,
@@ -5005,20 +4921,6 @@ _STOCK_REPORT_ROWS = [
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με ντομάτα, bottle 200ml EU - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000309",
-    },
-    {
-        "name": None,
-        "name_color": None,
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με ντομάτα, bottle 200ml US - Empty painted bottles",
-        "is_raw": True,
-        "sku": None,
-    },
-    {
-        "name": None,
-        "name_color": None,
-        "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο με ντομάτα, bottle 200ml - KR label filled",
-        "is_raw": False,
-        "sku": None,
     },
     {
         "name": None,
@@ -5157,7 +5059,7 @@ class StockReportView(View):
                 elif fin is not None:
                     stock = int(fin)
                 else:
-                    stock = None
+                    stock = 0  # no batch = no stock
             else:
                 stock = None
             rows.append(
