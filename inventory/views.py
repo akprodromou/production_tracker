@@ -4546,16 +4546,36 @@ class ReorderComponentsExportView(View):
         component_totals = defaultdict(Decimal)
         component_materials = {}
 
+        def expand(material, qty, visited=None):
+            if visited is None:
+                visited = set()
+            if material.pk in visited:
+                return
+            visited = visited | {material.pk}
+            try:
+                tmpl = ProductionTemplate.objects.get(product=material)
+            except ProductionTemplate.DoesNotExist:
+                component_totals[material.pk] += qty
+                component_materials[material.pk] = material
+                return
+            for comp in tmpl.components.select_related("material__unit").all():
+                required = comp.ratio * qty
+                if comp.material.category == "FIN":
+                    try:
+                        ProductionTemplate.objects.get(product=comp.material)
+                        expand(comp.material, required, visited)
+                        continue
+                    except ProductionTemplate.DoesNotExist:
+                        pass
+                component_totals[comp.material.pk] += required
+                component_materials[comp.material.pk] = comp.material
+
         for sku, restock_qty in selected.items():
             try:
                 material = Material.objects.get(sku=sku)
-                template = ProductionTemplate.objects.get(product=material)
-            except (Material.DoesNotExist, ProductionTemplate.DoesNotExist):
+            except Material.DoesNotExist:
                 continue
-            for comp in template.components.select_related("material__unit").all():
-                required = comp.ratio * restock_qty
-                component_totals[comp.material.pk] += required
-                component_materials[comp.material.pk] = comp.material
+            expand(material, restock_qty)
 
         rows = []
         for mat_id, required_qty in sorted(
