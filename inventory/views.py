@@ -5190,7 +5190,7 @@ _STOCK_REPORT_ROWS = [
     },
     {
         "name": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 50ml",
-        "name_color": "fff",
+        "name_color": "FF000000",
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο, bottle 50ml EU - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000182",
