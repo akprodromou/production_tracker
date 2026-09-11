@@ -10,16 +10,6 @@ For each SKU + location:
   - Zero quantities result in no batch being created
   - SKU+location combos present in DB but absent from ERP file are also deleted
 
-Run from project root:
-    python scripts/sync_erp_inventory.py inventory-YYYY-MM-DD.xlsx [--dry-run]
-
-To run against Railway:
-    $env:DATABASE_URL="postgresql://postgres:GSUajhGKPuJMLpItMmZbduFbjMVWAeNE@hayabusa.proxy.rlwy.net:55480/railway"
-    python scripts/sync_erp_inventory.py inventory-2026-09-02.xlsx
-    $env:DATABASE_URL=""
-
-File naming convention: inventory-YYYY-MM-DD.xlsx
-
 Export from Pylon ERP:
     Αποθήκη / Αναφορές / Εκτυπώσεις / (Είδη / Υπηρεσίες / Πάγια) / Υπόλοιπα / Υπόλοιπα ανά Αποθήκη και Είδος
     click «Μπάντες»
@@ -27,6 +17,16 @@ Export from Pylon ERP:
     Διαθ. Υπ.: Ορατή
     Εκτέλεση Ως: Grid
     Εξαγωγές / Εξαγωγή σε Excel (xlsx)
+
+File naming convention: inventory-YYYY-MM-DD.xlsx    
+
+Run from project root:
+    python scripts/sync_erp_inventory.py inventory-YYYY-MM-DD.xlsx [--dry-run]
+
+To run against Railway:
+    $env:DATABASE_URL="postgresql://postgres:GSUajhGKPuJMLpItMmZbduFbjMVWAeNE@hayabusa.proxy.rlwy.net:55480/railway"
+    python scripts/sync_erp_inventory.py inventory-2026-09-02.xlsx
+    $env:DATABASE_URL=""
 """
 
 import os, sys, re
