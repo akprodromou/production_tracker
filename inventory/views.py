@@ -5232,7 +5232,7 @@ _STOCK_REPORT_ROWS = [
     },
     {
         "name": "Εξαιρετικό παρθένο ελαιόλαδο star, bottle 50ml",
-        "name_color": "FF47865F",
+        "name_color": "FFFFD453",
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο star, bottle 50ml - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000291",
@@ -5253,7 +5253,7 @@ _STOCK_REPORT_ROWS = [
     },
     {
         "name": "Εξαιρετικό παρθένο ελαιόλαδο snowman, bottle 50ml",
-        "name_color": "FF47865F",
+        "name_color": "FF0077DB",
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο snowman, bottle 50ml - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000293",
@@ -5274,7 +5274,7 @@ _STOCK_REPORT_ROWS = [
     },
     {
         "name": "Εξαιρετικό παρθένο ελαιόλαδο reindeer, bottle 50ml",
-        "name_color": "FF47865F",
+        "name_color": "FFF2EFEE",
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο reindeer, bottle 50ml - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000292",
@@ -5295,7 +5295,7 @@ _STOCK_REPORT_ROWS = [
     },
     {
         "name": "Εξαιρετικό παρθένο ελαιόλαδο bell, bottle 50ml",
-        "name_color": "FF47865F",
+        "name_color": "FFE6609D",
         "breakdown": "Εξαιρετικό παρθένο ελαιόλαδο bell, bottle 50ml - Empty painted bottles",
         "is_raw": True,
         "sku": "07-0000294",
