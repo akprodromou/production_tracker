@@ -16,6 +16,7 @@ Export from Pylon ERP:
     click «Είδη»
     Διαθ. Υπ.: Ορατή
     Εκτέλεση Ως: Grid
+    Εκτέλεση
     Εξαγωγές / Εξαγωγή σε Excel (xlsx)
 
 File naming convention: inventory-YYYY-MM-DD.xlsx    
