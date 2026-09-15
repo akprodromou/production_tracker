@@ -4221,17 +4221,14 @@ class ReorderComponentsView(View):
                 return
             for comp in template.components.select_related("material__unit").all():
                 required = comp.ratio * qty
-                if comp.material.category == "FIN":
-                    try:
-                        ProductionTemplate.objects.get(product=comp.material)
-                        # Has its own template — recurse
-                        expand_components(comp.material, required, depth+1, visited)
-                        continue
-                    except ProductionTemplate.DoesNotExist:
-                        pass
-                # Leaf component
-                component_totals[comp.material.pk] += required
-                component_materials[comp.material.pk] = comp.material
+                # Recurse into any component that has its own template
+                try:
+                    ProductionTemplate.objects.get(product=comp.material)
+                    expand_components(comp.material, required, depth+1, visited)
+                except ProductionTemplate.DoesNotExist:
+                    # Leaf component — add directly
+                    component_totals[comp.material.pk] += required
+                    component_materials[comp.material.pk] = comp.material
 
         for sku, restock_qty in selected.items():
             try:
@@ -4318,15 +4315,12 @@ class ReorderComponentsView(View):
                 return
             for comp in template.components.select_related("material__unit").all():
                 required = comp.ratio * qty
-                if comp.material.category == "FIN":
-                    try:
-                        ProductionTemplate.objects.get(product=comp.material)
-                        expand_components(comp.material, required, visited)
-                        continue
-                    except ProductionTemplate.DoesNotExist:
-                        pass
-                component_totals[comp.material.pk] += required
-                component_materials[comp.material.pk] = comp.material
+                try:
+                    ProductionTemplate.objects.get(product=comp.material)
+                    expand_components(comp.material, required, visited)
+                except ProductionTemplate.DoesNotExist:
+                    component_totals[comp.material.pk] += required
+                    component_materials[comp.material.pk] = comp.material
 
         for sku, restock_qty in selected.items():
             try:
@@ -4560,15 +4554,12 @@ class ReorderComponentsExportView(View):
                 return
             for comp in tmpl.components.select_related("material__unit").all():
                 required = comp.ratio * qty
-                if comp.material.category == "FIN":
-                    try:
-                        ProductionTemplate.objects.get(product=comp.material)
-                        expand(comp.material, required, visited)
-                        continue
-                    except ProductionTemplate.DoesNotExist:
-                        pass
-                component_totals[comp.material.pk] += required
-                component_materials[comp.material.pk] = comp.material
+                try:
+                    ProductionTemplate.objects.get(product=comp.material)
+                    expand(comp.material, required, visited)
+                except ProductionTemplate.DoesNotExist:
+                    component_totals[comp.material.pk] += required
+                    component_materials[comp.material.pk] = comp.material
 
         for sku, restock_qty in selected.items():
             try:
