@@ -401,7 +401,7 @@ class SalesOrderEditView(View):
             form.save()
             formset.save()
             messages.success(request, f"Client order {order.reference} updated.")
-            return redirect("sales-order-detail", pk=order.pk)
+            return redirect("client-order-board")
         ctx = self._ctx()
         ctx.update(
             {
@@ -876,7 +876,7 @@ class SupplyOrderEditView(View):
             form.save()
             formset.save()
             messages.success(request, f"Supply order {order.reference} updated.")
-            return redirect("supply-order-detail", pk=order.pk)
+            return redirect("supply-order-board")
         ctx = self._ctx()
         ctx.update(
             {
