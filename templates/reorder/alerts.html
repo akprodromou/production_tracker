@@ -262,6 +262,7 @@ input:focus, select:focus { border-color:var(--accent); }
 <input type="hidden" name="reorder" value="{{ filter_reorder }}">
 <div style="margin-bottom:10px;display:flex;gap:10px;align-items:center">
   <button type="submit" class="btn btn-primary">&#9776; Calculate Components</button>
+  <button type="submit" formaction="{% url 'reorder-alerts-export' %}" class="btn btn-secondary">&#8659; Export xlsx</button>
   <span class="text-muted" style="font-size:12px">Select SKUs below and set restock quantities, then click Calculate Components</span>
 </div>
 <div class="card">
