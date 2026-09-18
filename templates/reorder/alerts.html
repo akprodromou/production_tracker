@@ -45,7 +45,6 @@ input:focus, select:focus { border-color:var(--accent); }
     </p>
   </div>
   <div class="page-actions">
-    {% if rows %}<a href="{% url 'reorder-alerts-export' %}" class="btn btn-secondary">&#8659; Export xlsx</a>{% endif %}
   </div>
 </div>
 
@@ -258,6 +257,9 @@ input:focus, select:focus { border-color:var(--accent); }
 {# Table #}
 <form method="post" action="{% url 'reorder-components' %}">
 {% csrf_token %}
+<input type="hidden" name="q" value="{{ filter_q }}">
+<input type="hidden" name="prefix" value="{{ filter_prefix }}">
+<input type="hidden" name="reorder" value="{{ filter_reorder }}">
 <div style="margin-bottom:10px;display:flex;gap:10px;align-items:center">
   <button type="submit" class="btn btn-primary">&#9776; Calculate Components</button>
   <span class="text-muted" style="font-size:12px">Select SKUs below and set restock quantities, then click Calculate Components</span>

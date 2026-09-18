@@ -4069,26 +4069,50 @@ class ReorderAlertsView(View):
 
 
 class ReorderAlertsExportView(View):
+    def post(self, request):
+        # Export only checked SKUs (or all filtered rows if none checked)
+        # Reuse same logic as calculate_rop but filter by selected
+        from .rop_engine import calculate_rop, get_settings, get_all_available_files, get_default_selected_months
+        settings = get_settings()
+        all_files = get_all_available_files()
+        selected_months = settings.selected_months if settings.selected_months else get_default_selected_months(all_files)
+        rows, labels = calculate_rop(selected_months=selected_months)
+
+        # Apply same filters as GET view
+        filter_q      = request.POST.get('q', '').strip()
+        filter_prefix = request.POST.get('prefix', '')
+        filter_reorder = request.POST.get('reorder', '')
+        if filter_reorder == '1':
+            rows = [r for r in rows if r['reorder']]
+        if filter_prefix:
+            rows = [r for r in rows if r['sku'].startswith(filter_prefix + '-')]
+        if filter_q:
+            terms = filter_q.lower().split()
+            rows = [r for r in rows if all(
+                t in r['sku'].lower() or t in r['name'].lower() for t in terms
+            )]
+
+        # Check if any checkboxes were ticked
+        checked = [key[4:] for key in request.POST if key.startswith('sel_')]
+        if checked:
+            rows = [r for r in rows if r['sku'] in checked]
+
+        return self._export(rows, labels)
+
     def get(self, request):
-        from .rop_engine import calculate_rop, get_settings, get_sales_files
+        # Fallback GET: export everything
+        from .rop_engine import calculate_rop, get_settings, get_all_available_files, get_default_selected_months
+        settings = get_settings()
+        all_files = get_all_available_files()
+        selected_months = settings.selected_months if settings.selected_months else get_default_selected_months(all_files)
+        rows, labels = calculate_rop(selected_months=selected_months)
+        return self._export(rows, labels)
+
+    def _export(self, rows, labels):
         import openpyxl
         from openpyxl.styles import Font, PatternFill, Alignment
         from django.http import HttpResponse
         from datetime import date
-
-        settings = get_settings()
-        from inventory.rop_engine import (
-            get_all_available_files,
-            get_default_selected_months,
-        )
-
-        all_files = get_all_available_files()
-        selected_months = (
-            settings.selected_months
-            if settings.selected_months
-            else get_default_selected_months(all_files)
-        )
-        rows, labels = calculate_rop(selected_months=selected_months)
 
         wb = openpyxl.Workbook()
         ws = wb.active
