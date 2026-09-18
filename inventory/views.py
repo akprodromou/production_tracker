@@ -3922,8 +3922,11 @@ class ReorderAlertsView(View):
         if filter_prefix:
             rows = [r for r in rows if r["sku"].startswith(filter_prefix + "-")]
         if filter_q:
-            q = filter_q.lower()
-            rows = [r for r in rows if q in r["sku"].lower() or q in r["name"].lower()]
+            terms = filter_q.lower().split()
+            rows = [r for r in rows if all(
+                t in r["sku"].lower() or t in r["name"].lower()
+                for t in terms
+            )]
 
         # Sort
         sort = request.GET.get("sort", "gap")
