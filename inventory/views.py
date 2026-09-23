@@ -4429,15 +4429,12 @@ class ReorderComponentsView(View):
 
 
 class SalesOrderComponentsView(View):
-    def post(self, request, pk):
+
+    def _compute(self, pk):
         from .models import (
-            SalesOrder,
-            ProductionTemplate,
-            Material,
-            ProductBatch,
-            ProductBatchReservation,
-            RawMaterialBatch,
-            RawBatchAllocation,
+            SalesOrder, ProductionTemplate, Material,
+            ProductBatch, ProductBatchReservation,
+            RawMaterialBatch, RawBatchAllocation,
         )
         from django.db.models import Sum as DSum
         from decimal import Decimal
@@ -4450,23 +4447,36 @@ class SalesOrderComponentsView(View):
         component_materials = {}
         sku_breakdown = []
 
+        def expand(material, qty, visited=None):
+            if visited is None:
+                visited = set()
+            if material.pk in visited:
+                return
+            visited = visited | {material.pk}
+            try:
+                tmpl = ProductionTemplate.objects.get(product=material)
+            except ProductionTemplate.DoesNotExist:
+                component_totals[material.pk] += qty
+                component_materials[material.pk] = material
+                return
+            for comp in tmpl.components.select_related("material__unit").all():
+                required = comp.ratio * qty
+                try:
+                    ProductionTemplate.objects.get(product=comp.material)
+                    expand(comp.material, required, visited)
+                except ProductionTemplate.DoesNotExist:
+                    component_totals[comp.material.pk] += required
+                    component_materials[comp.material.pk] = comp.material
+
         for line in lines:
             sku = line.material.sku
             qty = line.quantity
             try:
-                template = ProductionTemplate.objects.get(product=line.material)
+                ProductionTemplate.objects.get(product=line.material)
+                sku_breakdown.append({"sku": sku, "name": line.material.name, "qty": qty, "found": True})
+                expand(line.material, qty)
             except ProductionTemplate.DoesNotExist:
-                sku_breakdown.append(
-                    {"sku": sku, "name": line.material.name, "qty": qty, "found": False}
-                )
-                continue
-            sku_breakdown.append(
-                {"sku": sku, "name": line.material.name, "qty": qty, "found": True}
-            )
-            for comp in template.components.select_related("material__unit").all():
-                required = comp.ratio * qty
-                component_totals[comp.material.pk] += required
-                component_materials[comp.material.pk] = comp.material
+                sku_breakdown.append({"sku": sku, "name": line.material.name, "qty": qty, "found": False})
 
         rows = []
         for mat_id, required_qty in sorted(
@@ -4474,20 +4484,12 @@ class SalesOrderComponentsView(View):
         ):
             mat = component_materials[mat_id]
             if mat.category == "FIN":
-                total = ProductBatch.objects.filter(material=mat).aggregate(
-                    t=DSum("quantity_produced")
-                )["t"] or Decimal("0")
-                res = ProductBatchReservation.objects.filter(
-                    product_batch__material=mat, order_line__isnull=False
-                ).aggregate(t=DSum("quantity_reserved"))["t"] or Decimal("0")
+                total = ProductBatch.objects.filter(material=mat).aggregate(t=DSum("quantity_produced"))["t"] or Decimal("0")
+                res = ProductBatchReservation.objects.filter(product_batch__material=mat, order_line__isnull=False).aggregate(t=DSum("quantity_reserved"))["t"] or Decimal("0")
                 in_stock = total - res
             else:
-                total = RawMaterialBatch.objects.filter(material=mat).aggregate(
-                    t=DSum("total_quantity")
-                )["t"] or Decimal("0")
-                alloc = RawBatchAllocation.objects.filter(
-                    raw_batch__material=mat
-                ).aggregate(t=DSum("quantity"))["t"] or Decimal("0")
+                total = RawMaterialBatch.objects.filter(material=mat).aggregate(t=DSum("total_quantity"))["t"] or Decimal("0")
+                alloc = RawBatchAllocation.objects.filter(raw_batch__material=mat).aggregate(t=DSum("quantity"))["t"] or Decimal("0")
                 in_stock = total - alloc
             gap = in_stock - required_qty
             pallets = (
@@ -4495,30 +4497,43 @@ class SalesOrderComponentsView(View):
                 if mat.pack and mat.pallet_tie and mat.pallet_high
                 else None
             )
-            rows.append(
-                {
-                    "sku": mat.sku,
-                    "name": mat.name,
-                    "unit": mat.unit.name if mat.unit else "",
-                    "required_qty": round(required_qty, 1),
-                    "in_stock": round(in_stock, 1),
-                    "gap": round(gap, 1),
-                    "pallets": pallets,
-                }
-            )
+            rows.append({
+                "sku": mat.sku,
+                "name": mat.name,
+                "unit": mat.unit.name if mat.unit else "",
+                "required_qty": round(required_qty, 1),
+                "in_stock": round(in_stock, 1),
+                "gap": round(gap, 1),
+                "pallets": pallets,
+            })
 
-        return render(
-            request,
-            "reorder/components.html",
-            {
-                "rows": rows,
-                "sku_breakdown": sku_breakdown,
-                "selected": {},
-                "order": order,
-                "sort": "gap",
-                "dir": "asc",
-            },
-        )
+        return order, rows, sku_breakdown
+
+    def _render(self, request, pk, sort="gap", direction="asc"):
+        order, rows, sku_breakdown = self._compute(pk)
+        reverse = direction == "desc"
+        sort_key = {"gap": "gap", "sku": "sku", "name": "name",
+                    "required_qty": "required_qty", "in_stock": "in_stock"}.get(sort, "gap")
+        if sort_key in ("sku", "name"):
+            rows = sorted(rows, key=lambda r: r[sort_key], reverse=reverse)
+        else:
+            rows = sorted(rows, key=lambda r: float(r[sort_key]), reverse=reverse)
+        return render(request, "reorder/components.html", {
+            "rows": rows,
+            "sku_breakdown": sku_breakdown,
+            "selected": {},
+            "order": order,
+            "sort": sort,
+            "dir": direction,
+        })
+
+    def post(self, request, pk):
+        return self._render(request, pk, sort="gap", direction="asc")
+
+    def get(self, request, pk):
+        sort = request.GET.get("sort", "gap")
+        direction = request.GET.get("dir", "asc")
+        return self._render(request, pk, sort=sort, direction=direction)
 
 
 class SalesOrderPalletizerView(View):
