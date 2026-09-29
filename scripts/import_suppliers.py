@@ -6,6 +6,7 @@ Imports: code (Κωδικός), tin (ΑΦΜ), name (Όνομα), payment_terms (
 All other fields (contacts, address, notes) remain blank for manual entry later.
 
 Export from Pylon EPR:
+    Συναλλασόμενοι / Προμηθευτές
     Ενέργειες / Εξαγόμενα Grid / Εξαγωγή σε Excel
 
 Usage:
