@@ -165,7 +165,7 @@ class ClientOrderBoardView(View):
         placed = (
             SalesOrder.objects.filter(status="ORDER_PLACED")
             .select_related("client")
-            .order_by("expected_delivery")
+            .order_by("order_date")
         )
         dispatched = (
             SalesOrder.objects.filter(status="DISPATCHED")
