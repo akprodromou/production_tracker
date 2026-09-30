@@ -34,7 +34,7 @@
     <div class="order-card" onclick="window.location='{% url 'sales-order-detail' order.pk %}'">
       <div class="order-ref">{{ order.reference }}</div>
       <div class="order-client">{{ order.client.name }}</div>
-      <div class="order-meta">{% if order.expected_delivery %}Due {{ order.expected_delivery|date:"Y-m-d" }}{% endif %}</div>
+      <div class="order-meta">{% if order.order_date %}Dispatch {{ order.order_date|date:"Y-m-d" }}{% endif %}</div>
       <div style="margin-top:8px" onclick="event.stopPropagation()">
         <form method="post">{% csrf_token %}
           <input type="hidden" name="order_id" value="{{ order.pk }}">
@@ -55,7 +55,7 @@
     <div class="order-card" onclick="window.location='{% url 'sales-order-detail' order.pk %}'">
       <div class="order-ref">{{ order.reference }}</div>
       <div class="order-client">{{ order.client.name }}</div>
-      <div class="order-meta">{% if order.carrier %}{{ order.carrier.name }}{% endif %}{% if order.tracking_number %} · {{ order.tracking_number }}{% endif %}</div>
+      <div class="order-meta">{% if order.expected_delivery %}Expected {{ order.expected_delivery|date:"Y-m-d" }}{% endif %}</div>
       <div style="margin-top:8px" onclick="event.stopPropagation()">
         <form method="post">{% csrf_token %}
           <input type="hidden" name="order_id" value="{{ order.pk }}">

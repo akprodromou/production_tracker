@@ -73,9 +73,9 @@ var MATERIALS = {{ materials_json|safe }};
           {% if form.client.errors %}<ul class="errorlist">{% for e in form.client.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
         </div>
 
-        <div class="form-group"><label>Order Date</label>{{ form.order_date }}</div>
+        <div class="form-group"><label>Dispatch Date</label>{{ form.order_date }}</div>
         <div class="form-group"><label>Expected Delivery</label>{{ form.expected_delivery }}</div>
-        <div class="form-group"><label>Delivery Address</label>{{ form.delivery_address }}</div>
+        <div class="form-group"><label>Delivery Address</label><div style="line-height:1.3">{{ form.delivery_address }}</div></div>
         <div class="form-group"><label>Status</label>{{ form.status }}</div>
         <div class="form-group"><label>Carrier</label>{{ form.carrier }}</div>
         <div class="form-group"><label>Tracking Number</label>{{ form.tracking_number }}</div>
