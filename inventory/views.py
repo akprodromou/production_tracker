@@ -4304,7 +4304,7 @@ class ReorderComponentsView(View):
             sku_breakdown.append(
                 {"sku": sku, "name": material.name, "qty": restock_qty, "found": True}
             )
-            expand_components(material, restock_qty)
+            _expand_components(material, restock_qty, component_totals, component_materials, full=full)
 
         # Get current stock for each component material
         rows = []
