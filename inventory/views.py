@@ -97,6 +97,42 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import logout as _auth_logout
 
 
+
+def _expand_components(material, qty, component_totals, component_materials, full=True, visited=None):
+    """
+    Expand a material's template components into component_totals.
+    full=True: recursive (all the way to raw materials)
+    full=False: first level only (stop at first-level components)
+    """
+    from inventory.models import ProductionTemplate
+    from decimal import Decimal
+    if visited is None:
+        visited = set()
+    if material.pk in visited:
+        return
+    visited = visited | {material.pk}
+    try:
+        tmpl = ProductionTemplate.objects.get(product=material)
+    except ProductionTemplate.DoesNotExist:
+        component_totals[material.pk] += qty
+        component_materials[material.pk] = material
+        return
+    for comp in tmpl.components.select_related("material__unit").all():
+        required = comp.ratio * qty
+        if full:
+            # Recurse into any component that has its own template
+            try:
+                ProductionTemplate.objects.get(product=comp.material)
+                _expand_components(comp.material, required, component_totals, component_materials, full=True, visited=visited)
+            except ProductionTemplate.DoesNotExist:
+                component_totals[comp.material.pk] += required
+                component_materials[comp.material.pk] = comp.material
+        else:
+            # First level only — always treat as leaf
+            component_totals[comp.material.pk] += required
+            component_materials[comp.material.pk] = comp.material
+
+
 class LogoutView(View):
     def get(self, request):
         _auth_logout(request)
@@ -4311,6 +4347,7 @@ class ReorderComponentsView(View):
             )
 
         request.session["rop_selected"] = {k: str(v) for k, v in selected.items()}
+        request.session["rop_depth"] = request.POST.get("depth", "full")
         return redirect("reorder-components")
 
     def _render(self, request, selected):
@@ -4328,26 +4365,7 @@ class ReorderComponentsView(View):
         component_materials = {}
         sku_breakdown = []
 
-        def expand_components(material, qty, visited=None):
-            if visited is None:
-                visited = set()
-            if material.pk in visited:
-                return
-            visited = visited | {material.pk}
-            try:
-                template = ProductionTemplate.objects.get(product=material)
-            except ProductionTemplate.DoesNotExist:
-                component_totals[material.pk] += qty
-                component_materials[material.pk] = material
-                return
-            for comp in template.components.select_related("material__unit").all():
-                required = comp.ratio * qty
-                try:
-                    ProductionTemplate.objects.get(product=comp.material)
-                    expand_components(comp.material, required, visited)
-                except ProductionTemplate.DoesNotExist:
-                    component_totals[comp.material.pk] += required
-                    component_materials[comp.material.pk] = comp.material
+        full = request.POST.get("depth", "full") == "full"
 
         for sku, restock_qty in selected.items():
             try:
@@ -4360,7 +4378,7 @@ class ReorderComponentsView(View):
             sku_breakdown.append(
                 {"sku": sku, "name": material.name, "qty": restock_qty, "found": True}
             )
-            expand_components(material, restock_qty)
+            _expand_components(material, restock_qty, component_totals, component_materials, full=full)
 
         rows = []
         for mat_id, required_qty in sorted(
@@ -4447,26 +4465,7 @@ class SalesOrderComponentsView(View):
         component_materials = {}
         sku_breakdown = []
 
-        def expand(material, qty, visited=None):
-            if visited is None:
-                visited = set()
-            if material.pk in visited:
-                return
-            visited = visited | {material.pk}
-            try:
-                tmpl = ProductionTemplate.objects.get(product=material)
-            except ProductionTemplate.DoesNotExist:
-                component_totals[material.pk] += qty
-                component_materials[material.pk] = material
-                return
-            for comp in tmpl.components.select_related("material__unit").all():
-                required = comp.ratio * qty
-                try:
-                    ProductionTemplate.objects.get(product=comp.material)
-                    expand(comp.material, required, visited)
-                except ProductionTemplate.DoesNotExist:
-                    component_totals[comp.material.pk] += required
-                    component_materials[comp.material.pk] = comp.material
+        full = request.POST.get("depth", "full") == "full" if hasattr(request, 'POST') else True
 
         for line in lines:
             sku = line.material.sku
@@ -4474,7 +4473,7 @@ class SalesOrderComponentsView(View):
             try:
                 ProductionTemplate.objects.get(product=line.material)
                 sku_breakdown.append({"sku": sku, "name": line.material.name, "qty": qty, "found": True})
-                expand(line.material, qty)
+                _expand_components(line.material, qty, component_totals, component_materials, full=full)
             except ProductionTemplate.DoesNotExist:
                 sku_breakdown.append({"sku": sku, "name": line.material.name, "qty": qty, "found": False})
 
@@ -4582,26 +4581,7 @@ class ReorderComponentsExportView(View):
         component_totals = defaultdict(Decimal)
         component_materials = {}
 
-        def expand(material, qty, visited=None):
-            if visited is None:
-                visited = set()
-            if material.pk in visited:
-                return
-            visited = visited | {material.pk}
-            try:
-                tmpl = ProductionTemplate.objects.get(product=material)
-            except ProductionTemplate.DoesNotExist:
-                component_totals[material.pk] += qty
-                component_materials[material.pk] = material
-                return
-            for comp in tmpl.components.select_related("material__unit").all():
-                required = comp.ratio * qty
-                try:
-                    ProductionTemplate.objects.get(product=comp.material)
-                    expand(comp.material, required, visited)
-                except ProductionTemplate.DoesNotExist:
-                    component_totals[comp.material.pk] += required
-                    component_materials[comp.material.pk] = comp.material
+        full = request.POST.get("depth", "full") == "full" if hasattr(request, 'POST') else True
 
         for sku, restock_qty in selected.items():
             try:
