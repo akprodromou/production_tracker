@@ -4268,30 +4268,7 @@ class ReorderComponentsView(View):
         component_materials = {}  # material_id -> material obj
         sku_breakdown = []  # for display
 
-        def expand_components(material, qty, depth=0, visited=None):
-            """Recursively expand template components, summing into component_totals."""
-            if visited is None:
-                visited = set()
-            if material.pk in visited:
-                return  # prevent infinite loops
-            visited = visited | {material.pk}
-            try:
-                template = ProductionTemplate.objects.get(product=material)
-            except ProductionTemplate.DoesNotExist:
-                # No template — treat as leaf component
-                component_totals[material.pk] += qty
-                component_materials[material.pk] = material
-                return
-            for comp in template.components.select_related("material__unit").all():
-                required = comp.ratio * qty
-                # Recurse into any component that has its own template
-                try:
-                    ProductionTemplate.objects.get(product=comp.material)
-                    expand_components(comp.material, required, depth+1, visited)
-                except ProductionTemplate.DoesNotExist:
-                    # Leaf component — add directly
-                    component_totals[comp.material.pk] += required
-                    component_materials[comp.material.pk] = comp.material
+        full = request.POST.get("depth", "full") == "full"
 
         for sku, restock_qty in selected.items():
             try:
