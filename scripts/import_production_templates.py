@@ -6,6 +6,7 @@ Export from Pylon EPR:
     Αποθήκη / Αναφορές / Εκτυπώσεις / Σύνθεση / Προδιαγραφές Σετ Κιτ
     Μπάντες / Υλικά / Είδος - Κωδικός > Ορατό: Ναι
     Εκτέλεση ως: Grid
+    Εκτέλεση
     Εξαγωγές / Εξαγωγή σε Excel
 
 To run against Railway, run from project root:

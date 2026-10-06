@@ -4342,7 +4342,7 @@ class ReorderComponentsView(View):
         component_materials = {}
         sku_breakdown = []
 
-        full = request.POST.get("depth", "full") == "full"
+        full = request.session.get("rop_depth", "full") == "full"
 
         for sku, restock_qty in selected.items():
             try:
