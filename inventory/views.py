@@ -4558,14 +4558,14 @@ class ReorderComponentsExportView(View):
         component_totals = defaultdict(Decimal)
         component_materials = {}
 
-        full = request.POST.get("depth", "full") == "full" if hasattr(request, 'POST') else True
+        full = request.session.get("rop_depth", "full") == "full"
 
         for sku, restock_qty in selected.items():
             try:
                 material = Material.objects.get(sku=sku)
             except Material.DoesNotExist:
                 continue
-            expand(material, restock_qty)
+            _expand_components(material, restock_qty, component_totals, component_materials, full=full)
 
         rows = []
         for mat_id, required_qty in sorted(
