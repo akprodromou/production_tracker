@@ -4493,7 +4493,7 @@ class SalesOrderComponentsView(View):
             rows = sorted(rows, key=lambda r: r[sort_key], reverse=reverse)
         else:
             rows = sorted(rows, key=lambda r: float(r[sort_key]), reverse=reverse)
-        return render(request, "reorder/components.html", {
+        return render(request, "sales_orders/components.html", {
             "rows": rows,
             "sku_breakdown": sku_breakdown,
             "selected": {},
