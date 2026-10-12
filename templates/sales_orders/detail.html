@@ -12,6 +12,8 @@
       <button type="submit" name="depth" value="first" class="btn btn-ghost">&#128230; First Level</button>
       <button type="submit" name="depth" value="full" class="btn btn-secondary">&#9776; Full Breakdown</button>
     </form>
+    <a href="{% url 'sales-order-components-export' order.pk %}" class="btn btn-ghost ms-2">&#8659; Export xlsx</a>
+    
     <a href="{% url 'sales-order-edit' order.pk %}" class="btn btn-secondary">Edit</a>
     <form method="post" action="{% url 'sales-order-delete' order.pk %}" style="display:inline">
       {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ order.reference }}?')">Delete</button>
