@@ -4493,6 +4493,7 @@ class SalesOrderComponentsView(View):
             rows = sorted(rows, key=lambda r: r[sort_key], reverse=reverse)
         else:
             rows = sorted(rows, key=lambda r: float(r[sort_key]), reverse=reverse)
+        depth_val = "full" if full else "first"
         return render(request, "sales_orders/components.html", {
             "rows": rows,
             "sku_breakdown": sku_breakdown,
@@ -4500,6 +4501,7 @@ class SalesOrderComponentsView(View):
             "order": order,
             "sort": sort,
             "dir": direction,
+            "depth": depth_val,
         })
 
     def post(self, request, pk):
@@ -4539,7 +4541,8 @@ class SalesOrderComponentsExportView(View):
         from django.http import HttpResponse
         from datetime import date
 
-        full = request.session.get("so_depth", "full") == "full"
+        depth = request.GET.get("depth", request.session.get("so_depth", "full"))
+        full = depth == "full"
         order, rows, _ = SalesOrderComponentsView()._compute(pk, full=full)
 
         wb = openpyxl.Workbook()

@@ -9,7 +9,7 @@
   </div>
   <div class="page-actions">
     <a href="{% url 'sales-order-detail' order.pk %}" class="btn btn-secondary">&#8592; Back to Sales Order</a>
-    <a href="{% url 'sales-order-components-export' order.pk %}" class="btn btn-secondary">&#8659; Export xlsx</a>
+    <a href="{% url 'sales-order-components-export' order.pk %}?depth={{ depth }}" class="btn btn-secondary">&#8659; Export xlsx</a>
   </div>
 </div>
 
