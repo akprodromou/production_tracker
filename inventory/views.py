@@ -4425,7 +4425,7 @@ class ReorderComponentsView(View):
 
 class SalesOrderComponentsView(View):
 
-    def _compute(self, pk):
+    def _compute(self, pk, full=True):
         from .models import (
             SalesOrder, ProductionTemplate, Material,
             ProductBatch, ProductBatchReservation,
@@ -4442,7 +4442,6 @@ class SalesOrderComponentsView(View):
         component_materials = {}
         sku_breakdown = []
 
-        full = request.POST.get("depth", "full") == "full" if hasattr(request, 'POST') else True
 
         for line in lines:
             sku = line.material.sku
@@ -4485,8 +4484,8 @@ class SalesOrderComponentsView(View):
 
         return order, rows, sku_breakdown
 
-    def _render(self, request, pk, sort="gap", direction="asc"):
-        order, rows, sku_breakdown = self._compute(pk)
+    def _render(self, request, pk, sort="gap", direction="asc", full=True):
+        order, rows, sku_breakdown = self._compute(pk, full=full)
         reverse = direction == "desc"
         sort_key = {"gap": "gap", "sku": "sku", "name": "name",
                     "required_qty": "required_qty", "in_stock": "in_stock"}.get(sort, "gap")
@@ -4504,12 +4503,15 @@ class SalesOrderComponentsView(View):
         })
 
     def post(self, request, pk):
-        return self._render(request, pk, sort="gap", direction="asc")
+        full = request.POST.get("depth", "full") == "full"
+        request.session["so_depth"] = request.POST.get("depth", "full")
+        return self._render(request, pk, sort="gap", direction="asc", full=full)
 
     def get(self, request, pk):
         sort = request.GET.get("sort", "gap")
         direction = request.GET.get("dir", "asc")
-        return self._render(request, pk, sort=sort, direction=direction)
+        full = request.session.get("so_depth", "full") == "full"
+        return self._render(request, pk, sort=sort, direction=direction, full=full)
 
 
 class SalesOrderPalletizerView(View):
