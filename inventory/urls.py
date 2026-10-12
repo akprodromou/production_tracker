@@ -20,6 +20,7 @@ urlpatterns = [
     path('sales-orders/<int:pk>/', views.SalesOrderDetailView.as_view(), name='sales-order-detail'),
     path('sales-orders/<int:pk>/palletizer/', views.SalesOrderPalletizerView.as_view(), name='sales-order-palletizer'),
     path('sales-orders/<int:pk>/components/', views.SalesOrderComponentsView.as_view(), name='sales-order-components'),
+    path('sales-orders/<int:pk>/components/export/', views.SalesOrderComponentsExportView.as_view(), name='sales-order-components-export'),
     path('sales-orders/<int:pk>/edit/', views.SalesOrderEditView.as_view(), name='sales-order-edit'),
     path('sales-orders/<int:pk>/delete/', views.SalesOrderDeleteView.as_view(), name='sales-order-delete'),
 

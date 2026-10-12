@@ -4531,6 +4531,53 @@ class SalesOrderPalletizerView(View):
         )
 
 
+
+class SalesOrderComponentsExportView(View):
+    def get(self, request, pk):
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill
+        from django.http import HttpResponse
+        from datetime import date
+
+        full = request.session.get("so_depth", "full") == "full"
+        order, rows, _ = SalesOrderComponentsView()._compute(pk, full=full)
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Component Requirements"
+        headers = ["SKU", "Material", "Unit", "Stock", "Required", "Gap"]
+        ws.append(headers)
+        for cell in ws[1]:
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = PatternFill("solid", fgColor="1F3864")
+
+        red_fill = PatternFill("solid", fgColor="FFCCCC")
+        green_fill = PatternFill("solid", fgColor="CCFFCC")
+        for row in rows:
+            ws.append([
+                row["sku"],
+                row["name"],
+                row["unit"],
+                row["in_stock"],
+                row["required_qty"],
+                row["gap"],
+            ])
+            fill = green_fill if row["gap"] >= 0 else red_fill
+            ws.cell(ws.max_row, 6).fill = fill
+
+        ws.column_dimensions["A"].width = 14
+        ws.column_dimensions["B"].width = 45
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="so{pk}-components-{date.today()}.xlsx"'
+        )
+        wb.save(response)
+        return response
+
+
 class ReorderComponentsExportView(View):
     def get(self, request):
         import openpyxl
