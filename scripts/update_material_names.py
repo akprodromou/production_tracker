@@ -15,11 +15,11 @@ Export from Pylon ERP:
     Εξαγωγές / Εξαγωγή σε Excel (xlsx)
 
 Run from project root:
-    python update_material_names.py inventory-2026-08-20.xlsx [--dry-run]
+    python scripts/update_material_names.py inventory-2026-08-20.xlsx [--dry-run]
 
 To run against Railway:
     $env:DATABASE_URL="postgresql://postgres:GSUajhGKPuJMLpItMmZbduFbjMVWAeNE@hayabusa.proxy.rlwy.net:55480/railway"
-    python update_material_names.py inventory-2026-08-20.xlsx
+    python scripts/update_material_names.py inventory-2026-08-20.xlsx
     $env:DATABASE_URL=""
 """
 
