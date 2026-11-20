@@ -131,9 +131,7 @@ def parse_xlsx(filepath):
 
 
 def get_or_create_unit(name):
-    unit, _ = Unit.objects.get_or_create(
-        name=name, defaults={'abbreviation': name[:10]}
-    )
+    unit, _ = Unit.objects.get_or_create(name=name)
     return unit
 
 
