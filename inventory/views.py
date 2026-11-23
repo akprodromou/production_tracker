@@ -749,9 +749,21 @@ class SupplyOrderListView(View):
     def get(self, request):
         q = request.GET.get("q", "").strip()
         status = request.GET.get("status", "").strip()
-        orders = SupplyOrder.objects.select_related("supplier", "carrier").order_by(
-            "-order_date"
-        )
+        sort = request.GET.get("sort", "order_date")
+        direction = request.GET.get("dir", "desc")
+
+        SORT_MAP = {
+            "reference": "reference",
+            "supplier": "supplier__name",
+            "order_date": "order_date",
+            "expected": "expected_delivery",
+            "status": "status",
+        }
+        sort_field = SORT_MAP.get(sort, "order_date")
+        if direction == "desc":
+            sort_field = "-" + sort_field
+
+        orders = SupplyOrder.objects.select_related("supplier", "carrier").order_by(sort_field)
         if q:
             orders = orders.filter(
                 Q(reference__icontains=q) | Q(supplier__name__icontains=q)
@@ -766,6 +778,8 @@ class SupplyOrderListView(View):
                 "q": q,
                 "status": status,
                 "status_choices": SupplyOrder.STATUS_CHOICES,
+                "sort": sort,
+                "dir": direction,
             },
         )
 

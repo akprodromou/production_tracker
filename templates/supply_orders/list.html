@@ -24,7 +24,14 @@
   <div class="table-wrap">
     {% if orders %}
     <table>
-      <thead><tr><th>Reference</th><th>Supplier</th><th>Order Date</th><th>Expected</th><th>Status</th><th></th></tr></thead>
+      <thead><tr>
+  <th>{% if sort == "reference" %}<a href="?q={{ q }}&status={{ status }}&sort=reference&dir={% if dir == "asc" %}desc{% else %}asc{% endif %}" style="color:var(--text);text-decoration:none">Reference {% if dir == "asc" %}▲{% else %}▼{% endif %}</a>{% else %}<a href="?q={{ q }}&status={{ status }}&sort=reference&dir=asc" style="color:var(--text-muted,#999);text-decoration:none">Reference</a>{% endif %}</th>
+  <th>{% if sort == "supplier" %}<a href="?q={{ q }}&status={{ status }}&sort=supplier&dir={% if dir == "asc" %}desc{% else %}asc{% endif %}" style="color:var(--text);text-decoration:none">Supplier {% if dir == "asc" %}▲{% else %}▼{% endif %}</a>{% else %}<a href="?q={{ q }}&status={{ status }}&sort=supplier&dir=asc" style="color:var(--text-muted,#999);text-decoration:none">Supplier</a>{% endif %}</th>
+  <th>{% if sort == "order_date" %}<a href="?q={{ q }}&status={{ status }}&sort=order_date&dir={% if dir == "asc" %}desc{% else %}asc{% endif %}" style="color:var(--text);text-decoration:none">Order Date {% if dir == "asc" %}▲{% else %}▼{% endif %}</a>{% else %}<a href="?q={{ q }}&status={{ status }}&sort=order_date&dir=asc" style="color:var(--text-muted,#999);text-decoration:none">Order Date</a>{% endif %}</th>
+  <th>{% if sort == "expected" %}<a href="?q={{ q }}&status={{ status }}&sort=expected&dir={% if dir == "asc" %}desc{% else %}asc{% endif %}" style="color:var(--text);text-decoration:none">Expected {% if dir == "asc" %}▲{% else %}▼{% endif %}</a>{% else %}<a href="?q={{ q }}&status={{ status }}&sort=expected&dir=asc" style="color:var(--text-muted,#999);text-decoration:none">Expected</a>{% endif %}</th>
+  <th>{% if sort == "status" %}<a href="?q={{ q }}&status={{ status }}&sort=status&dir={% if dir == "asc" %}desc{% else %}asc{% endif %}" style="color:var(--text);text-decoration:none">Status {% if dir == "asc" %}▲{% else %}▼{% endif %}</a>{% else %}<a href="?q={{ q }}&status={{ status }}&sort=status&dir=asc" style="color:var(--text-muted,#999);text-decoration:none">Status</a>{% endif %}</th>
+  <th></th>
+</tr></thead>
       <tbody>
         {% for o in orders %}
         <tr>
